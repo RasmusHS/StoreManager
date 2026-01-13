@@ -1,5 +1,5 @@
-# StoreManager\
-Currently working in branch: master\
+# StoreManager 
+Currently working in branch: master 
 
 # Plans
 - [ ] Setup backend
