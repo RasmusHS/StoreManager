@@ -13,6 +13,7 @@ Currently working in branch: master
   - [ ] Finish setting up the api
   - [ ] Setup logic to facilitate writing and running integration tests
   - [ ] Write integration tests for the api
+  - [ ] Setup docker compose and write instructions for how to run the application in docker
 - [ ] Setup frontend
   - [ ] Dummy login page that doesn't work unless if I get to the bonus task
   - [ ] Multibutton layout
