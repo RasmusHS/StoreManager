@@ -1,0 +1,15 @@
+<Solution>
+  <Folder Name="/dev/" />
+  <Folder Name="/src/">
+    <Project Path="src/StoreManager.API/StoreManager.API.csproj" Id="df2a5138-f792-4de3-9e9e-abca46339f71" />
+    <Project Path="src/StoreManager.Application/StoreManager.Application.csproj" Id="0a784295-5320-43fa-af0b-8b353f5f6c84" />
+    <Project Path="src/StoreManager.Domain/StoreManager.Domain.csproj" Id="261de548-d0e9-48d9-a3b6-7d24d61c0839" />
+    <Project Path="src/StoreManager.Infrastructure/StoreManager.Infrastructure.csproj" Id="a804e1e0-c245-4d91-9a60-5a477f636165" />
+    <Project Path="src/StoreManager.Persistence/StoreManager.Persistence.csproj" Id="3c36679e-fc79-423e-8d0e-e0f2f4b18b0a" />
+    <Project Path="src/StoreManager.Webapp/StoreManager.Webapp.Client/StoreManager.Webapp.Client.csproj" Id="94385963-3f23-4e8b-8627-b5075dfbbe56" />
+    <Project Path="src/StoreManager.Webapp/StoreManager.Webapp/StoreManager.Webapp.csproj" Id="44680d0f-c05a-4d5f-8deb-c8786d684e76" />
+  </Folder>
+  <Folder Name="/src/Tests/">
+    <Project Path="src/Tests/StoreManager.API.IntegrationTests/StoreManager.API.IntegrationTests.csproj" Id="ee844471-1cbf-4596-866a-53662d324984" />
+  </Folder>
+</Solution>
