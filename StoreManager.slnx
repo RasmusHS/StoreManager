@@ -1,5 +1,7 @@
 <Solution>
-  <Folder Name="/dev/" />
+  <Folder Name="/dev/">
+    <File Path="dev/LocalSetup.md" />
+  </Folder>
   <Folder Name="/src/">
     <Project Path="src/StoreManager.API/StoreManager.API.csproj" Id="df2a5138-f792-4de3-9e9e-abca46339f71" />
     <Project Path="src/StoreManager.Application/StoreManager.Application.csproj" Id="0a784295-5320-43fa-af0b-8b353f5f6c84" />
