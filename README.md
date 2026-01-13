@@ -7,7 +7,7 @@ Currently working in branch: master
   - [ ] Rule: Ensure a chain's name is unique from other chains
   - [ ] Rule: Prevent a chain from being deleted if it still has stores associated with it
   - [ ] Rule: Store number must be unique, and will be manually assigned by an OptikIT employee (why manually???)
-  - [ ] Rule: Stores can be assigned to 0 or 1 chain. If 0 then the store will appear as belonging the "n/a" or "independent" chain.
+  - [ ] Rule: Stores can be assigned to 0 or 1 chain. If 0 then the store's chainId FK will be null.
   - [ ] Rule: A chain can have 1 or more stores
   - [ ] Create unit tests for domain and application layer before moving on to the api
   - [ ] Finish setting up the api
