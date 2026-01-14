@@ -76,11 +76,13 @@ public class StoreController : BaseController
     {
         UpdateStoreDto.Validator validator = new UpdateStoreDto.Validator();
         var result = await validator.ValidateAsync(request);
+        //var chainIdResult = (request.ChainId != null) ? ChainId.GetExisting(request.ChainId.Value) : null;
         if (result.IsValid)
         {
             UpdateStoreCommand command = new UpdateStoreCommand(
                 StoreId.GetExisting(request.Id).Value,
-                ChainId.GetExisting(request.ChainId).Value,
+                //chainIdResult,
+                ChainId.GetExisting(request.ChainId.Value),
                 request.Number,
                 request.Name,
                 Address.Create(request.Street, request.PostalCode, request.City),

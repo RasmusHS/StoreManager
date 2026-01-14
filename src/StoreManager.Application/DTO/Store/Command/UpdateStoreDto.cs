@@ -4,7 +4,7 @@ namespace StoreManager.Application.DTO.Store.Command;
 
 public record UpdateStoreDto
 {
-    public UpdateStoreDto(Guid id, Guid chainId, int number, string name, string street, string postalCode, string city, string countryCode, string phoneNumber, string email, string firstName, string lastName, DateTime createdOn, DateTime modifiedOn)
+    public UpdateStoreDto(Guid id, Guid? chainId, int number, string name, string street, string postalCode, string city, string countryCode, string phoneNumber, string email, string firstName, string lastName, DateTime createdOn, DateTime modifiedOn)
     {
         Id = id;
         ChainId = chainId;
@@ -27,7 +27,7 @@ public record UpdateStoreDto
     public UpdateStoreDto() { }
 
     public Guid Id { get; set; } // Store Identifier
-    public Guid ChainId { get; set; } // Associated Chain Identifier
+    public Guid? ChainId { get; set; } // Associated Chain Identifier
     public int Number { get; set; }
     public string Name { get; set; }
     public string Street { get; set; }

@@ -19,9 +19,9 @@ public class Address : ValueObject
 
     public static Result<Address> Create(string street, string postalcode, string city)
     {
-        Ensure.That(street, nameof(street)).IsNotNullOrEmpty();
-        Ensure.That(postalcode, nameof(postalcode)).IsNotNullOrEmpty();
-        Ensure.That(city, nameof(city)).IsNotNullOrEmpty();
+        Ensure.That(street, nameof(street)).IsNotNullOrEmpty().IsNotNullOrWhiteSpace();
+        Ensure.That(postalcode, nameof(postalcode)).IsNotNullOrEmpty().IsNotNullOrWhiteSpace();
+        Ensure.That(city, nameof(city)).IsNotNullOrEmpty().IsNotNullOrWhiteSpace();
 
         return Result.Ok<Address>(new Address(street, postalcode, city));
     }

@@ -31,19 +31,20 @@ public sealed class StoreEntity : Entity<StoreId>
     public static Result<StoreEntity> Create(ChainId? chainId, int number, string name, Address address, PhoneNumber phoneNumber, Email email, FullName storeOwner)
     {
         //Ensure.That(, nameof());
-        if (chainId.Value != null)
+        if (chainId != null)
         {
             Ensure.That(chainId.Value, nameof(chainId.Value)).IsNotEmpty();
         }  
         Ensure.That(number, nameof(number));
-        Ensure.That(address.Street, nameof(address.Street)).IsNotNullOrEmpty();
-        Ensure.That(address.PostalCode, nameof(address.PostalCode)).IsNotNullOrEmpty();
-        Ensure.That(address.City, nameof(address.City)).IsNotNullOrEmpty();
-        Ensure.That(phoneNumber.CountryCode, nameof(phoneNumber.CountryCode)).IsNotNullOrEmpty();
-        Ensure.That(phoneNumber.Number, nameof(phoneNumber.Number)).IsNotNullOrEmpty();
-        Ensure.That(email.Value, nameof(email.Value)).IsNotNullOrEmpty();
-        Ensure.That(storeOwner.FirstName, nameof(storeOwner.FirstName));
-        Ensure.That(storeOwner.LastName, nameof(storeOwner.LastName));
+        Ensure.That(name, nameof(name)).IsNotNullOrEmpty().IsNotNullOrWhiteSpace();
+        Ensure.That(address.Street, nameof(address.Street)).IsNotNullOrEmpty().IsNotNullOrWhiteSpace();
+        Ensure.That(address.PostalCode, nameof(address.PostalCode)).IsNotNullOrEmpty().IsNotNullOrWhiteSpace();
+        Ensure.That(address.City, nameof(address.City)).IsNotNullOrEmpty().IsNotNullOrWhiteSpace();
+        Ensure.That(phoneNumber.CountryCode, nameof(phoneNumber.CountryCode)).IsNotNullOrEmpty().IsNotNullOrWhiteSpace();
+        Ensure.That(phoneNumber.Number, nameof(phoneNumber.Number)).IsNotNullOrEmpty().IsNotNullOrWhiteSpace();
+        Ensure.That(email.Value, nameof(email.Value)).IsNotNullOrEmpty().IsNotNullOrWhiteSpace();
+        Ensure.That(storeOwner.FirstName, nameof(storeOwner.FirstName)).IsNotNullOrEmpty().IsNotNullOrWhiteSpace();
+        Ensure.That(storeOwner.LastName, nameof(storeOwner.LastName)).IsNotNullOrEmpty().IsNotNullOrWhiteSpace();
 
         return Result.Ok<StoreEntity>(new StoreEntity(StoreId.Create().Value, chainId, number, name, address, phoneNumber, email, storeOwner));
     }
@@ -51,14 +52,15 @@ public sealed class StoreEntity : Entity<StoreId>
     public void UpdateStore(ChainId? chainId, int number, string name, Address address, PhoneNumber phoneNumber, Email email, FullName storeOwner /*string street, string postalCode, string city, string countryCode, string phoneNumber, string email, string firstName, string lastName*/)
     {
         Ensure.That(number, nameof(number));
-        Ensure.That(address.Street, nameof(address.Street)).IsNotNullOrEmpty();
-        Ensure.That(address.PostalCode, nameof(address.PostalCode)).IsNotNullOrEmpty();
-        Ensure.That(address.City, nameof(address.City)).IsNotNullOrEmpty();
-        Ensure.That(phoneNumber.CountryCode, nameof(phoneNumber.CountryCode)).IsNotNullOrEmpty();
-        Ensure.That(phoneNumber.Number, nameof(phoneNumber.Number)).IsNotNullOrEmpty();
-        Ensure.That(email.Value, nameof(email.Value)).IsNotNullOrEmpty();
-        Ensure.That(storeOwner.FirstName, nameof(storeOwner.FirstName));
-        Ensure.That(storeOwner.LastName, nameof(storeOwner.LastName));
+        Ensure.That(name, nameof(name)).IsNotNullOrEmpty().IsNotNullOrWhiteSpace();
+        Ensure.That(address.Street, nameof(address.Street)).IsNotNullOrEmpty().IsNotNullOrWhiteSpace();
+        Ensure.That(address.PostalCode, nameof(address.PostalCode)).IsNotNullOrEmpty().IsNotNullOrWhiteSpace();
+        Ensure.That(address.City, nameof(address.City)).IsNotNullOrEmpty().IsNotNullOrWhiteSpace();
+        Ensure.That(phoneNumber.CountryCode, nameof(phoneNumber.CountryCode)).IsNotNullOrEmpty().IsNotNullOrWhiteSpace();
+        Ensure.That(phoneNumber.Number, nameof(phoneNumber.Number)).IsNotNullOrEmpty().IsNotNullOrWhiteSpace();
+        Ensure.That(email.Value, nameof(email.Value)).IsNotNullOrEmpty().IsNotNullOrWhiteSpace();
+        Ensure.That(storeOwner.FirstName, nameof(storeOwner.FirstName)).IsNotNullOrEmpty().IsNotNullOrWhiteSpace();
+        Ensure.That(storeOwner.LastName, nameof(storeOwner.LastName)).IsNotNullOrEmpty().IsNotNullOrWhiteSpace();
         //Ensure.That(street, nameof(street)).IsNotNullOrEmpty();
         //Ensure.That(postalCode, nameof(postalCode)).IsNotNullOrEmpty();
         //Ensure.That(city, nameof(city)).IsNotNullOrEmpty();
@@ -68,11 +70,7 @@ public sealed class StoreEntity : Entity<StoreId>
         //Ensure.That(firstName, nameof(firstName));
         //Ensure.That(lastName, nameof(lastName));
 
-        if (chainId != null)
-        {
-            //ChainId = ChainId.GetExisting(chainId).Value;
-            ChainId = chainId;
-        }
+        ChainId = chainId;
         Number = number;
         Name = name;
         Address = address;

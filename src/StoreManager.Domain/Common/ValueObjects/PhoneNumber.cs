@@ -21,7 +21,7 @@ public class PhoneNumber : ValueObject
             return Result.Fail<PhoneNumber>(Errors.General.ValueIsRequired(number));
         }
 
-        if (!int.TryParse(number.Trim(), out _))
+        if (!Int64.TryParse(number.Trim(), out _))
         {
             return Result.Fail<PhoneNumber>(Errors.General.UnexpectedValue($"Value {number} is not a number"));
         }

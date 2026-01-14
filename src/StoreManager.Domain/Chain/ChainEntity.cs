@@ -22,7 +22,7 @@ public sealed class ChainEntity : AggregateRoot<ChainId>
     public static Result<ChainEntity> Create(string name)
     {
         //Ensure.That(, nameof());
-        Ensure.That(name, nameof(name)).IsNotNullOrEmpty();
+        Ensure.That(name, nameof(name)).IsNotNullOrEmpty().IsNotNullOrWhiteSpace();
 
         return Result.Ok<ChainEntity>(new ChainEntity(ChainId.Create().Value, name));
     }
@@ -41,7 +41,7 @@ public sealed class ChainEntity : AggregateRoot<ChainId>
 
     public void UpdateChainDetails(string name)
     {
-        Ensure.That(name, nameof(name)).IsNotNullOrEmpty();
+        Ensure.That(name, nameof(name)).IsNotNullOrEmpty().IsNotNullOrWhiteSpace();
         Name = name;
 
         ModifiedOn = DateTime.UtcNow;
