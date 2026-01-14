@@ -28,7 +28,7 @@ public class ChainRepository : IChainRepository
 
             await _dbContext.Database.CommitTransactionAsync(cancellationToken);
 
-            return await Task.FromResult(entity).Result;
+            return Task.FromResult(entity).Result;
         }
 
         await _dbContext.ChainEntities.AddAsync(entity, cancellationToken);
@@ -36,7 +36,7 @@ public class ChainRepository : IChainRepository
 
         await _dbContext.Database.CommitTransactionAsync(cancellationToken);
 
-        return await Task.FromResult(entity).Result;
+        return Task.FromResult(entity).Result;
     }
 
     public async Task<IEnumerable<ChainEntity>> AddRangeAsync(List<ChainEntity> entities, CancellationToken cancellationToken = default)
@@ -66,6 +66,15 @@ public class ChainRepository : IChainRepository
         await _dbContext.Database.CommitTransactionAsync();
         
         return chain!;
+    }
+
+    public async Task<int> GetCountofStoresByChainAsync(object id)
+    {
+        await _dbContext.Database.BeginTransactionAsync(IsolationLevel.RepeatableRead);
+        int stores = _dbContext.StoreEntities.AsNoTracking().Count(c => c.ChainId! == (ChainId)id);
+        await _dbContext.Database.CommitTransactionAsync();
+
+        return stores;
     }
 
     public async Task UpdateAsync(ChainEntity entity, CancellationToken cancellationToken = default)

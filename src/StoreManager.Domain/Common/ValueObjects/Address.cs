@@ -25,6 +25,7 @@ public class Address : ValueObject
 
         return Result.Ok<Address>(new Address(street, postalcode, city));
     }
+
     protected override IEnumerable<object> GetEqualityComponents()
     {
         yield return Street;

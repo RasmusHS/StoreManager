@@ -1,4 +1,4 @@
-﻿namespace StoreManager.API.IntegrationTests
+﻿namespace StoreManager.Application.Tests
 {
     public class UnitTest1
     {

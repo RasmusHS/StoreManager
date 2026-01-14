@@ -1,5 +1,16 @@
-﻿namespace StoreManager.Application.Commands.Chain;
+﻿using StoreManager.Application.Data;
+using StoreManager.Domain.Chain.ValueObjects;
 
-public class DeleteChainCommand
+namespace StoreManager.Application.Commands.Chain;
+
+public class DeleteChainCommand : ICommand
 {
+    public DeleteChainCommand(ChainId id)
+    {
+        Id = id;
+    }
+
+    public DeleteChainCommand() { }
+
+    public ChainId Id { get; set; }
 }

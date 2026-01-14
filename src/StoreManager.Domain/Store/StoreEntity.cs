@@ -48,28 +48,41 @@ public sealed class StoreEntity : Entity<StoreId>
         return Result.Ok<StoreEntity>(new StoreEntity(StoreId.Create().Value, chainId, number, name, address, phoneNumber, email, storeOwner));
     }
 
-    public void UpdateStore(Guid? chainId, int number, string name, string street, string postalCode, string city, string countryCode, string phoneNumber, string email, string firstName, string lastName)
+    public void UpdateStore(ChainId? chainId, int number, string name, Address address, PhoneNumber phoneNumber, Email email, FullName storeOwner /*string street, string postalCode, string city, string countryCode, string phoneNumber, string email, string firstName, string lastName*/)
     {
         Ensure.That(number, nameof(number));
-        Ensure.That(street, nameof(street)).IsNotNullOrEmpty();
-        Ensure.That(postalCode, nameof(postalCode)).IsNotNullOrEmpty();
-        Ensure.That(city, nameof(city)).IsNotNullOrEmpty();
-        Ensure.That(countryCode, nameof(countryCode)).IsNotNullOrEmpty();
-        Ensure.That(phoneNumber, nameof(phoneNumber)).IsNotNullOrEmpty();
-        Ensure.That(email, nameof(email)).IsNotNullOrEmpty();
-        Ensure.That(firstName, nameof(firstName));
-        Ensure.That(lastName, nameof(lastName));
+        Ensure.That(address.Street, nameof(address.Street)).IsNotNullOrEmpty();
+        Ensure.That(address.PostalCode, nameof(address.PostalCode)).IsNotNullOrEmpty();
+        Ensure.That(address.City, nameof(address.City)).IsNotNullOrEmpty();
+        Ensure.That(phoneNumber.CountryCode, nameof(phoneNumber.CountryCode)).IsNotNullOrEmpty();
+        Ensure.That(phoneNumber.Number, nameof(phoneNumber.Number)).IsNotNullOrEmpty();
+        Ensure.That(email.Value, nameof(email.Value)).IsNotNullOrEmpty();
+        Ensure.That(storeOwner.FirstName, nameof(storeOwner.FirstName));
+        Ensure.That(storeOwner.LastName, nameof(storeOwner.LastName));
+        //Ensure.That(street, nameof(street)).IsNotNullOrEmpty();
+        //Ensure.That(postalCode, nameof(postalCode)).IsNotNullOrEmpty();
+        //Ensure.That(city, nameof(city)).IsNotNullOrEmpty();
+        //Ensure.That(countryCode, nameof(countryCode)).IsNotNullOrEmpty();
+        //Ensure.That(phoneNumber, nameof(phoneNumber)).IsNotNullOrEmpty();
+        //Ensure.That(email, nameof(email)).IsNotNullOrEmpty();
+        //Ensure.That(firstName, nameof(firstName));
+        //Ensure.That(lastName, nameof(lastName));
 
         if (chainId != null)
         {
-            ChainId = ChainId.GetExisting(chainId).Value;
+            //ChainId = ChainId.GetExisting(chainId).Value;
+            ChainId = chainId;
         }
         Number = number;
         Name = name;
-        Address = Address.Create(street, postalCode, city).Value;
-        PhoneNumber = PhoneNumber.Create(countryCode, phoneNumber).Value;
-        Email = Email.Create(email).Value;
-        StoreOwner = FullName.Create(firstName, lastName).Value;
+        Address = address;
+        PhoneNumber = phoneNumber;
+        Email = email;
+        StoreOwner = storeOwner;
+        //Address = Address.Create(street, postalCode, city).Value;
+        //PhoneNumber = PhoneNumber.Create(countryCode, phoneNumber).Value;
+        //Email = Email.Create(email).Value;
+        //StoreOwner = FullName.Create(firstName, lastName).Value;
 
         ModifiedOn = DateTime.UtcNow;
     }

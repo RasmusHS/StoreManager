@@ -2,6 +2,7 @@
 using StoreManager.Application.Data.Infrastructure;
 using StoreManager.Application.DTO.Store.Query;
 using StoreManager.Domain.Common;
+using StoreManager.Domain.Common.ValueObjects;
 
 namespace StoreManager.Application.Queries.Store.Handlers;
 
@@ -17,7 +18,7 @@ public class GetAllStoresByChainQueryHandler : IQueryHandler<GetAllStoresByChain
     public async Task<Result<CollectionResponseBase<QueryStoreDto>>> Handle(GetAllStoresByChainQuery query, CancellationToken cancellationToken = default)
     {
         List<QueryStoreDto> stores = new List<QueryStoreDto>();
-        var storesResult = await _storeRepository.GetAllByChainIdAsync(query.ChainId, cancellationToken) ?? throw new KeyNotFoundException($"Stores belonging to Chain with ID {query.ChainId} not found.");
+        var storesResult = await _storeRepository.GetAllByChainIdAsync(query.ChainId) ?? throw new KeyNotFoundException($"Stores belonging to Chain with ID {query.ChainId} not found.");
         if (storesResult.Count() < 1)
         {
             throw new KeyNotFoundException($"Stores belonging to Chain with ID {query.ChainId} not found.");
@@ -26,18 +27,18 @@ public class GetAllStoresByChainQueryHandler : IQueryHandler<GetAllStoresByChain
         foreach (var store in storesResult)
         {
             QueryStoreDto storeDto = new QueryStoreDto(
-                store.Id,
-                store.ChainId,
+                store.Id.Value,
+                store.ChainId!.Value,
                 store.Number,
                 store.Name,
-                store.Street,
-                store.PostalCode,
-                store.City,
-                store.CountryCode,
-                store.PhoneNumber,
-                store.Email,
-                store.FirstName,
-                store.LastName,
+                store.Address.Street,
+                store.Address.PostalCode,
+                store.Address.City,
+                store.PhoneNumber.CountryCode,
+                store.PhoneNumber.Number,
+                store.Email.Value,
+                store.StoreOwner.FirstName,
+                store.StoreOwner.LastName,
                 store.CreatedOn,
                 store.ModifiedOn
                 );

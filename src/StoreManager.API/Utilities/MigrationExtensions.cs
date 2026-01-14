@@ -1,4 +1,5 @@
-﻿using StoreManager.Persistence;
+﻿using Microsoft.EntityFrameworkCore;
+using StoreManager.Persistence;
 
 namespace StoreManager.API.Utilities;
 

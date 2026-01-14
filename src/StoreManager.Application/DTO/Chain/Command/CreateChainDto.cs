@@ -36,5 +36,6 @@ public record CreateChainDto
             {
                 RuleFor(x => x.Name).NotEmpty().WithMessage("Chain name is required.").MaximumLength(100).WithMessage("Chain name must not exceed 100 characters.");
             }
+        }
     }
 }

@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace StoreManager.Domain.Common.ValueObjects;
+﻿namespace StoreManager.Domain.Common.ValueObjects;
 
 public class PhoneNumber : ValueObject
 {
@@ -22,22 +18,15 @@ public class PhoneNumber : ValueObject
         // Basic validation for phone number format
         if (string.IsNullOrWhiteSpace(number))
         {
-            return Result.Fail<PhoneNumber>("Phone number cannot be empty.");
+            return Result.Fail<PhoneNumber>(Errors.General.ValueIsRequired(number));
         }
 
-        if (!int.TryParse(number.Trim()))
+        if (!int.TryParse(number.Trim(), out _))
         {
-            return Result.Fail<PhoneNumber>("Phone number must contain only digits.");
+            return Result.Fail<PhoneNumber>(Errors.General.UnexpectedValue($"Value {number} is not a number"));
         }
 
-        var fullNumber = new StringBuilder();
-        if (!string.IsNullOrWhiteSpace(countryCode) && int.TryParse(number.Trim()))
-        {
-            fullNumber.Append($"{countryCode}");
-            fullNumber.Append(number);
-        }
-
-        return Result.Ok(new PhoneNumber(fullNumber.ToString()));
+        return Result.Ok(new PhoneNumber($"+{countryCode}", number));
     }
 
     protected override IEnumerable<object> GetEqualityComponents()

@@ -22,8 +22,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Configs\Chain\" />
-    <Folder Include="Configs\Store\" />
     <Folder Include="Migrations\" />
   </ItemGroup>
 

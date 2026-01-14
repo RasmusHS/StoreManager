@@ -12,6 +12,9 @@
     <Project Path="src/StoreManager.Webapp/StoreManager.Webapp/StoreManager.Webapp.csproj" Id="44680d0f-c05a-4d5f-8deb-c8786d684e76" />
   </Folder>
   <Folder Name="/src/Tests/">
+    <Project Path="src/Tests/Helpers/Helpers.csproj" Id="007f1ed7-4347-48b0-a2c2-40223e47d9a8" />
     <Project Path="src/Tests/StoreManager.API.IntegrationTests/StoreManager.API.IntegrationTests.csproj" Id="ee844471-1cbf-4596-866a-53662d324984" />
+    <Project Path="src/Tests/StoreManager.Application.Tests/StoreManager.Application.Tests.csproj" Id="f8d0137f-1b91-466d-82fa-a5477d73bc1b" />
+    <Project Path="src/Tests/StoreManager.Domain.Tests/StoreManager.Domain.Tests.csproj" Id="92b250f3-adec-42fb-afbf-45aa80c0309e" />
   </Folder>
 </Solution>

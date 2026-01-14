@@ -1,7 +1,7 @@
 ﻿using EnsureThat;
 using StoreManager.Domain.Common;
 
-namespace StoreManager.Domain.Store.ValueObjects;
+namespace StoreManager.Domain.Common.ValueObjects;
 
 public class FullName : ValueObject
 {

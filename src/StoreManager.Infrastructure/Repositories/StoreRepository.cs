@@ -80,6 +80,15 @@ public class StoreRepository : IStoreRepository
         await _dbContext.Database.CommitTransactionAsync(cancellationToken);
     }
 
+    public async Task DeleteByChainIdAsync(object chainId, CancellationToken cancellationToken = default)
+    {
+        await _dbContext.Database.BeginTransactionAsync(IsolationLevel.RepeatableRead, cancellationToken);
+        var entities = _dbContext.StoreEntities.Where(s => s.ChainId == (ChainId)chainId);
+        _dbContext.StoreEntities.RemoveRange(entities);
+        Save(cancellationToken);
+        await _dbContext.Database.CommitTransactionAsync(cancellationToken);
+    }
+
     public void Save(CancellationToken cancellationToken = default)
     {
         _dbContext.SaveChanges(cancellationToken);
