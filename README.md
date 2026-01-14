@@ -3,12 +3,12 @@ Currently working in branch: master
 
 # Plans
 - [ ] Setup backend
-  - [ ] Configure EFCore in the persistence layer so it knows how to map the domain entities to sql tables and vice versa
-  - [ ] Rule: Ensure a chain's name is unique from other chains
+  - [x] Configure EFCore in the persistence layer so it knows how to map the domain entities to sql tables and vice versa
+  - [x] Rule: Ensure a chain's name is unique from other chains
   - [ ] Rule: Prevent a chain from being deleted if it still has stores associated with it
-  - [ ] Rule: Store number must be unique, and will be manually assigned by an OptikIT employee (why manually???)
+  - [x] Rule: Store number must be unique, and will be manually assigned by an OptikIT employee (why manually???)
   - [ ] Rule: Stores can be assigned to 0 or 1 chain. If 0 then the store's chainId FK will be null.
-  - [ ] Rule: A chain can have 1 or more stores
+  - [x] Rule: A chain can have 1 or more stores
   - [ ] Create unit tests for domain and application layer before moving on to the api
   - [ ] Finish setting up the api
   - [ ] Setup logic to facilitate writing and running integration tests
