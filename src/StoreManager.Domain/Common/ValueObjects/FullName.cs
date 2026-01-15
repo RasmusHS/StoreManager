@@ -18,8 +18,8 @@ public class FullName : ValueObject
 
     public static Result<FullName> Create(string firstName, string lastName)
     {
-        Ensure.That(firstName, nameof(firstName)).IsNotNullOrEmpty();
-        Ensure.That(lastName, nameof(lastName)).IsNotNullOrEmpty();
+        Ensure.That(firstName, nameof(firstName)).IsNotNullOrEmpty().IsNotNullOrWhiteSpace();
+        Ensure.That(lastName, nameof(lastName)).IsNotNullOrEmpty().IsNotNullOrWhiteSpace();
 
         return Result.Ok<FullName>(new FullName(firstName, lastName));
     }

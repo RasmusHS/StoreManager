@@ -13,14 +13,14 @@ namespace StoreManager.API.IntegrationTests;
 
 public class StoreManagerWebApplicationFactory : WebApplicationFactory<Program>, IAsyncLifetime
 {
-    //private readonly MsSqlContainer _dbContainer = new MsSqlBuilder()
-    //    .WithImage("mcr.microsoft.com/mssql/server:2022-latest")
-    //    .WithName($"storemanager_dev.db{Guid.NewGuid():N}")
-    //    .WithPassword("yourStrong(!)Password")
-    //    .WithCleanUp(true)
-    //    .Build();
+    private readonly MsSqlContainer _dbContainer = new MsSqlBuilder()
+        .WithImage("mcr.microsoft.com/mssql/server:2022-latest")
+        .WithName($"storemanager_dev.db{Guid.NewGuid():N}")
+        .WithPassword("yourStrong(!)Password")
+        .WithCleanUp(true)
+        .Build();
 
-    private readonly MsSqlContainer _dbContainer = new MsSqlContainer(new MsSqlConfiguration($"storemanager_dev.db{Guid.NewGuid():N}", "SA", "yourStrong(!)Password"));
+    //private readonly MsSqlContainer _dbContainer = new MsSqlContainer(new MsSqlConfiguration($"storemanager_dev.db{Guid.NewGuid():N}", "SA", "yourStrong(!)Password"));
 
     // Track if THIS factory's database has been initialized
     private bool _databaseInitialized;
