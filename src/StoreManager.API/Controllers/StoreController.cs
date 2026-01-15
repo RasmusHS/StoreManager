@@ -123,10 +123,10 @@ public class StoreController : BaseController
 
     [HttpDelete]
     [Route("deleteAllStores")]
-    public async Task<IActionResult> DeleteAllStores(DeleteStoreDto request)
+    public async Task<IActionResult> DeleteAllStores(DeleteAllStoresDto request)
     {
         // Uses ChainId from DeleteStoreDto
-        DeleteStoreDto.Validator validator = new DeleteStoreDto.Validator();
+        DeleteAllStoresDto.Validator validator = new DeleteAllStoresDto.Validator();
         var result = await validator.ValidateAsync(request);
         if (result.IsValid)
         {

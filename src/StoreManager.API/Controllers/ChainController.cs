@@ -120,7 +120,16 @@ public class ChainController : BaseController
         // A chain can only be deleted if it has no associated stores
         DeleteChainDto.Validator validator = new DeleteChainDto.Validator();
         var result = await validator.ValidateAsync(request);
-
-        return Ok();
+        if (result.IsValid)
+        {
+            DeleteChainCommand command = new DeleteChainCommand(ChainId.GetExisting(request.Id));
+            var commandResult = await _dispatcher.Dispatch(command);
+            if (commandResult.Success)
+            {
+                return Ok(commandResult);
+            }
+            return BadRequest(commandResult.Error.Code);
+        }
+        return BadRequest(result.Errors);
     }
 }
