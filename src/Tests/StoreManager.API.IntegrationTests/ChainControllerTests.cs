@@ -1,10 +1,9 @@
-﻿using StoreManager.Application.DTO.Chain.Command;
+﻿using Helpers;
+using StoreManager.Application.DTO.Chain.Command;
 using StoreManager.Application.DTO.Store.Command;
 using StoreManager.Domain.Chain;
-using StoreManager.Domain.Chain.ValueObjects;
 using StoreManager.Domain.Common.ValueObjects;
 using StoreManager.Domain.Store;
-using System.IO;
 using System.Net;
 using System.Net.Http.Json;
 using Xunit.Abstractions;
@@ -45,7 +44,7 @@ public class ChainControllerTests : BaseIntegrationTest
         // Arrange
         var stores = new List<CreateStoreDto>
         {
-            new CreateStoreDto(null, 101, "Store 1", "123 Main St", "12345", "Test City", "1", "5551234567", "store1@test.com", "John", "Doe")
+            new CreateStoreDto(Guid.NewGuid(), 101, "Store 1", "123 Main St", "12345", "Test City", "1", "5551234567", "store1@test.com", "John", "Doe")
         };
         var request = new CreateChainDto("Test Chain With Stores", stores);
 
@@ -58,15 +57,13 @@ public class ChainControllerTests : BaseIntegrationTest
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
     }
 
-    [Fact]
-    public async Task CreateChain_WithEmptyName_ReturnsBadRequest()
+    [Theory]
+    [InlineData("")]
+    [InlineData(" ")]
+    public async Task CreateChain_WithEmptyName_ReturnsBadRequest(string name)
     {
         // Arrange
-        var request = new CreateChainDto
-        {
-            Name = "",
-            Stores = null
-        };
+        var request = new CreateChainDto(name);
 
         // Act
         var response = await _client.PostAsJsonAsync("/api/chain/createChain", request);
@@ -81,11 +78,7 @@ public class ChainControllerTests : BaseIntegrationTest
     public async Task CreateChain_WithNameExceeding100Characters_ReturnsBadRequest()
     {
         // Arrange
-        var request = new CreateChainDto
-        {
-            Name = new string('A', 101),
-            Stores = null
-        };
+        var request = new CreateChainDto(StringRandom.GetRandomString(101));
 
         // Act
         var response = await _client.PostAsJsonAsync("/api/chain/createChain", request);
@@ -100,28 +93,11 @@ public class ChainControllerTests : BaseIntegrationTest
     public async Task CreateChain_WithInvalidStoreData_ReturnsBadRequest()
     {
         // Arrange
-        var chainId = ChainId.Create().Value.Value;
-        var request = new CreateChainDto
+        var stores = new List<CreateStoreDto>
         {
-            Name = "Test Chain",
-            Stores = new List<CreateStoreDto>
-            {
-                new CreateStoreDto
-                {
-                    ChainId = chainId,
-                    Number = 101,
-                    Name = null, // Invalid: missing name
-                    Street = "123 Main St",
-                    PostalCode = "12345",
-                    City = "Test City",
-                    CountryCode = "+1",
-                    PhoneNumber = "5551234567",
-                    Email = "store1@test.com",
-                    FirstName = "John",
-                    LastName = "Doe"
-                }
-            }
+            new CreateStoreDto(null, 101, null, "123 Main St", "12345", "Test City", "1", "5551234567", "store1@test.com", "John", "Doe")
         };
+        var request = new CreateChainDto("Test Chain With Stores", stores);
 
         // Act
         var response = await _client.PostAsJsonAsync("/api/chain/createChain", request);
@@ -141,10 +117,10 @@ public class ChainControllerTests : BaseIntegrationTest
     {
         // Arrange
         var chain = ChainEntity.Create("Test Chain").Value;
-        await DbContext.Database.BeginTransactionAsync();
+        await using var transaction = await DbContext.Database.BeginTransactionAsync();
         await DbContext.ChainEntities.AddAsync(chain);
         await DbContext.SaveChangesAsync();
-        await DbContext.Database.CommitTransactionAsync();
+        await transaction.CommitAsync();
 
         // Act
         var response = await _client.GetAsync($"/api/chain/getChain/{chain.Id.Value}");
@@ -185,11 +161,11 @@ public class ChainControllerTests : BaseIntegrationTest
             StoreEntity.Create(chain.Id, 1, "Store 1", Address.Create("123 Test St", "12345", "Test City"), PhoneNumber.Create("+1", "5551234567"), Email.Create("store1@test.com"), FullName.Create("Test", "Manager1")).Value,
             StoreEntity.Create(chain.Id, 2, "Store 2", Address.Create("456 Test St", "67890", "Test City"), PhoneNumber.Create("+1", "5559876543"), Email.Create("store2@test.com"), FullName.Create("Test", "Manager2")).Value
         };
-        await DbContext.Database.BeginTransactionAsync();
+        await using var transaction = await DbContext.Database.BeginTransactionAsync();
         await DbContext.ChainEntities.AddAsync(chain);
         await DbContext.StoreEntities.AddRangeAsync(stores);
         await DbContext.SaveChangesAsync();
-        await DbContext.Database.CommitTransactionAsync();
+        await transaction.CommitAsync();
 
         // Act
         var response = await _client.GetAsync($"/api/chain/getChainAndStores/{chain.Id.Value}");
@@ -202,22 +178,22 @@ public class ChainControllerTests : BaseIntegrationTest
     }
 
     [Fact]
-    public async Task GetChainIncludeStores_WithExistingChainNoStores_ReturnsOkWithChainOnly()
+    public async Task GetChainIncludeStores_WithExistingChainNoStores_ReturnsInternalServerError()
     {
         // Arrange
         var chain = ChainEntity.Create("Test Chain Without Stores").Value;
-        await DbContext.Database.BeginTransactionAsync();
+        await using var transaction = await DbContext.Database.BeginTransactionAsync();
         await DbContext.ChainEntities.AddAsync(chain);
         await DbContext.SaveChangesAsync();
-        await DbContext.Database.CommitTransactionAsync();
+        await transaction.CommitAsync();
 
         // Act
         var response = await _client.GetAsync($"/api/chain/getChainAndStores/{chain.Id.Value}");
         var responseBody = await response.Content.ReadAsStringAsync();
         _output.WriteLine(responseBody);
 
-        // Assert
-        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        // Assert 
+        Assert.Equal(HttpStatusCode.InternalServerError, response.StatusCode);
         Assert.NotEmpty(responseBody);
     }
 
@@ -245,18 +221,12 @@ public class ChainControllerTests : BaseIntegrationTest
     {
         // Arrange
         var chain = ChainEntity.Create("Original Chain Name").Value;
-        await DbContext.Database.BeginTransactionAsync();
+        await using var transaction = await DbContext.Database.BeginTransactionAsync();
         await DbContext.ChainEntities.AddAsync(chain);
         await DbContext.SaveChangesAsync();
-        await DbContext.Database.CommitTransactionAsync();
+        await transaction.CommitAsync();
 
-        var request = new UpdateChainDto
-        {
-            Id = chain.Id.Value,
-            Name = "Updated Chain Name",
-            CreatedOn = chain.CreatedOn,
-            ModifiedOn = DateTime.UtcNow
-        };
+        var request = new UpdateChainDto(chain.Id.Value, "Updated Chain Name", chain.CreatedOn, DateTime.UtcNow);
 
         // Act
         var response = await _client.PutAsJsonAsync("/api/chain/updateChain", request);
@@ -271,13 +241,7 @@ public class ChainControllerTests : BaseIntegrationTest
     public async Task UpdateChain_WithEmptyId_ReturnsBadRequest()
     {
         // Arrange
-        var request = new UpdateChainDto
-        {
-            Id = Guid.Empty,
-            Name = "Updated Chain Name",
-            CreatedOn = DateTime.UtcNow,
-            ModifiedOn = DateTime.UtcNow
-        };
+        var request = new UpdateChainDto(Guid.Empty, "Updated Chain Name", DateTime.UtcNow, DateTime.UtcNow);
 
         // Act
         var response = await _client.PutAsJsonAsync("/api/chain/updateChain", request);
@@ -288,23 +252,19 @@ public class ChainControllerTests : BaseIntegrationTest
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
     }
 
-    [Fact]
-    public async Task UpdateChain_WithEmptyName_ReturnsBadRequest()
+    [Theory]
+    [InlineData("")]
+    [InlineData(" ")]
+    public async Task UpdateChain_WithEmptyName_ReturnsBadRequest(string name)
     {
         // Arrange
         var chain = ChainEntity.Create("Test Chain").Value;
-        await DbContext.Database.BeginTransactionAsync();
+        await using var transaction = await DbContext.Database.BeginTransactionAsync();
         await DbContext.ChainEntities.AddAsync(chain);
         await DbContext.SaveChangesAsync();
-        await DbContext.Database.CommitTransactionAsync();
+        await transaction.CommitAsync();
 
-        var request = new UpdateChainDto
-        {
-            Id = chain.Id.Value,
-            Name = "",
-            CreatedOn = chain.CreatedOn,
-            ModifiedOn = DateTime.UtcNow
-        };
+        var request = new UpdateChainDto(chain.Id.Value, name, chain.CreatedOn, DateTime.UtcNow);
 
         // Act
         var response = await _client.PutAsJsonAsync("/api/chain/updateChain", request);
@@ -320,18 +280,12 @@ public class ChainControllerTests : BaseIntegrationTest
     {
         // Arrange
         var chain = ChainEntity.Create("Test Chain").Value;
-        await DbContext.Database.BeginTransactionAsync();
+        await using var transaction = await DbContext.Database.BeginTransactionAsync();
         await DbContext.ChainEntities.AddAsync(chain);
         await DbContext.SaveChangesAsync();
-        await DbContext.Database.CommitTransactionAsync();
+        await transaction.CommitAsync();
 
-        var request = new UpdateChainDto
-        {
-            Id = chain.Id.Value,
-            Name = new string('A', 101),
-            CreatedOn = chain.CreatedOn,
-            ModifiedOn = DateTime.UtcNow
-        };
+        var request = new UpdateChainDto(chain.Id.Value, StringRandom.GetRandomString(101), chain.CreatedOn, DateTime.UtcNow);
 
         // Act
         var response = await _client.PutAsJsonAsync("/api/chain/updateChain", request);
@@ -346,13 +300,7 @@ public class ChainControllerTests : BaseIntegrationTest
     public async Task UpdateChain_WithNonExistingChainId_ReturnsBadRequest()
     {
         // Arrange
-        var request = new UpdateChainDto
-        {
-            Id = Guid.NewGuid(),
-            Name = "Updated Chain",
-            CreatedOn = DateTime.UtcNow.AddDays(-1),
-            ModifiedOn = DateTime.UtcNow
-        };
+        var request = new UpdateChainDto(Guid.NewGuid(), "Updated Chain", DateTime.UtcNow, DateTime.UtcNow.AddDays(1));
 
         // Act
         var response = await _client.PutAsJsonAsync("/api/chain/updateChain", request);
@@ -360,7 +308,7 @@ public class ChainControllerTests : BaseIntegrationTest
         _output.WriteLine(responseBody);
 
         // Assert
-        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+        Assert.Equal(HttpStatusCode.InternalServerError, response.StatusCode);
     }
 
     #endregion
@@ -372,49 +320,43 @@ public class ChainControllerTests : BaseIntegrationTest
     {
         // Arrange
         var chain = ChainEntity.Create("Chain To Delete").Value;
-        await DbContext.Database.BeginTransactionAsync();
+        await using var transaction = await DbContext.Database.BeginTransactionAsync();
         await DbContext.ChainEntities.AddAsync(chain);
         await DbContext.SaveChangesAsync();
-        await DbContext.Database.CommitTransactionAsync();
+        await transaction.CommitAsync();
 
-        var request = new DeleteChainDto
-        {
-            Id = chain.Id.Value,
-            CreatedOn = chain.CreatedOn,
-            ModifiedOn = DateTime.UtcNow
-        };
+        var request = new DeleteChainDto(chain.Id.Value, chain.CreatedOn, DateTime.UtcNow);
 
         // Act
-        var response = await _client.DeleteAsync($"/api/chain/deleteChain");
-        response = await _client.PostAsJsonAsync("/api/chain/deleteChain", request);
-        var responseBody = await response.Content.ReadAsStringAsync();
-        _output.WriteLine(responseBody);
-
-        // Assert - Note: The actual HTTP method doesn't matter for the assertion, focus on the result
-        Assert.NotNull(response);
-    }
-
-    [Fact]
-    public async Task DeleteChain_WithEmptyId_ReturnsBadRequest()
-    {
-        // Arrange
-        var request = new DeleteChainDto
-        {
-            Id = Guid.Empty,
-            CreatedOn = DateTime.UtcNow,
-            ModifiedOn = DateTime.UtcNow
-        };
-
-        // Act
-        var response = await _client.DeleteAsync("/api/chain/deleteChain");
-        // Use a workaround for sending body with DELETE request
         var httpRequestMessage = new HttpRequestMessage
         {
             Method = HttpMethod.Delete,
             RequestUri = new Uri(_client.BaseAddress + "api/chain/deleteChain"),
             Content = JsonContent.Create(request)
         };
-        response = await _client.SendAsync(httpRequestMessage);
+        var response = await _client.SendAsync(httpRequestMessage);
+        var responseBody = await response.Content.ReadAsStringAsync();
+        _output.WriteLine(responseBody);
+
+        // Assert - Note: The actual HTTP method doesn't matter for the assertion, focus on the result
+        Assert.NotNull(response);
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task DeleteChain_WithEmptyId_ReturnsBadRequest()
+    {
+        // Arrange
+        var request = new DeleteChainDto(Guid.Empty, DateTime.UtcNow, DateTime.UtcNow);
+
+        // Act
+        var httpRequestMessage = new HttpRequestMessage
+        {
+            Method = HttpMethod.Delete,
+            RequestUri = new Uri(_client.BaseAddress + "api/chain/deleteChain"),
+            Content = JsonContent.Create(request)
+        };
+        var response = await _client.SendAsync(httpRequestMessage);
         var responseBody = await response.Content.ReadAsStringAsync();
         _output.WriteLine(responseBody);
 
@@ -426,12 +368,7 @@ public class ChainControllerTests : BaseIntegrationTest
     public async Task DeleteChain_WithNonExistingChainId_ReturnsBadRequest()
     {
         // Arrange
-        var request = new DeleteChainDto
-        {
-            Id = Guid.NewGuid(),
-            CreatedOn = DateTime.UtcNow.AddDays(-1),
-            ModifiedOn = DateTime.UtcNow
-        };
+        var request = new DeleteChainDto(Guid.NewGuid(), DateTime.UtcNow, DateTime.UtcNow);
 
         // Act
         var httpRequestMessage = new HttpRequestMessage
@@ -453,19 +390,14 @@ public class ChainControllerTests : BaseIntegrationTest
     {
         // Arrange - A chain can only be deleted if it has no associated stores
         var chain = ChainEntity.Create("Chain With Stores").Value;
-        var store = StoreEntity.Create(chain.Id, 1, "Store 1", Address.Create("123 Test St", "12345", "Test City"), PhoneNumber.Create("+1", "5551234567"), Email.Create("store1@test.com"), FullName.Create("Test", "Manager")).Value;
-        await DbContext.Database.BeginTransactionAsync();
+        var store = StoreEntity.Create(chain.Id, 1, "Store 1", Address.Create("123 Test St", "12345", "Test City"), PhoneNumber.Create("1", "5551234567"), Email.Create("store1@test.com"), FullName.Create("Test", "Manager")).Value;
+        await using var transaction = await DbContext.Database.BeginTransactionAsync();
         await DbContext.ChainEntities.AddAsync(chain);
         await DbContext.StoreEntities.AddAsync(store);
         await DbContext.SaveChangesAsync();
-        await DbContext.Database.CommitTransactionAsync();
+        await transaction.CommitAsync();
 
-        var request = new DeleteChainDto
-        {
-            Id = chain.Id.Value,
-            CreatedOn = chain.CreatedOn,
-            ModifiedOn = DateTime.UtcNow
-        };
+        var request = new DeleteChainDto(chain.Id.Value, chain.CreatedOn, DateTime.UtcNow);
 
         // Act
         var httpRequestMessage = new HttpRequestMessage

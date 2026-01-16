@@ -29,12 +29,12 @@ public record CreateChainDto
         {
             if (containsStores == true)
             {
-                RuleFor(x => x.Name).NotEmpty().WithMessage("Chain name is required.").MaximumLength(100).WithMessage("Chain name must not exceed 100 characters.");
+                RuleFor(x => x.Name).NotEmpty().NotNull().WithMessage("Chain name is required.").MaximumLength(100).WithMessage("Chain name must not exceed 100 characters.");
                 RuleForEach(x => x.Stores).SetValidator(new CreateStoreDto.Validator());
             }
             else
             {
-                RuleFor(x => x.Name).NotEmpty().WithMessage("Chain name is required.").MaximumLength(100).WithMessage("Chain name must not exceed 100 characters.");
+                RuleFor(x => x.Name).NotEmpty().NotNull().WithMessage("Chain name is required.").MaximumLength(100).WithMessage("Chain name must not exceed 100 characters.");
             }
         }
     }

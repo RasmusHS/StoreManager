@@ -1,27 +1,34 @@
 ﻿using StoreManager.Application.Data;
 using StoreManager.Application.Data.Infrastructure;
 using StoreManager.Application.DTO.Store.Query;
+using StoreManager.Domain.Chain.ValueObjects;
 using StoreManager.Domain.Common;
-using StoreManager.Domain.Common.ValueObjects;
 
 namespace StoreManager.Application.Queries.Store.Handlers;
 
 public class GetAllStoresByChainQueryHandler : IQueryHandler<GetAllStoresByChainQuery, CollectionResponseBase<QueryStoreDto>>
 {
     private readonly IStoreRepository _storeRepository;
+    private readonly IChainRepository _chainRepository;
 
-    public GetAllStoresByChainQueryHandler(IStoreRepository storeRepository)
+    public GetAllStoresByChainQueryHandler(IStoreRepository storeRepository, IChainRepository chainRepository)
     {
         _storeRepository = storeRepository;
+        _chainRepository = chainRepository;
     }
 
     public async Task<Result<CollectionResponseBase<QueryStoreDto>>> Handle(GetAllStoresByChainQuery query, CancellationToken cancellationToken = default)
     {
+        if (_chainRepository.GetByIdAsync(query.ChainId) == null)
+        {
+            return Result.Fail<CollectionResponseBase<QueryStoreDto>>(Errors.General.NotFound<ChainId>(query.ChainId));
+        }
+
         List<QueryStoreDto> stores = new List<QueryStoreDto>();
         var storesResult = await _storeRepository.GetAllByChainIdAsync(query.ChainId) ?? throw new KeyNotFoundException($"Stores belonging to Chain with ID {query.ChainId} not found.");
         if (storesResult.Count() < 1)
         {
-            throw new KeyNotFoundException($"Stores belonging to Chain with ID {query.ChainId} not found.");
+            return Result.Fail<CollectionResponseBase<QueryStoreDto>>(Errors.ChainErrors.ChainHasNoStores<ChainId>(query.ChainId));
         }
 
         foreach (var store in storesResult)

@@ -7,6 +7,7 @@ using StoreManager.Application.DTO.Store.Command;
 using StoreManager.Application.Queries.Store;
 using StoreManager.Application.Queries.Store.Handlers;
 using StoreManager.Domain.Chain.ValueObjects;
+using StoreManager.Domain.Common;
 using StoreManager.Domain.Common.ValueObjects;
 using StoreManager.Domain.Store.ValueObjects;
 
@@ -30,20 +31,60 @@ public class StoreController : BaseController
         CreateStoreDto.Validator validator = new CreateStoreDto.Validator();
         var result = await validator.ValidateAsync(request);
 
-        CreateStoreCommand command = new CreateStoreCommand(
-            ChainId.GetExisting(request.ChainId!.Value).Value,
-            request.Number,
-            request.Name,
-            Address.Create(request.Street, request.PostalCode, request.City),
-            PhoneNumber.Create(request.CountryCode, request.PhoneNumber),
-            Email.Create(request.Email),
-            FullName.Create(request.FirstName, request.LastName));
-        var commandResult = await _dispatcher.Dispatch(command);
-        if (commandResult.Success)
+        if (!result.IsValid)
         {
-            return Ok(commandResult);
+            return BadRequest(result.Errors);
         }
-        return BadRequest(commandResult.Error.Code);
+
+        // Validate value objects
+        var addressResult = Address.Create(request.Street, request.PostalCode, request.City);
+        var phoneResult = PhoneNumber.Create(request.CountryCode, request.PhoneNumber);
+        var emailResult = Email.Create(request.Email);
+        var nameResult = FullName.Create(request.FirstName, request.LastName);
+
+        if (!addressResult.Success)
+            return BadRequest(addressResult.Error.Code);
+        if (!phoneResult.Success)
+            return BadRequest(phoneResult.Error.Code);
+        if (!emailResult.Success)
+            return BadRequest(emailResult.Error.Code);
+        if (!nameResult.Success)
+            return BadRequest(nameResult.Error.Code);
+
+        if (request.ChainId == null)
+        {
+            CreateStoreCommand command = new CreateStoreCommand(
+                null,
+                request.Number,
+                request.Name,
+                addressResult.Value,
+                phoneResult.Value,
+                emailResult.Value,
+                nameResult.Value);
+            var commandResult = await _dispatcher.Dispatch(command);
+            if (commandResult.Success)
+            {
+                return Ok(commandResult.Value);
+            }
+            return BadRequest(commandResult.Error.Code);
+        }
+        else
+        {
+            CreateStoreCommand command = new CreateStoreCommand(
+                ChainId.GetExisting(request.ChainId!.Value).Value,
+                request.Number,
+                request.Name,
+                addressResult.Value,
+                phoneResult.Value,
+                emailResult.Value,
+                nameResult.Value);
+            var commandResult = await _dispatcher.Dispatch(command);
+            if (commandResult.Success)
+            {
+                return Ok(commandResult.Value);
+            }
+            return BadRequest(commandResult.Error.Code);
+        }
     }
 
     [HttpGet]
@@ -76,13 +117,33 @@ public class StoreController : BaseController
     {
         UpdateStoreDto.Validator validator = new UpdateStoreDto.Validator();
         var result = await validator.ValidateAsync(request);
-        //var chainIdResult = (request.ChainId != null) ? ChainId.GetExisting(request.ChainId.Value) : null;
-        if (result.IsValid)
+
+        if (!result.IsValid)
+        {
+            return BadRequest(result.Errors);
+        }
+
+        // Validate value objects
+        var addressResult = Address.Create(request.Street, request.PostalCode, request.City);
+        var phoneResult = PhoneNumber.Create(request.CountryCode, request.PhoneNumber);
+        var emailResult = Email.Create(request.Email);
+        var nameResult = FullName.Create(request.FirstName, request.LastName);
+
+        if (!addressResult.Success)
+            return BadRequest(addressResult.Error.Code);
+        if (!phoneResult.Success)
+            return BadRequest(phoneResult.Error.Code);
+        if (!emailResult.Success)
+            return BadRequest(emailResult.Error.Code);
+        if (!nameResult.Success)
+            return BadRequest(nameResult.Error.Code);
+
+        // Validate ChainId is not null before accessing .Value
+        if (request.ChainId == null)
         {
             UpdateStoreCommand command = new UpdateStoreCommand(
                 StoreId.GetExisting(request.Id).Value,
-                //chainIdResult,
-                ChainId.GetExisting(request.ChainId.Value),
+                null,
                 request.Number,
                 request.Name,
                 Address.Create(request.Street, request.PostalCode, request.City),
@@ -94,18 +155,37 @@ public class StoreController : BaseController
             var commandResult = await _dispatcher.Dispatch(command);
             if (commandResult.Success)
             {
-                return Ok(commandResult);
+                return Ok(commandResult.Value);
             }
             return BadRequest(commandResult.Error.Code);
         }
-        return BadRequest(result.Errors);
+        else
+        {
+            UpdateStoreCommand command = new UpdateStoreCommand(
+                StoreId.GetExisting(request.Id).Value,
+                ChainId.GetExisting(request.ChainId.Value),
+                request.Number,
+                request.Name,
+                Address.Create(request.Street, request.PostalCode, request.City),
+                PhoneNumber.Create(request.CountryCode, request.PhoneNumber),
+                Email.Create(request.Email),
+                FullName.Create(request.FirstName, request.LastName),
+                request.CreatedOn,
+                request.ModifiedOn);
+
+            var commandResult = await _dispatcher.Dispatch(command);
+            if (commandResult.Success)
+            {
+                return Ok(commandResult.Value);
+            }
+            return BadRequest(commandResult.Error.Code);
+        }
     }
 
     [HttpDelete]
     [Route("deleteStore")]
     public async Task<IActionResult> DeleteStore(DeleteStoreDto request)
     {
-        // Uses Id from DeleteStoreDto
         DeleteStoreDto.Validator validator = new DeleteStoreDto.Validator();
         var result = await validator.ValidateAsync(request);
         if (result.IsValid) 
@@ -125,12 +205,11 @@ public class StoreController : BaseController
     [Route("deleteAllStores")]
     public async Task<IActionResult> DeleteAllStores(DeleteAllStoresDto request)
     {
-        // Uses ChainId from DeleteStoreDto
         DeleteAllStoresDto.Validator validator = new DeleteAllStoresDto.Validator();
         var result = await validator.ValidateAsync(request);
         if (result.IsValid)
         {
-            DeleteStoreCommand command = new DeleteStoreCommand(ChainId.GetExisting(request.ChainId).Value);
+            DeleteAllStoresCommand command = new DeleteAllStoresCommand(ChainId.GetExisting(request.ChainId).Value);
             var commandResult = await _dispatcher.Dispatch(command);
             if (commandResult.Success)
             {

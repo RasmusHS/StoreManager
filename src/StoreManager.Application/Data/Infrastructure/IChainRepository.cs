@@ -1,4 +1,5 @@
 ﻿using StoreManager.Domain.Chain;
+using StoreManager.Domain.Store;
 
 namespace StoreManager.Application.Data.Infrastructure;
 

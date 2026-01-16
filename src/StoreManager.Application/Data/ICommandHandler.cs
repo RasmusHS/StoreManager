@@ -8,3 +8,9 @@ public interface ICommandHandler<in TCommand>
 {
     new Task<Result> Handle(TCommand command, CancellationToken cancellationToken = default);
 }
+
+public interface ICommandHandler<in TCommand, TResult>
+    : IRequestHandler<TCommand, Result<TResult>> where TCommand : ICommand<TResult>
+{
+    new Task<Result<TResult>> Handle(TCommand command, CancellationToken cancellationToken = default);
+}

@@ -1,4 +1,5 @@
 ﻿using MediatR;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using StoreManager.Persistence;
 
@@ -31,9 +32,14 @@ public abstract class BaseIntegrationTest : IClassFixture<StoreManagerWebApplica
 
     private async Task CleanDatabaseAsync()
     {
-        // Remove all data from tables
-        DbContext.StoreEntities.RemoveRange(DbContext.StoreEntities);
-        DbContext.ChainEntities.RemoveRange(DbContext.ChainEntities);
+        // Use raw SQL for efficient bulk deletion respecting FK constraints
+        // Delete in order: child tables first (Stores), then parent tables (Chains)
+        await DbContext.Database.ExecuteSqlRawAsync("DELETE FROM store_entities");
+        await DbContext.Database.ExecuteSqlRawAsync("DELETE FROM chain_entities");
+
+        // Alternative if ExecuteSqlRaw doesn't work, use ExecuteDeleteAsync (EF Core 7+):
+        // await DbContext.StoreEntities.ExecuteDeleteAsync();
+        // await DbContext.ChainEntities.ExecuteDeleteAsync();
 
         await DbContext.SaveChangesAsync();
     }

@@ -12,5 +12,8 @@ public interface IApplicationDbContext
     public DbSet<ChainEntity> ChainEntities { get; set; }
     public DbSet<StoreEntity> StoreEntities { get; set; }
 
+    //savechangesasync
+    Task SaveChangesAsync(CancellationToken cancellationToken = default);
+
     void SaveChanges(CancellationToken cancellationToken = default);
 }

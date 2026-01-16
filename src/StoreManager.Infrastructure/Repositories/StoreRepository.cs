@@ -18,43 +18,32 @@ public class StoreRepository : IStoreRepository
 
     public async Task<StoreEntity> AddAsync(StoreEntity entity, CancellationToken cancellationToken = default)
     {
-        await _dbContext.Database.BeginTransactionAsync(IsolationLevel.ReadCommitted, cancellationToken);
-
         await _dbContext.StoreEntities.AddAsync(entity, cancellationToken);
-        await _dbContext.Database.CommitTransactionAsync(cancellationToken);
-        Save(cancellationToken);
-
-        return await Task.FromResult(entity);
+        await _dbContext.SaveChangesAsync(cancellationToken);
+        return entity;
     }
 
     public async Task<IEnumerable<StoreEntity>> AddRangeAsync(List<StoreEntity> entities, CancellationToken cancellationToken = default)
     {
-        await _dbContext.Database.BeginTransactionAsync(IsolationLevel.ReadCommitted, cancellationToken);
-
         await _dbContext.StoreEntities.AddRangeAsync(entities, cancellationToken);
-        await _dbContext.Database.CommitTransactionAsync(cancellationToken);
-        Save(cancellationToken);
-
-        return await Task.FromResult(entities);
+        await _dbContext.SaveChangesAsync(cancellationToken);
+        return entities;
     }
 
-    public async Task<StoreEntity> GetByIdAsync(object id)
+    public async Task<StoreEntity?> GetByIdAsync(object id)
     {
-        await _dbContext.Database.BeginTransactionAsync(IsolationLevel.RepeatableRead);
-        var result = await _dbContext.StoreEntities.FindAsync(id);
-        await _dbContext.Database.CommitTransactionAsync();
-        
-        return result;
+        return await _dbContext.StoreEntities.FindAsync(id);
     }
 
     public async Task<IReadOnlyList<StoreEntity>> GetAllByChainIdAsync(object chainId)
     {
-        await _dbContext.Database.BeginTransactionAsync(IsolationLevel.RepeatableRead);
+        var chainIdValue = chainId as ChainId ?? throw new ArgumentException("Invalid ChainId", nameof(chainId));
+
         var result = await _dbContext.StoreEntities.AsNoTracking()
-            .Where(s => s.ChainId == (ChainId)chainId)
+            .Where(s => s.ChainId != null && s.ChainId == chainIdValue)
             .ToListAsync();
-        await _dbContext.Database.CommitTransactionAsync();
-        if (result.Count() < 1)
+
+        if (result.Count < 1)
         {
             throw new KeyNotFoundException($"No stores found for ChainId: {chainId}");
         }
@@ -64,29 +53,32 @@ public class StoreRepository : IStoreRepository
 
     public async Task UpdateAsync(StoreEntity entity, CancellationToken cancellationToken = default)
     {
-        _dbContext.StoreEntities.Attach(entity);
-        await _dbContext.Database.BeginTransactionAsync(IsolationLevel.ReadCommitted, cancellationToken);
         _dbContext.StoreEntities.Update(entity);
-        Save(cancellationToken);
-        await _dbContext.Database.CommitTransactionAsync(cancellationToken);
+        await _dbContext.SaveChangesAsync(cancellationToken);
     }
 
     public async Task DeleteAsync(object id, CancellationToken cancellationToken = default)
     {
-        await _dbContext.Database.BeginTransactionAsync(IsolationLevel.RepeatableRead, cancellationToken);
         var entity = await _dbContext.StoreEntities.FindAsync(id);
+        if (entity is null)
+        {
+            throw new KeyNotFoundException($"StoreEntity with id {id} not found.");
+        }
+
         _dbContext.StoreEntities.Remove(entity);
-        Save(cancellationToken);
-        await _dbContext.Database.CommitTransactionAsync(cancellationToken);
+        await _dbContext.SaveChangesAsync(cancellationToken);
     }
 
     public async Task DeleteByChainIdAsync(object chainId, CancellationToken cancellationToken = default)
     {
-        await _dbContext.Database.BeginTransactionAsync(IsolationLevel.RepeatableRead, cancellationToken);
-        var entities = _dbContext.StoreEntities.Where(s => s.ChainId == (ChainId)chainId);
+        var chainIdValue = chainId as ChainId ?? throw new ArgumentException("Invalid ChainId", nameof(chainId));
+
+        var entities = await _dbContext.StoreEntities
+            .Where(s => s.ChainId != null && s.ChainId == chainIdValue)
+            .ToListAsync(cancellationToken);
+
         _dbContext.StoreEntities.RemoveRange(entities);
-        Save(cancellationToken);
-        await _dbContext.Database.CommitTransactionAsync(cancellationToken);
+        await _dbContext.SaveChangesAsync(cancellationToken);
     }
 
     public void Save(CancellationToken cancellationToken = default)

@@ -4,6 +4,7 @@ namespace StoreManager.Application.Data;
 
 public interface IDispatcher
 {
-    Task<Result<T>> Dispatch<T>(IQuery<T> query);
-    Task<Result> Dispatch(ICommand command);
+    Task<Result<TResult>> Dispatch<TResult>(IQuery<TResult> query, CancellationToken cancellationToken = default);
+    Task<Result> Dispatch(ICommand command, CancellationToken cancellationToken = default);
+    Task<Result<TResult>> Dispatch<TResult>(ICommand<TResult> command, CancellationToken cancellationToken = default);
 }

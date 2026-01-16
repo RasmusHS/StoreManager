@@ -19,7 +19,7 @@ public class DeleteAllStoresDto
     {
         public Validator()
         {
-            RuleFor(x => x.ChainId).NotEmpty().WithMessage("Chain ID must not be empty.");
+            RuleFor(x => x.ChainId).NotEmpty().NotNull().WithMessage("Chain ID must not be empty.");
         }
     }
 }

@@ -1,13 +1,12 @@
 ﻿using StoreManager.Application.Data;
 using StoreManager.Application.Data.Infrastructure;
+using StoreManager.Application.DTO.Store.Command;
 using StoreManager.Domain.Common;
-using StoreManager.Domain.Common.ValueObjects;
 using StoreManager.Domain.Store;
-using StoreManager.Domain.Store.ValueObjects;
 
 namespace StoreManager.Application.Commands.Store.Handlers;
 
-public class CreateStoreCommandHandler : ICommandHandler<CreateStoreCommand>
+public class CreateStoreCommandHandler : ICommandHandler<CreateStoreCommand, StoreResponseDto>
 {
     private readonly IStoreRepository _storeRepository;
     
@@ -16,25 +15,8 @@ public class CreateStoreCommandHandler : ICommandHandler<CreateStoreCommand>
         _storeRepository = storeRepository;
     }
 
-    public async Task<Result> Handle(CreateStoreCommand command, CancellationToken cancellationToken = default)
+    public async Task<Result<StoreResponseDto>> Handle(CreateStoreCommand command, CancellationToken cancellationToken = default)
     {
-        if (command.ChainId == null)
-        {
-            return Result.Fail(Errors.General.ValueIsRequired(nameof(command.ChainId)));
-        }
-
-        //Result<Address> addressResult = Address.Create(command.Address.Street, command.Address.PostalCode, command.Address.City);
-        //if (addressResult.Failure) return addressResult;
-
-        //Result<PhoneNumber> phoneResult = PhoneNumber.Create(command.PhoneNumber.CountryCode, command.PhoneNumber.Number);
-        //if (phoneResult.Failure) return phoneResult;
-
-        //Result<Email> emailResult = Email.Create(command.Email.Value);
-        //if (emailResult.Failure) return emailResult;
-
-        //Result<FullName> storeOwnerResult = FullName.Create(command.StoreOwner.FirstName, command.StoreOwner.LastName);
-        //if (storeOwnerResult.Failure) return storeOwnerResult;
-
         Result<StoreEntity> storeResult = StoreEntity.Create(
             command.ChainId,
             command.Number,
@@ -43,10 +25,28 @@ public class CreateStoreCommandHandler : ICommandHandler<CreateStoreCommand>
             command.PhoneNumber,
             command.Email,
             command.StoreOwner);
-        if (storeResult.Failure) return storeResult;
+        if (storeResult.Failure) return Result.Fail<StoreResponseDto>(Errors.General.CreateEntityFailed(storeResult));
 
         await _storeRepository.AddAsync(storeResult.Value, cancellationToken);
 
-        return Result.Ok();
+        var storeDto = new StoreResponseDto
+        {
+            Id = storeResult.Value.Id.Value,
+            ChainId = storeResult.Value.ChainId?.Value,
+            Number = storeResult.Value.Number,
+            Name = storeResult.Value.Name,
+            Street = storeResult.Value.Address.Street,
+            PostalCode = storeResult.Value.Address.PostalCode,
+            City = storeResult.Value.Address.City,
+            CountryCode = storeResult.Value.PhoneNumber.CountryCode,
+            PhoneNumber = storeResult.Value.PhoneNumber.Number,
+            Email = storeResult.Value.Email.Value,
+            FirstName = storeResult.Value.StoreOwner.FirstName,
+            LastName = storeResult.Value.StoreOwner.LastName,
+            CreatedOn = storeResult.Value.CreatedOn,
+            ModifiedOn = storeResult.Value.ModifiedOn
+        };
+
+        return Result.Ok<StoreResponseDto>(storeDto);
     }
 }

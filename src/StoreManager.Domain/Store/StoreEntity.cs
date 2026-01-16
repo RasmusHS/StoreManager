@@ -61,14 +61,6 @@ public sealed class StoreEntity : Entity<StoreId>
         Ensure.That(email.Value, nameof(email.Value)).IsNotNullOrEmpty().IsNotNullOrWhiteSpace();
         Ensure.That(storeOwner.FirstName, nameof(storeOwner.FirstName)).IsNotNullOrEmpty().IsNotNullOrWhiteSpace();
         Ensure.That(storeOwner.LastName, nameof(storeOwner.LastName)).IsNotNullOrEmpty().IsNotNullOrWhiteSpace();
-        //Ensure.That(street, nameof(street)).IsNotNullOrEmpty();
-        //Ensure.That(postalCode, nameof(postalCode)).IsNotNullOrEmpty();
-        //Ensure.That(city, nameof(city)).IsNotNullOrEmpty();
-        //Ensure.That(countryCode, nameof(countryCode)).IsNotNullOrEmpty();
-        //Ensure.That(phoneNumber, nameof(phoneNumber)).IsNotNullOrEmpty();
-        //Ensure.That(email, nameof(email)).IsNotNullOrEmpty();
-        //Ensure.That(firstName, nameof(firstName));
-        //Ensure.That(lastName, nameof(lastName));
 
         ChainId = chainId;
         Number = number;
@@ -77,10 +69,6 @@ public sealed class StoreEntity : Entity<StoreId>
         PhoneNumber = phoneNumber;
         Email = email;
         StoreOwner = storeOwner;
-        //Address = Address.Create(street, postalCode, city).Value;
-        //PhoneNumber = PhoneNumber.Create(countryCode, phoneNumber).Value;
-        //Email = Email.Create(email).Value;
-        //StoreOwner = FullName.Create(firstName, lastName).Value;
 
         ModifiedOn = DateTime.UtcNow;
     }

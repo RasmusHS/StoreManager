@@ -14,17 +14,18 @@ public class Dispatcher : IDispatcher
 
     private IMediator Mediator { get; }
 
-    public Task<Result<T>> Dispatch<T>(IQuery<T> query)
+    public async Task<Result> Dispatch(ICommand command, CancellationToken cancellationToken = default)
     {
-        Ensure.That(query, nameof(query)).IsNotNull();
-
-        return Mediator.Send(query);
+        return await Mediator.Send(command, cancellationToken);
     }
 
-    public Task<Result> Dispatch(ICommand command)
+    public async Task<Result<TResult>> Dispatch<TResult>(ICommand<TResult> command, CancellationToken cancellationToken = default)
     {
-        Ensure.That(command, nameof(command)).IsNotNull();
+        return await Mediator.Send(command, cancellationToken);
+    }
 
-        return Mediator.Send(command);
+    public async Task<Result<TResult>> Dispatch<TResult>(IQuery<TResult> query, CancellationToken cancellationToken = default)
+    {
+        return await Mediator.Send(query, cancellationToken);
     }
 }

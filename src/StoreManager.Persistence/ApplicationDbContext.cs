@@ -32,6 +32,11 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
         return base.SaveChangesAsync(cancellationToken);
     }
 
+    Task IApplicationDbContext.SaveChangesAsync(CancellationToken cancellationToken)
+    {
+        return SaveChangesAsync(cancellationToken);
+    }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(ApplicationDbContext).Assembly);

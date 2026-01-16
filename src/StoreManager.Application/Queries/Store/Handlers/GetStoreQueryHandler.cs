@@ -20,7 +20,7 @@ public class GetStoreQueryHandler : IQueryHandler<GetStoreQuery, QueryStoreDto>
 
         var storeDto = new QueryStoreDto(
             storeResult.Id.Value,
-            storeResult.ChainId!.Value,
+            storeResult.ChainId?.Value,
             storeResult.Number,
             storeResult.Name,
             storeResult.Address.Street,

@@ -26,6 +26,8 @@ public class PhoneNumber : ValueObject
             return Result.Fail<PhoneNumber>(Errors.General.UnexpectedValue($"Value {number} is not a number"));
         }
 
+        
+
         return Result.Ok(new PhoneNumber($"+{countryCode}", number));
     }
 

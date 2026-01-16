@@ -20,8 +20,6 @@ public class StoreManagerWebApplicationFactory : WebApplicationFactory<Program>,
         .WithCleanUp(true)
         .Build();
 
-    //private readonly MsSqlContainer _dbContainer = new MsSqlContainer(new MsSqlConfiguration($"storemanager_dev.db{Guid.NewGuid():N}", "SA", "yourStrong(!)Password"));
-
     // Track if THIS factory's database has been initialized
     private bool _databaseInitialized;
     private readonly SemaphoreSlim _initLock = new(1, 1);

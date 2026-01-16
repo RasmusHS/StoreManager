@@ -1,5 +1,5 @@
 ﻿using StoreManager.Application.Data;
-using StoreManager.Domain.Chain.ValueObjects;
+using StoreManager.Application.DTO.Store.Command;
 using StoreManager.Domain.Store.ValueObjects;
 
 namespace StoreManager.Application.Commands.Store;
@@ -11,13 +11,5 @@ public class DeleteStoreCommand : ICommand
         Id = id;
     }
 
-    public DeleteStoreCommand(ChainId chainId)
-    {
-        ChainId = chainId;
-    }
-
-    public DeleteStoreCommand() { }
-
     public StoreId Id { get; set; }
-    public ChainId ChainId { get; set; }
 }

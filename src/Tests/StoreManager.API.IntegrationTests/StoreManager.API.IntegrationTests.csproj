@@ -20,6 +20,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\StoreManager.API\StoreManager.API.csproj" />
+    <ProjectReference Include="..\Helpers\Helpers.csproj" />
   </ItemGroup>
 
   <ItemGroup>

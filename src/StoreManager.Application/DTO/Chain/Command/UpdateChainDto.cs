@@ -24,8 +24,8 @@ public record UpdateChainDto
     {
         public Validator()
         {
-            RuleFor(x => x.Id).NotEmpty().WithMessage("Chain ID must not be empty.");
-            RuleFor(x => x.Name).NotEmpty().WithMessage("Chain name must not be empty.").MaximumLength(100).WithMessage("Chain name must not exceed 100 characters.");
+            RuleFor(x => x.Id).NotEmpty().NotNull().WithMessage("Chain ID must not be empty.");
+            RuleFor(x => x.Name).NotEmpty().NotNull().WithMessage("Chain name must not be empty.").MaximumLength(100).WithMessage("Chain name must not exceed 100 characters.");
         }
     }
 }

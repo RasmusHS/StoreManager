@@ -48,7 +48,7 @@ public class ChainController : BaseController
                 var commandResult = await _dispatcher.Dispatch(command);
                 if (commandResult.Success)
                 {
-                    return Ok(commandResult);
+                    return Ok(commandResult.Value);
                 }
             }
             else
@@ -59,7 +59,7 @@ public class ChainController : BaseController
                 var commandResult = await _dispatcher.Dispatch(command);
                 if (commandResult.Success)
                 {
-                    return Ok(commandResult);
+                    return Ok(commandResult.Value);
                 }
             }
         }
@@ -106,7 +106,7 @@ public class ChainController : BaseController
             var commandResult = await _dispatcher.Dispatch(command);
             if (commandResult.Success)
             {
-                return Ok(commandResult);
+                return Ok(commandResult.Value);
             }
             return BadRequest(commandResult.Error.Code);
         }

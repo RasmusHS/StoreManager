@@ -1,10 +1,12 @@
 ﻿using StoreManager.Application.Data;
 using StoreManager.Application.Data.Infrastructure;
+using StoreManager.Application.DTO.Store.Command;
 using StoreManager.Domain.Common;
+using StoreManager.Domain.Store.ValueObjects;
 
 namespace StoreManager.Application.Commands.Store.Handlers;
 
-public class UpdateStoreCommandHandler : ICommandHandler<UpdateStoreCommand>
+public class UpdateStoreCommandHandler : ICommandHandler<UpdateStoreCommand, StoreResponseDto>
 {
     private readonly IStoreRepository _storeRepository;
     
@@ -13,9 +15,13 @@ public class UpdateStoreCommandHandler : ICommandHandler<UpdateStoreCommand>
         _storeRepository = storeRepository;
     }
 
-    public async Task<Result> Handle(UpdateStoreCommand command, CancellationToken cancellationToken = default)
+    public async Task<Result<StoreResponseDto>> Handle(UpdateStoreCommand command, CancellationToken cancellationToken = default)
     {
-        var storeResult = await _storeRepository.GetByIdAsync(command.Id) ?? throw new KeyNotFoundException($"Store with Id {command.Id} was not found.");
+        var storeResult = await _storeRepository.GetByIdAsync(command.Id);
+        if (storeResult is null)
+        {
+            return Result.Fail<StoreResponseDto>(Errors.General.NotFound<StoreId>(command.Id));
+        }
 
         storeResult.UpdateStore(
             command.ChainId,
@@ -28,6 +34,24 @@ public class UpdateStoreCommandHandler : ICommandHandler<UpdateStoreCommand>
 
         await _storeRepository.UpdateAsync(storeResult, cancellationToken);
 
-        return Result.Ok();
+        var storeResponseDto = new StoreResponseDto
+        {
+            Id = storeResult.Id.Value,
+            ChainId = storeResult.ChainId.Value,
+            Number = storeResult.Number,
+            Name =  storeResult.Name,
+            Street = storeResult.Address.Street,
+            PostalCode = storeResult.Address.PostalCode,
+            City = storeResult.Address.City,
+            CountryCode = storeResult.PhoneNumber.CountryCode,
+            PhoneNumber = storeResult.PhoneNumber.Number,
+            Email = storeResult.Email.Value,
+            FirstName = storeResult.StoreOwner.FirstName,
+            LastName = storeResult.StoreOwner.LastName,
+            CreatedOn = command.CreatedOn,
+            ModifiedOn = command.ModifiedOn
+        };
+
+        return Result.Ok<StoreResponseDto>(storeResponseDto);
     }
 }
