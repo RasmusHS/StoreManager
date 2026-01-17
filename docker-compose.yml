@@ -1,31 +1,38 @@
 services:
-  store_manager_dev.db:
+  storemanager_dev.db:
     image: mcr.microsoft.com/mssql/server:2022-latest
-    container_name: store_manager_dev.db
+    container_name: storemanager_dev.db
     environment:
-      - ACCEPT_EULA: "Y"
-      - SA_PASSWORD: "yourStrong(!)Password"
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=yourStrong(!)Password
     ports:
       - "1433:1433"
     volumes:
       - ./.containers/db:/var/lib/mssql/data
+    healthcheck:
+      test: /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P "yourStrong(!)Password" -Q "SELECT 1" -C || exit 1
+      interval: 10s
+      timeout: 3s
+      retries: 10
+      start_period: 10s
 
   storemanager.api:
-    ports:
-      - "5088:80"
-      - "7157:443"
     image: ${DOCKER_REGISTRY-}storemanagerapi
     build:
       context: .
-      dockerfile: ./StoreManager.API/Dockerfile
+      dockerfile: src/StoreManager.API/Dockerfile
+    ports:
+      - "5088:8080"
+      #- "7157:8081"
     environment:
-      - "ASPNETCORE_ENVIRONMENT": "Development"
-      - "ASPNETCORE_URLS": "https://+:7157;http://+:5088"
-      #- "ASPNETCORE_HTTP_PORT": "5088"
-      #- "ASPNETCORE_Kestrel__Certificates__Default__Password": "eeJD2puyfUyYYPXfQt"
-      #- "ASPNETCORE_Kestrel__Certificates__Default__Path": "/https/aspnetapp.pfx"
-      - "ConnectionStrings:DefaultConnection": "Data Source=localhost,1433;Database=storemanager_dev.db;Application Name=StoreManager;Integrated Security=false;User ID=SA;Password=yourStrong(!)Password;TrustServerCertificate=True;"
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URL=http://localhost
+      - ASPNETCORE_HTTP_PORT=5088
+      #- ASPNETCORE_Kestrel__Certificates__Default__Password=eeJD2puyfUyYYPXfQt
+      #- ASPNETCORE_Kestrel__Certificates__Default__Path=/https/aspnetapp.pfx
+      - ConnectionStrings:DefaultConnection=Data Source=storemanager_dev.db,1433;Database=storemanager_dev.db;Application Name=StoreManager;Integrated Security=false;User ID=SA;Password=yourStrong(!)Password;TrustServerCertificate=True;
     #volumes:
       #- ~/.aspnet/https:/https:ro
     depends_on:
-      - storemanager_dev.db
+      storemanager_dev.db:
+        condition: service_healthy

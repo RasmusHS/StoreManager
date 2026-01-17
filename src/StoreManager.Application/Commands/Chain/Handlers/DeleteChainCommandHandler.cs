@@ -16,17 +16,24 @@ public class DeleteChainCommandHandler : ICommandHandler<DeleteChainCommand>
 
     public async Task<Result> Handle(DeleteChainCommand command, CancellationToken cancellationToken = default)
     {
-        var entity = await _chainRepository.GetByIdAsync(command.Id);
-        if (entity == null)
+        try
         {
-            return Result.Fail(Errors.General.NotFound<ChainId>(command.Id));
-        }
-        if (_chainRepository.GetCountofStoresByChainAsync(command.Id).Result > 0)
-        {
-            return Result.Fail(Errors.ChainErrors.ChainHasStores());
-        }
-        await _chainRepository.DeleteAsync(command.Id, cancellationToken);
+            var entity = await _chainRepository.GetByIdAsync(command.Id);
+            if (entity == null)
+            {
+                return Result.Fail(Errors.General.NotFound<ChainId>(command.Id));
+            }
+            if (_chainRepository.GetCountofStoresByChainAsync(command.Id).Result > 0)
+            {
+                return Result.Fail(Errors.ChainErrors.ChainHasStores());
+            }
+            await _chainRepository.DeleteAsync(command.Id, cancellationToken);
 
-        return Result.Ok();
+            return Result.Ok(); 
+        }
+        catch (Exception ex)
+        {
+            return Result.Fail(Errors.General.ExceptionThrown(ex.Message));
+        }
     }
 }

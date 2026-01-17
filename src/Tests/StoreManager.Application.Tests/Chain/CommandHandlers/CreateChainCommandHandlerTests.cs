@@ -273,19 +273,31 @@ public class CreateChainCommandHandlerTests
         // Arrange
         var command = new CreateChainCommand(invalidName, null);
 
-        // Act & Assert
-        await Assert.ThrowsAsync<ArgumentException>(async () => await _handler.Handle(command));
+        // Act
+        var result = await _handler.Handle(command);
+
+        // Assert
+        Assert.False(result.Success);
+        Assert.True(result.Failure);
+        Assert.NotNull(result.Error);
+        Assert.Equal("exception.thrown", result.Error.Code);
         _mockChainRepository.Verify(r => r.AddAsync(It.IsAny<ChainEntity>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
     [Fact]
-    public async Task Handle_WithNullChainName_ThrowsException()
+    public async Task Handle_WithNullChainName_ReturnsFailureResult()
     {
         // Arrange
         var command = new CreateChainCommand(null, null);
 
-        // Act & Assert
-        await Assert.ThrowsAsync<ArgumentNullException>(async () => await _handler.Handle(command));
+        // Act
+        var result = await _handler.Handle(command);
+
+        // Assert
+        Assert.False(result.Success);
+        Assert.True(result.Failure);
+        Assert.NotNull(result.Error);
+        Assert.Equal("exception.thrown", result.Error.Code);
         _mockChainRepository.Verify(r => r.AddAsync(It.IsAny<ChainEntity>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 

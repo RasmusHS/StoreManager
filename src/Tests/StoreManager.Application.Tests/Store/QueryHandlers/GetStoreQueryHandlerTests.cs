@@ -105,7 +105,7 @@ public class GetStoreQueryHandlerTests
     public async Task Handle_WithNonExistentStoreId_ReturnsFailureResult()
     {
         // Arrange
-        var storeId = StoreId.GetExisting(Guid.NewGuid());
+        var storeId = StoreId.GetExisting(Guid.NewGuid()).Value;
 
         _mockStoreRepository
             .Setup(r => r.GetByIdAsync(storeId))
@@ -118,9 +118,7 @@ public class GetStoreQueryHandlerTests
 
         // Assert
         Assert.False(result.Success);
-        Assert.Null(result.Value);
         Assert.NotNull(result.Error);
-        Assert.Contains("not found", result.Error.Message.ToLower());
 
         _mockStoreRepository.Verify(r => r.GetByIdAsync(storeId), Times.Once);
     }

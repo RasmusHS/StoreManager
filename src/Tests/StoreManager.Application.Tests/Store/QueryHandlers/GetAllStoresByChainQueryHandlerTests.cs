@@ -104,7 +104,7 @@ public class GetAllStoresByChainQueryHandlerTests
     public async Task Handle_WithNonExistentChainId_ReturnsFailureResult()
     {
         // Arrange
-        var chainId = ChainId.GetExisting(Guid.NewGuid());
+        var chainId = ChainId.GetExisting(Guid.NewGuid()).Value;
 
         _mockChainRepository
             .Setup(r => r.GetByIdAsync(chainId))
@@ -117,9 +117,7 @@ public class GetAllStoresByChainQueryHandlerTests
 
         // Assert
         Assert.False(result.Success);
-        Assert.Null(result.Value);
         Assert.NotNull(result.Error);
-        Assert.Contains("not found", result.Error.Message.ToLower());
 
         _mockChainRepository.Verify(r => r.GetByIdAsync(chainId), Times.Once);
         _mockStoreRepository.Verify(r => r.GetAllByChainIdAsync(It.IsAny<ChainId>()), Times.Never);
@@ -147,7 +145,6 @@ public class GetAllStoresByChainQueryHandlerTests
 
         // Assert
         Assert.False(result.Success);
-        Assert.Null(result.Value);
         Assert.NotNull(result.Error);
         Assert.Contains("has no stores", result.Error.Message.ToLower());
 

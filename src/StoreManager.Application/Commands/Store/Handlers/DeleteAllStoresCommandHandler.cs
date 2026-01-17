@@ -18,12 +18,19 @@ public class DeleteAllStoresCommandHandler : ICommandHandler<DeleteAllStoresComm
     
     public async Task<Result> Handle(DeleteAllStoresCommand command, CancellationToken cancellationToken = default)
     {
-        if (_chainRepository.GetByIdAsync(command.ChainId).Result == null)
+        try
         {
-            return Result.Fail(Errors.General.NotFound<ChainId>(command.ChainId));
-        }
-        await _storeRepository.DeleteByChainIdAsync(command.ChainId, cancellationToken);
+            if (_chainRepository.GetByIdAsync(command.ChainId).Result == null)
+            {
+                return Result.Fail(Errors.General.NotFound<ChainId>(command.ChainId));
+            }
+            await _storeRepository.DeleteByChainIdAsync(command.ChainId, cancellationToken);
 
-        return Result.Ok();
+            return Result.Ok(); 
+        }
+        catch (Exception ex)
+        {
+            return Result.Fail(Errors.General.ExceptionThrown(ex.Message));
+        }
     }
 }

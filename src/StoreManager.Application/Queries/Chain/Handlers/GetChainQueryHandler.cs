@@ -17,21 +17,28 @@ public class GetChainQueryHandler : IQueryHandler<GetChainQuery, QueryChainDto>
 
     public async Task<Result<QueryChainDto>> Handle(GetChainQuery query, CancellationToken cancellationToken = default)
     {
-        var chainResult = await _chainRepository.GetByIdAsync(query.Id);
-        if (chainResult == null)
+        try
         {
-            return Result.Fail<QueryChainDto>(Errors.General.NotFound<ChainId>(query.Id));
-        }
-        int storeCount = await _chainRepository.GetCountofStoresByChainAsync(query.Id);
+            var chainResult = await _chainRepository.GetByIdAsync(query.Id);
+            if (chainResult == null)
+            {
+                return Result.Fail<QueryChainDto>(Errors.General.NotFound<ChainId>(query.Id));
+            }
+            int storeCount = await _chainRepository.GetCountofStoresByChainAsync(query.Id);
 
-        var chainDto = new QueryChainDto(
-            chainResult.Id.Value,
-            chainResult.Name,
-            null,
-            storeCount,
-            chainResult.CreatedOn,
-            chainResult.ModifiedOn
-            );
-        return Result.Ok(chainDto);
+            var chainDto = new QueryChainDto(
+                chainResult.Id.Value,
+                chainResult.Name,
+                null,
+                storeCount,
+                chainResult.CreatedOn,
+                chainResult.ModifiedOn
+                );
+            return Result.Ok(chainDto); 
+        }
+        catch (Exception ex)
+        {
+            return Result.Fail<QueryChainDto>(Errors.General.ExceptionThrown(ex.Message));
+        }
     }
 }

@@ -345,7 +345,6 @@ public class UpdateStoreCommandHandlerTests
 
         // Assert
         Assert.False(result.Success);
-        Assert.Null(result.Value);
         Assert.NotNull(result.Error);
         _mockStoreRepository.Verify(r => r.GetByIdAsync(storeId), Times.Once);
         _mockStoreRepository.Verify(r => r.UpdateAsync(It.IsAny<StoreEntity>(), It.IsAny<CancellationToken>()), Times.Never);

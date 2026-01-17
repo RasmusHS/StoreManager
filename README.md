@@ -1,19 +1,30 @@
 # StoreManager 
 Currently working in branch: master 
 
+# Docker Compose Setup
+To run the application using Docker Compose, ensure you have Docker and Docker Compose installed on your machine. Then, follow these steps:
+1. Clone the repository to your local machine.
+2. Navigate to the project directory.
+3. Run the following command to build and start the containers:
+    3.1. ```bash
+       docker compose up
+       ```
+4. The api may need to be manually restarted (retry logic have yet to be implemented). Otherwise the swagger ui should be available at: http://localhost:5088/swagger/
+5. The db should have seed data already populated to demo.
+
 # Plans
-- [ ] Setup backend
+- [x] Setup backend
   - [x] Configure EFCore in the persistence layer so it knows how to map the domain entities to sql tables and vice versa
   - [x] Rule: Ensure a chain's name is unique from other chains
   - [x] Rule: Prevent a chain from being deleted if it still has stores associated with it
   - [x] Rule: Store number must be unique, and will be manually assigned by an OptikIT employee (why manually???)
   - [x] Rule: Stores can be assigned to 0 or 1 chain. If 0 then the store's chainId FK will be null.
   - [x] Rule: A chain can have 1 or more stores
-  - [ ] Create unit tests for domain and application layer
+  - [x] Create unit tests for domain and application layer
   - [x] Finish setting up the api
   - [x] Setup logic to facilitate writing and running integration tests
   - [x] Write integration tests for the api
-  - [ ] Setup docker compose and write instructions for how to run the application in docker
+  - [x] Setup docker compose and write instructions for how to run the application in docker
 - [ ] Setup frontend
   - [ ] Dummy login page that doesn't work unless if I get to the bonus task
   - [ ] Multibutton layout

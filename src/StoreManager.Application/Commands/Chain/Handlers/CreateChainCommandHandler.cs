@@ -19,73 +19,80 @@ public class CreateChainCommandHandler : ICommandHandler<CreateChainCommand, Cha
 
     public async Task<Result<ChainResponseDto>> Handle(CreateChainCommand command, CancellationToken cancellationToken = default)
     {
-        if (command.Stores != null && command.Stores.Count() >= 1)
+        try
         {
-            Result<ChainEntity> chainResult = ChainEntity.Create(command.Name);
-            if (chainResult.Failure) return Result.Fail<ChainResponseDto>(Errors.General.CreateEntityFailed(chainResult));
-
-
-            List<StoreEntity> stores = new List<StoreEntity>();
-            foreach (var store in command.Stores)
+            if (command.Stores != null && command.Stores.Count() >= 1)
             {
-                Result<StoreEntity> storeResult = StoreEntity.Create(
-                    store.ChainId = chainResult.Value.Id,
-                    store.Number,
-                    store.Name,
-                    store.Address,
-                    store.PhoneNumber,
-                    store.Email,
-                    store.StoreOwner);
-                if (storeResult.Failure) return Result.Fail<ChainResponseDto>(Errors.General.CreateEntityFailed(storeResult));
+                Result<ChainEntity> chainResult = ChainEntity.Create(command.Name);
+                if (chainResult.Failure) return Result.Fail<ChainResponseDto>(Errors.General.CreateEntityFailed(chainResult));
 
-                stores.Add(storeResult.Value);
-            }
-            chainResult.Value.AddRangeStoresToChain(stores);
-            await _chainRepository.AddAsync(chainResult.Value, cancellationToken);
 
-            var responseDto = new ChainResponseDto
-            {
-                Id = chainResult.Value.Id.Value,
-                Name = chainResult.Value.Name,
-                Stores = stores.Select(s => new StoreResponseDto
+                List<StoreEntity> stores = new List<StoreEntity>();
+                foreach (var store in command.Stores)
                 {
-                    Id = s.Id.Value,
-                    ChainId = s.ChainId?.Value,
-                    Number = s.Number,
-                    Name = s.Name,
-                    Street = s.Address.Street,
-                    PostalCode = s.Address.PostalCode,
-                    City = s.Address.City,
-                    CountryCode = s.PhoneNumber.CountryCode,
-                    PhoneNumber = s.PhoneNumber.Number,
-                    Email = s.Email.Value,
-                    FirstName = s.StoreOwner.FirstName,
-                    LastName = s.StoreOwner.LastName,
-                    CreatedOn = s.CreatedOn,
-                    ModifiedOn = s.ModifiedOn
-                }).ToList(),
-                CreatedOn = chainResult.Value.CreatedOn,
-                ModifiedOn = chainResult.Value.ModifiedOn
-            };
+                    Result<StoreEntity> storeResult = StoreEntity.Create(
+                        store.ChainId = chainResult.Value.Id,
+                        store.Number,
+                        store.Name,
+                        store.Address,
+                        store.PhoneNumber,
+                        store.Email,
+                        store.StoreOwner);
+                    if (storeResult.Failure) return Result.Fail<ChainResponseDto>(Errors.General.CreateEntityFailed(storeResult));
 
-            return Result.Ok<ChainResponseDto>(responseDto);
-        }
-        else
-        {
-            Result<ChainEntity> chainResult = ChainEntity.Create(
-                command.Name);
-            if (chainResult.Failure) return Result.Fail<ChainResponseDto>(Errors.General.CreateEntityFailed(chainResult));
-            await _chainRepository.AddAsync(chainResult.Value, cancellationToken);
+                    stores.Add(storeResult.Value);
+                }
+                chainResult.Value.AddRangeStoresToChain(stores);
+                await _chainRepository.AddAsync(chainResult.Value, cancellationToken);
 
-            var responseDto = new ChainResponseDto
+                var responseDto = new ChainResponseDto
+                {
+                    Id = chainResult.Value.Id.Value,
+                    Name = chainResult.Value.Name,
+                    Stores = stores.Select(s => new StoreResponseDto
+                    {
+                        Id = s.Id.Value,
+                        ChainId = s.ChainId?.Value,
+                        Number = s.Number,
+                        Name = s.Name,
+                        Street = s.Address.Street,
+                        PostalCode = s.Address.PostalCode,
+                        City = s.Address.City,
+                        CountryCode = s.PhoneNumber.CountryCode,
+                        PhoneNumber = s.PhoneNumber.Number,
+                        Email = s.Email.Value,
+                        FirstName = s.StoreOwner.FirstName,
+                        LastName = s.StoreOwner.LastName,
+                        CreatedOn = s.CreatedOn,
+                        ModifiedOn = s.ModifiedOn
+                    }).ToList(),
+                    CreatedOn = chainResult.Value.CreatedOn,
+                    ModifiedOn = chainResult.Value.ModifiedOn
+                };
+
+                return Result.Ok<ChainResponseDto>(responseDto);
+            }
+            else
             {
-                Id = chainResult.Value.Id.Value,
-                Name = chainResult.Value.Name,
-                CreatedOn = chainResult.Value.CreatedOn,
-                ModifiedOn = chainResult.Value.ModifiedOn
-            };
+                Result<ChainEntity> chainResult = ChainEntity.Create(
+                    command.Name);
+                if (chainResult.Failure) return Result.Fail<ChainResponseDto>(Errors.General.CreateEntityFailed(chainResult));
+                await _chainRepository.AddAsync(chainResult.Value, cancellationToken);
 
-            return Result.Ok<ChainResponseDto>(responseDto);
+                var responseDto = new ChainResponseDto
+                {
+                    Id = chainResult.Value.Id.Value,
+                    Name = chainResult.Value.Name,
+                    CreatedOn = chainResult.Value.CreatedOn,
+                    ModifiedOn = chainResult.Value.ModifiedOn
+                };
+
+                return Result.Ok<ChainResponseDto>(responseDto);
+            } 
+        }
+        catch (ArgumentException ex)
+        {
+            return Result.Fail<ChainResponseDto>(Errors.General.ExceptionThrown(ex.Message));
         }
     }
 }

@@ -16,12 +16,19 @@ public class DeleteStoreCommandHandler : ICommandHandler<DeleteStoreCommand>
 
     public async Task<Result> Handle(DeleteStoreCommand command, CancellationToken cancellationToken = default)
     {
-        if (_storeRepository.GetByIdAsync(command.Id).Result == null)
+        try
         {
-            return Result.Fail(Errors.General.NotFound<StoreId>(command.Id));
-        }
-        await _storeRepository.DeleteAsync(command.Id, cancellationToken);
+            if (_storeRepository.GetByIdAsync(command.Id).Result == null)
+            {
+                return Result.Fail(Errors.General.NotFound<StoreId>(command.Id));
+            }
+            await _storeRepository.DeleteAsync(command.Id, cancellationToken);
 
-        return Result.Ok();
+            return Result.Ok(); 
+        }
+        catch (Exception ex)
+        {
+            return Result.Fail(Errors.General.ExceptionThrown(ex.Message));
+        }
     }
 }

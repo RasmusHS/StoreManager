@@ -19,41 +19,48 @@ public class GetAllStoresByChainQueryHandler : IQueryHandler<GetAllStoresByChain
 
     public async Task<Result<CollectionResponseBase<QueryStoreDto>>> Handle(GetAllStoresByChainQuery query, CancellationToken cancellationToken = default)
     {
-        if (await _chainRepository.GetByIdAsync(query.ChainId) == null)
+        try 
         {
-            return Result.Fail<CollectionResponseBase<QueryStoreDto>>(Errors.General.NotFound<ChainId>(query.ChainId));
-        }
+            if (await _chainRepository.GetByIdAsync(query.ChainId) == null)
+            {
+                return Result.Fail<CollectionResponseBase<QueryStoreDto>>(Errors.General.NotFound<ChainId>(query.ChainId));
+            }
 
-        List<QueryStoreDto> stores = new List<QueryStoreDto>();
-        var storesResult = await _storeRepository.GetAllByChainIdAsync(query.ChainId);
-        if (storesResult.Count() < 1)
-        {
-            return Result.Fail<CollectionResponseBase<QueryStoreDto>>(Errors.ChainErrors.ChainHasNoStores<ChainId>(query.ChainId));
-        }
+            List<QueryStoreDto> stores = new List<QueryStoreDto>();
+            var storesResult = await _storeRepository.GetAllByChainIdAsync(query.ChainId);
+            if (storesResult.Count() < 1)
+            {
+                return Result.Fail<CollectionResponseBase<QueryStoreDto>>(Errors.ChainErrors.ChainHasNoStores<ChainId>(query.ChainId));
+            }
 
-        foreach (var store in storesResult)
-        {
-            QueryStoreDto storeDto = new QueryStoreDto(
-                store.Id.Value,
-                store.ChainId!.Value,
-                store.Number,
-                store.Name,
-                store.Address.Street,
-                store.Address.PostalCode,
-                store.Address.City,
-                store.PhoneNumber.CountryCode,
-                store.PhoneNumber.Number,
-                store.Email.Value,
-                store.StoreOwner.FirstName,
-                store.StoreOwner.LastName,
-                store.CreatedOn,
-                store.ModifiedOn
-                );
-            stores.Add(storeDto);
+            foreach (var store in storesResult)
+            {
+                QueryStoreDto storeDto = new QueryStoreDto(
+                    store.Id.Value,
+                    store.ChainId!.Value,
+                    store.Number,
+                    store.Name,
+                    store.Address.Street,
+                    store.Address.PostalCode,
+                    store.Address.City,
+                    store.PhoneNumber.CountryCode,
+                    store.PhoneNumber.Number,
+                    store.Email.Value,
+                    store.StoreOwner.FirstName,
+                    store.StoreOwner.LastName,
+                    store.CreatedOn,
+                    store.ModifiedOn
+                    );
+                stores.Add(storeDto);
+            }
+            return new CollectionResponseBase<QueryStoreDto>()
+            {
+                Data = stores
+            }; 
         }
-        return new CollectionResponseBase<QueryStoreDto>()
+        catch (Exception ex)
         {
-            Data = stores
-        };
+            return Result.Fail<CollectionResponseBase<QueryStoreDto>>(Errors.General.ExceptionThrown(ex.Message));
+        }
     }
 }

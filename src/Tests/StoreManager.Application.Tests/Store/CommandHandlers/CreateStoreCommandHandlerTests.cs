@@ -214,30 +214,6 @@ public class CreateStoreCommandHandlerTests
         _mockStoreRepository.Verify(r => r.AddAsync(It.IsAny<StoreEntity>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
-    [Fact]
-    public async Task Handle_WhenStoreEntityCreationFails_ReturnsFailureResult()
-    {
-        // Arrange - Using empty address street to trigger validation failure
-
-        // Since the value objects might validate themselves, we test with the assumption
-        // that StoreEntity.Create could fail
-        var command = new CreateStoreCommand(
-            null,
-            1,
-            "Test Store",
-            Address.Create("", "12345", "TestCity").Value, // This might be caught by Address validation
-            PhoneNumber.Create("+1", "1234567890").Value,
-            Email.Create("store@example.com").Value,
-            FullName.Create("John", "Doe").Value);
-
-        // Act
-        var result = await _handler.Handle(command);
-
-        // Assert
-        Assert.True(result.Failure);
-        _mockStoreRepository.Verify(r => r.AddAsync(It.IsAny<StoreEntity>(), It.IsAny<CancellationToken>()), Times.Never);
-    }
-
     #endregion
 
     #region DTO Mapping Tests

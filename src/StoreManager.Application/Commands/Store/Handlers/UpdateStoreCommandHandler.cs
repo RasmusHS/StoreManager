@@ -17,68 +17,77 @@ public class UpdateStoreCommandHandler : ICommandHandler<UpdateStoreCommand, Sto
 
     public async Task<Result<StoreResponseDto>> Handle(UpdateStoreCommand command, CancellationToken cancellationToken = default)
     {
-        var storeResult = await _storeRepository.GetByIdAsync(command.Id);
-        if (storeResult is null)
+        try
         {
-            return Result.Fail<StoreResponseDto>(Errors.General.NotFound<StoreId>(command.Id));
+            var storeResult = await _storeRepository.GetByIdAsync(command.Id);
+            if (storeResult is null)
+            {
+                return Result.Fail<StoreResponseDto>(Errors.General.NotFound<StoreId>(command.Id));
+            }
+
+            if (command.ChainId == null && storeResult.ChainId == null)
+            {
+                storeResult.UpdateStore(
+                null,
+                command.Number,
+                command.Name,
+                command.Address,
+                command.PhoneNumber,
+                command.Email,
+                command.StoreOwner);
+
+                await _storeRepository.UpdateAsync(storeResult, cancellationToken);
+            }
+            else if (command.ChainId == null && storeResult.ChainId != null)
+            {
+                storeResult.UpdateStore(
+                null,
+                command.Number,
+                command.Name,
+                command.Address,
+                command.PhoneNumber,
+                command.Email,
+                command.StoreOwner);
+
+                await _storeRepository.UpdateAsync(storeResult, cancellationToken);
+            }
+            else
+            {
+                storeResult.UpdateStore(
+                command.ChainId,
+                command.Number,
+                command.Name,
+                command.Address,
+                command.PhoneNumber,
+                command.Email,
+                command.StoreOwner);
+
+                await _storeRepository.UpdateAsync(storeResult, cancellationToken);
+            }
+
+            var storeResponseDto = new StoreResponseDto
+            {
+                Id = storeResult.Id.Value,
+                ChainId = storeResult.ChainId?.Value,
+                Number = storeResult.Number,
+                Name = storeResult.Name,
+                Street = storeResult.Address.Street,
+                PostalCode = storeResult.Address.PostalCode,
+                City = storeResult.Address.City,
+                CountryCode = storeResult.PhoneNumber.CountryCode,
+                PhoneNumber = storeResult.PhoneNumber.Number,
+                Email = storeResult.Email.Value,
+                FirstName = storeResult.StoreOwner.FirstName,
+                LastName = storeResult.StoreOwner.LastName,
+                CreatedOn = command.CreatedOn,
+                ModifiedOn = command.ModifiedOn
+            };
+
+            return Result.Ok<StoreResponseDto>(storeResponseDto);
         }
-
-        if (command.ChainId == null && storeResult.ChainId == null)
+        catch (Exception ex)
         {
-            storeResult.UpdateStore(
-            null,
-            command.Number,
-            command.Name,
-            command.Address,
-            command.PhoneNumber,
-            command.Email,
-            command.StoreOwner);
-
-            await _storeRepository.UpdateAsync(storeResult, cancellationToken);
+            return Result.Fail<StoreResponseDto>(Errors.General.ExceptionThrown(ex.Message));
         }
-        else if (command.ChainId == null && storeResult.ChainId != null)
-        {
-            storeResult.UpdateStore(
-            null,
-            command.Number,
-            command.Name,
-            command.Address,
-            command.PhoneNumber,
-            command.Email,
-            command.StoreOwner);
-
-            await _storeRepository.UpdateAsync(storeResult, cancellationToken);
-        }
-        else
-        {
-            storeResult.UpdateStore(
-            command.ChainId,
-            command.Number,
-            command.Name,
-            command.Address,
-            command.PhoneNumber,
-            command.Email,
-            command.StoreOwner);
-        }
-
-        var storeResponseDto = new StoreResponseDto
-        {
-            Id = storeResult.Id.Value,
-            ChainId = storeResult.ChainId?.Value,
-            Number = storeResult.Number,
-            Name = storeResult.Name,
-            Street = storeResult.Address.Street,
-            PostalCode = storeResult.Address.PostalCode,
-            City = storeResult.Address.City,
-            CountryCode = storeResult.PhoneNumber.CountryCode,
-            PhoneNumber = storeResult.PhoneNumber.Number,
-            Email = storeResult.Email.Value,
-            FirstName = storeResult.StoreOwner.FirstName,
-            LastName = storeResult.StoreOwner.LastName,
-            CreatedOn = command.CreatedOn,
-            ModifiedOn = command.ModifiedOn
-        };
-
-        return Result.Ok<StoreResponseDto>(storeResponseDto);
     }
 }
