@@ -5,15 +5,14 @@ Currently working in branch: master
 - [ ] Setup backend
   - [x] Configure EFCore in the persistence layer so it knows how to map the domain entities to sql tables and vice versa
   - [x] Rule: Ensure a chain's name is unique from other chains
-  - [ ] Rule: Prevent a chain from being deleted if it still has stores associated with it
+  - [x] Rule: Prevent a chain from being deleted if it still has stores associated with it
   - [x] Rule: Store number must be unique, and will be manually assigned by an OptikIT employee (why manually???)
-    - [ ] Experiment with setting the property as auto-increment
-  - [ ] Rule: Stores can be assigned to 0 or 1 chain. If 0 then the store's chainId FK will be null.
+  - [x] Rule: Stores can be assigned to 0 or 1 chain. If 0 then the store's chainId FK will be null.
   - [x] Rule: A chain can have 1 or more stores
-  - [ ] Create unit tests for domain and application layer before moving on to the api
-  - [ ] Finish setting up the api
-  - [ ] Setup logic to facilitate writing and running integration tests
-  - [ ] Write integration tests for the api
+  - [ ] Create unit tests for domain and application layer
+  - [x] Finish setting up the api
+  - [x] Setup logic to facilitate writing and running integration tests
+  - [x] Write integration tests for the api
   - [ ] Setup docker compose and write instructions for how to run the application in docker
 - [ ] Setup frontend
   - [ ] Dummy login page that doesn't work unless if I get to the bonus task
