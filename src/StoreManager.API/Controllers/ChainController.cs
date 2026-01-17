@@ -1,12 +1,10 @@
-﻿using Azure.Core;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using StoreManager.Application.Commands.Chain;
 using StoreManager.Application.Commands.Store;
 using StoreManager.Application.Data;
 using StoreManager.Application.DTO.Chain.Command;
 using StoreManager.Application.Queries.Chain;
 using StoreManager.Domain.Chain.ValueObjects;
-using StoreManager.Domain.Common;
 using StoreManager.Domain.Common.ValueObjects;
 
 namespace StoreManager.API.Controllers;
@@ -37,19 +35,20 @@ public class ChainController : BaseController
                 CreateChainCommand command = new CreateChainCommand(
                     request.Name,
                     request.Stores!.Select(s => new CreateStoreCommand(
-                        ChainId.GetExisting(s.ChainId!.Value).Value,
+                        ChainId.GetExisting(Guid.Empty).Value,
                         s.Number,
                         s.Name,
-                        Address.Create(s.Street, s.PostalCode, s.City),
-                        PhoneNumber.Create(s.CountryCode, s.PhoneNumber),
-                        Email.Create(s.Email),
-                        FullName.Create(s.FirstName, s.LastName)
+                        Address.Create(s.Street, s.PostalCode, s.City).Value,
+                        PhoneNumber.Create(s.CountryCode, s.PhoneNumber).Value,
+                        Email.Create(s.Email).Value,
+                        FullName.Create(s.FirstName, s.LastName).Value
                         )).ToList());
                 var commandResult = await _dispatcher.Dispatch(command);
                 if (commandResult.Success)
                 {
                     return Ok(commandResult.Value);
                 }
+                return BadRequest(commandResult.Error.Code);
             }
             else
             {
@@ -70,7 +69,12 @@ public class ChainController : BaseController
     [Route("getChain/{chainId}")]
     public async Task<IActionResult> GetChainById(Guid chainId)
     {
-        var result = await _dispatcher.Dispatch(new GetChainQuery(ChainId.GetExisting(chainId).Value)) ?? throw new KeyNotFoundException($"Chain with ID {chainId} not found.");
+        var result = await _dispatcher.Dispatch(new GetChainQuery(ChainId.GetExisting(chainId).Value));
+        if (result == null)
+        {
+            return BadRequest($"Chain with ID {chainId} not found.");
+        }
+
         if (result.Success)
         {
             return Ok(result.Value);
@@ -82,7 +86,11 @@ public class ChainController : BaseController
     [Route("getChainAndStores/{chainId}")]
     public async Task<IActionResult> GetChainIncludeStores(Guid chainId)
     {
-        var result = await _dispatcher.Dispatch(new GetChainAndStoresQuery(ChainId.GetExisting(chainId).Value)) ?? throw new KeyNotFoundException($"Chain with ID {chainId} not found.");
+        var result = await _dispatcher.Dispatch(new GetChainAndStoresQuery(ChainId.GetExisting(chainId).Value));
+        if (result == null) 
+        {
+            return BadRequest($"Chain with ID {chainId} not found.");
+        }
         if (result.Success)
         {
             return Ok(result.Value);

@@ -2,6 +2,7 @@
 using StoreManager.Application.DTO.Store.Query;
 using StoreManager.Application.Data.Infrastructure;
 using StoreManager.Domain.Common;
+using StoreManager.Domain.Store.ValueObjects;
 
 namespace StoreManager.Application.Queries.Store.Handlers;
 
@@ -16,7 +17,11 @@ public class GetStoreQueryHandler : IQueryHandler<GetStoreQuery, QueryStoreDto>
 
     public async Task<Result<QueryStoreDto>> Handle(GetStoreQuery query, CancellationToken cancellationToken = default)
     {
-        var storeResult = await _storeRepository.GetByIdAsync(query.Id) ?? throw new KeyNotFoundException($"Store with ID {query.Id} not found.");
+        var storeResult = await _storeRepository.GetByIdAsync(query.Id);
+        if (storeResult == null)
+        {
+            return Result.Fail<QueryStoreDto>(Errors.General.NotFound<StoreId>(query.Id));
+        }
 
         var storeDto = new QueryStoreDto(
             storeResult.Id.Value,

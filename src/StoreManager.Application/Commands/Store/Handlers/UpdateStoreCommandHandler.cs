@@ -23,8 +23,10 @@ public class UpdateStoreCommandHandler : ICommandHandler<UpdateStoreCommand, Sto
             return Result.Fail<StoreResponseDto>(Errors.General.NotFound<StoreId>(command.Id));
         }
 
-        storeResult.UpdateStore(
-            command.ChainId,
+        if (command.ChainId == null && storeResult.ChainId == null)
+        {
+            storeResult.UpdateStore(
+            null,
             command.Number,
             command.Name,
             command.Address,
@@ -32,14 +34,39 @@ public class UpdateStoreCommandHandler : ICommandHandler<UpdateStoreCommand, Sto
             command.Email,
             command.StoreOwner);
 
-        await _storeRepository.UpdateAsync(storeResult, cancellationToken);
+            await _storeRepository.UpdateAsync(storeResult, cancellationToken);
+        }
+        else if (command.ChainId == null && storeResult.ChainId != null)
+        {
+            storeResult.UpdateStore(
+            null,
+            command.Number,
+            command.Name,
+            command.Address,
+            command.PhoneNumber,
+            command.Email,
+            command.StoreOwner);
+
+            await _storeRepository.UpdateAsync(storeResult, cancellationToken);
+        }
+        else
+        {
+            storeResult.UpdateStore(
+            command.ChainId,
+            command.Number,
+            command.Name,
+            command.Address,
+            command.PhoneNumber,
+            command.Email,
+            command.StoreOwner);
+        }
 
         var storeResponseDto = new StoreResponseDto
         {
             Id = storeResult.Id.Value,
-            ChainId = storeResult.ChainId.Value,
+            ChainId = storeResult.ChainId?.Value,
             Number = storeResult.Number,
-            Name =  storeResult.Name,
+            Name = storeResult.Name,
             Street = storeResult.Address.Street,
             PostalCode = storeResult.Address.PostalCode,
             City = storeResult.Address.City,

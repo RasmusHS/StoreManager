@@ -49,7 +49,7 @@ public sealed class StoreEntity : Entity<StoreId>
         return Result.Ok<StoreEntity>(new StoreEntity(StoreId.Create().Value, chainId, number, name, address, phoneNumber, email, storeOwner));
     }
 
-    public void UpdateStore(ChainId? chainId, int number, string name, Address address, PhoneNumber phoneNumber, Email email, FullName storeOwner /*string street, string postalCode, string city, string countryCode, string phoneNumber, string email, string firstName, string lastName*/)
+    public void UpdateStore(ChainId? chainId, int number, string name, Address address, PhoneNumber phoneNumber, Email email, FullName storeOwner)
     {
         Ensure.That(number, nameof(number));
         Ensure.That(name, nameof(name)).IsNotNullOrEmpty().IsNotNullOrWhiteSpace();

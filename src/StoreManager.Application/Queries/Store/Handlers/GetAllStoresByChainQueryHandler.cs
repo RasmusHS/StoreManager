@@ -19,13 +19,13 @@ public class GetAllStoresByChainQueryHandler : IQueryHandler<GetAllStoresByChain
 
     public async Task<Result<CollectionResponseBase<QueryStoreDto>>> Handle(GetAllStoresByChainQuery query, CancellationToken cancellationToken = default)
     {
-        if (_chainRepository.GetByIdAsync(query.ChainId) == null)
+        if (await _chainRepository.GetByIdAsync(query.ChainId) == null)
         {
             return Result.Fail<CollectionResponseBase<QueryStoreDto>>(Errors.General.NotFound<ChainId>(query.ChainId));
         }
 
         List<QueryStoreDto> stores = new List<QueryStoreDto>();
-        var storesResult = await _storeRepository.GetAllByChainIdAsync(query.ChainId) ?? throw new KeyNotFoundException($"Stores belonging to Chain with ID {query.ChainId} not found.");
+        var storesResult = await _storeRepository.GetAllByChainIdAsync(query.ChainId);
         if (storesResult.Count() < 1)
         {
             return Result.Fail<CollectionResponseBase<QueryStoreDto>>(Errors.ChainErrors.ChainHasNoStores<ChainId>(query.ChainId));

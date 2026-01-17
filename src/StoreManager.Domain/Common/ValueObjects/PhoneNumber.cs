@@ -26,9 +26,9 @@ public class PhoneNumber : ValueObject
             return Result.Fail<PhoneNumber>(Errors.General.UnexpectedValue($"Value {number} is not a number"));
         }
 
-        
+        var cleanedCountryCode = countryCode.Trim().Replace("+", "").Replace("(", "").Replace(")", "");
 
-        return Result.Ok(new PhoneNumber($"+{countryCode}", number));
+        return Result.Ok(new PhoneNumber($"+{cleanedCountryCode}", number));
     }
 
     protected override IEnumerable<object> GetEqualityComponents()

@@ -146,10 +146,10 @@ public class StoreController : BaseController
                 null,
                 request.Number,
                 request.Name,
-                Address.Create(request.Street, request.PostalCode, request.City),
-                PhoneNumber.Create(request.CountryCode, request.PhoneNumber),
-                Email.Create(request.Email),
-                FullName.Create(request.FirstName, request.LastName),
+                addressResult.Value,
+                phoneResult.Value,
+                emailResult.Value,
+                nameResult.Value,
                 request.CreatedOn,
                 request.ModifiedOn);
             var commandResult = await _dispatcher.Dispatch(command);
@@ -163,13 +163,13 @@ public class StoreController : BaseController
         {
             UpdateStoreCommand command = new UpdateStoreCommand(
                 StoreId.GetExisting(request.Id).Value,
-                ChainId.GetExisting(request.ChainId.Value),
+                ChainId.GetExisting(request.ChainId.Value).Value,
                 request.Number,
                 request.Name,
-                Address.Create(request.Street, request.PostalCode, request.City),
-                PhoneNumber.Create(request.CountryCode, request.PhoneNumber),
-                Email.Create(request.Email),
-                FullName.Create(request.FirstName, request.LastName),
+                addressResult.Value,
+                phoneResult.Value,
+                emailResult.Value,
+                nameResult.Value,
                 request.CreatedOn,
                 request.ModifiedOn);
 

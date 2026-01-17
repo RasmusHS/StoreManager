@@ -2,6 +2,7 @@
 using StoreManager.Application.Data.Infrastructure;
 using StoreManager.Application.DTO.Chain.Query;
 using StoreManager.Application.DTO.Store.Query;
+using StoreManager.Domain.Chain.ValueObjects;
 using StoreManager.Domain.Common;
 
 namespace StoreManager.Application.Queries.Chain.Handlers;
@@ -17,11 +18,14 @@ public class GetChainAndStoresQueryHandler : IQueryHandler<GetChainAndStoresQuer
 
     public async Task<Result<QueryChainDto>> Handle(GetChainAndStoresQuery query, CancellationToken cancellationToken = default)
     {
-        //List<QueryStoreDto> stores = new List<QueryStoreDto>();
-        var chainResult = await _chainRepository.GetByIdIncludeStoresAsync(query.Id) ?? throw new KeyNotFoundException($"Stores belonging to Chain with ID {query.Id} not found.");
+        var chainResult = await _chainRepository.GetByIdIncludeStoresAsync(query.Id);
+        if (chainResult == null)
+        {
+            return Result.Fail<QueryChainDto>(Errors.General.NotFound<ChainId>(query.Id));
+        }
         if (chainResult.Stores.Count() < 1)
         {
-            throw new KeyNotFoundException($"Stores belonging to Chain with ID {query.Id} not found.");
+            return Result.Fail<QueryChainDto>(Errors.ChainErrors.ChainHasNoStores<ChainId>(query.Id));
         }
 
         var chainDto = new QueryChainDto

@@ -1,16 +1,8 @@
 ﻿using Helpers;
 using Microsoft.EntityFrameworkCore;
-using StoreManager.Application.Commands.Store;
-using StoreManager.Application.DTO.Chain.Command;
 using StoreManager.Application.DTO.Store.Command;
-using StoreManager.Domain.Chain;
-using StoreManager.Domain.Chain.ValueObjects;
-using StoreManager.Domain.Common.ValueObjects;
-using StoreManager.Domain.Store;
-using StoreManager.Domain.Store.ValueObjects;
 using System.Net;
 using System.Net.Http.Json;
-using System.Text.Json;
 using Xunit.Abstractions;
 
 namespace StoreManager.API.IntegrationTests;
@@ -96,7 +88,7 @@ public class StoreControllerTests : BaseIntegrationTest
     }
 
     [Fact]
-    public async Task GetStore_WithNonExistingStoreId_ThrowsKeyNotFoundException()
+    public async Task GetStore_WithNonExistingStoreId_ReturnsBadRequest()
     {
         // Arrange
         var nonExistingId = Guid.NewGuid();
@@ -107,7 +99,7 @@ public class StoreControllerTests : BaseIntegrationTest
         _output.WriteLine(responseBody);
 
         // Assert
-        Assert.Equal(HttpStatusCode.InternalServerError, response.StatusCode);
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
     }
 
     [Fact]
@@ -159,22 +151,6 @@ public class StoreControllerTests : BaseIntegrationTest
     }
 
     [Fact]
-    public async Task GetStoresByChainId_WithNonExistingChainId_ReturnsKeyNotFoundException()
-    {
-        // Arrange
-        var chain = ChainId.GetExisting(Guid.NewGuid()).Value;
-
-        // Act
-        var response = await _client.GetAsync($"/api/store/getStoresByChain/{chain.Value}");
-        var responseBody = await response.Content.ReadAsStringAsync(); // log full server error for debugging
-        _output.WriteLine(responseBody);
-
-        // Assert
-        Assert.NotNull(response);
-        Assert.Equal(HttpStatusCode.InternalServerError, response.StatusCode);
-    }
-
-    [Fact]
     public async Task GetStoresByChainId_WithChainHavingNoStores_ReturnsBadRequest()
     {
         // Arrange
@@ -191,7 +167,7 @@ public class StoreControllerTests : BaseIntegrationTest
     }
 
     [Fact]
-    public async Task GetStoresByChainId_WithNonExistingChainId_ThrowsKeyNotFoundException()
+    public async Task GetStoresByChainId_WithNonExistingChainId_ReturnsBadRequest()
     {
         // Arrange
         var nonExistingId = Guid.NewGuid();
@@ -202,7 +178,7 @@ public class StoreControllerTests : BaseIntegrationTest
         _output.WriteLine(responseBody);
 
         // Assert
-        Assert.Equal(HttpStatusCode.InternalServerError, response.StatusCode);
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
     }
 
     [Fact]
@@ -463,20 +439,42 @@ public class StoreControllerTests : BaseIntegrationTest
     {
         // Arrange
         var storeDto = new CreateStoreDto(null, 101, "Test Store", "123 Main St", "12345", "Test City", "1", "5551234567", "test@store.com", "John", "Doe");
-        var storeId = await ApiHelper.CreateStoreAndGetId(_client, storeDto);
+        var store = await ApiHelper.CreateStore(_client, storeDto);
+        _output.WriteLine(store.Result.Id.ToString());
 
         var updatedName = "Newly Updated Store";
-        var updateRequest = new UpdateStoreDto(storeId, null, 203, updatedName, "456 Updated St", "54321", "Updated City", "1", "5559876543", "new@store.com", "Jane", "Smith", DateTime.UtcNow, DateTime.UtcNow.AddDays(1));
+        var updateRequest = new UpdateStoreDto(
+            store.Result.Id, 
+            null, 
+            203, 
+            updatedName, 
+            "456 Updated St", 
+            "54321", 
+            "Updated City", 
+            "1", 
+            "5559876543", 
+            "new@store.com", 
+            "Jane", 
+            "Smith", 
+            store.Result.CreatedOn, 
+            store.Result.ModifiedOn);
 
         // Act
-        await _client.PutAsJsonAsync("/api/store/updateStore", updateRequest);
-        var response = await _client.GetAsync($"/api/store/getStore/{storeId}");
+        var updateResponse = await _client.PutAsJsonAsync("/api/store/updateStore", updateRequest);
+        // Check that update succeeded
+        if (!updateResponse.IsSuccessStatusCode)
+        {
+            var errorBody = await updateResponse.Content.ReadAsStringAsync();
+            _output.WriteLine($"Update failed: {errorBody}");
+        }
+        Assert.Equal(HttpStatusCode.OK, updateResponse.StatusCode);
+
+        var response = await _client.GetAsync($"/api/store/getStore/{store.Result.Id}");
         var responseBody = await response.Content.ReadAsStringAsync(); // log full server error for debugging
         _output.WriteLine(responseBody);
 
         // Assert
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-        var content = await response.Content.ReadAsStringAsync();
-        Assert.Contains(updatedName, content);
+        Assert.Contains(updatedName, responseBody);
     }
 }

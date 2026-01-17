@@ -81,12 +81,12 @@ public class ChainRepository : IChainRepository
         await using var transaction = await _dbContext.Database.BeginTransactionAsync(IsolationLevel.RepeatableRead);
         try
         {
-            var chainIdValue = id as ChainId ?? throw new ArgumentException("Invalid ChainId", nameof(id));
+            //var chainIdValue = id as ChainId ?? throw new ArgumentException("Invalid ChainId", nameof(id));
 
             var chain = await _dbContext.ChainEntities
                 .AsNoTracking()
                 .Include(s => s.Stores)
-                .FirstOrDefaultAsync(s => s.Id == chainIdValue);
+                .FirstOrDefaultAsync(s => s.Id == (ChainId)id);
 
             await transaction.CommitAsync();
             return chain;
@@ -103,11 +103,9 @@ public class ChainRepository : IChainRepository
         await using var transaction = await _dbContext.Database.BeginTransactionAsync(IsolationLevel.RepeatableRead);
         try
         {
-            var chainIdValue = id as ChainId ?? throw new ArgumentException("Invalid ChainId", nameof(id));
-
             int stores = await _dbContext.StoreEntities
                 .AsNoTracking()
-                .CountAsync(c => c.ChainId != null && c.ChainId == chainIdValue);
+                .CountAsync(c => c.ChainId != null && c.ChainId == (ChainId)id);
 
             await transaction.CommitAsync();
             return stores;
@@ -124,6 +122,7 @@ public class ChainRepository : IChainRepository
         await using var transaction = await _dbContext.Database.BeginTransactionAsync(IsolationLevel.ReadCommitted, cancellationToken);
         try
         {
+            //_dbContext.ChainEntities.Attach(entity);
             _dbContext.ChainEntities.Update(entity);
             await _dbContext.SaveChangesAsync(cancellationToken);
             await transaction.CommitAsync(cancellationToken);

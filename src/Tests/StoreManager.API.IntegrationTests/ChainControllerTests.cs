@@ -1,9 +1,6 @@
 ﻿using Helpers;
 using StoreManager.Application.DTO.Chain.Command;
 using StoreManager.Application.DTO.Store.Command;
-using StoreManager.Domain.Chain;
-using StoreManager.Domain.Common.ValueObjects;
-using StoreManager.Domain.Store;
 using System.Net;
 using System.Net.Http.Json;
 using Xunit.Abstractions;
@@ -44,7 +41,7 @@ public class ChainControllerTests : BaseIntegrationTest
         // Arrange
         var stores = new List<CreateStoreDto>
         {
-            new CreateStoreDto(Guid.NewGuid(), 101, "Store 1", "123 Main St", "12345", "Test City", "1", "5551234567", "store1@test.com", "John", "Doe")
+            new CreateStoreDto(null, 101, "Store 1", "123 Main St", "12345", "Test City", "1", "5551234567", "store1@test.com", "John", "Doe")
         };
         var request = new CreateChainDto("Test Chain With Stores", stores);
 
@@ -116,14 +113,11 @@ public class ChainControllerTests : BaseIntegrationTest
     public async Task GetChainById_WithExistingChainId_ReturnsOkWithChain()
     {
         // Arrange
-        var chain = ChainEntity.Create("Test Chain").Value;
-        await using var transaction = await DbContext.Database.BeginTransactionAsync();
-        await DbContext.ChainEntities.AddAsync(chain);
-        await DbContext.SaveChangesAsync();
-        await transaction.CommitAsync();
+        var chainId = await ApiHelper.CreateChainAndGetId(_client, StringRandom.GetRandomString(10));
+        _output.WriteLine($"Created Chain ID: {chainId}");
 
         // Act
-        var response = await _client.GetAsync($"/api/chain/getChain/{chain.Id.Value}");
+        var response = await _client.GetAsync($"/api/chain/getChain/{chainId}");
         var responseBody = await response.Content.ReadAsStringAsync();
         _output.WriteLine(responseBody);
 
@@ -133,7 +127,7 @@ public class ChainControllerTests : BaseIntegrationTest
     }
 
     [Fact]
-    public async Task GetChainById_WithNonExistingChainId_ThrowsKeyNotFoundException()
+    public async Task GetChainById_WithNonExistingChainId_ReturnsBadRequest()
     {
         // Arrange
         var nonExistingId = Guid.NewGuid();
@@ -144,7 +138,7 @@ public class ChainControllerTests : BaseIntegrationTest
         _output.WriteLine(responseBody);
 
         // Assert
-        Assert.Equal(HttpStatusCode.InternalServerError, response.StatusCode);
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
     }
 
     #endregion
@@ -155,20 +149,20 @@ public class ChainControllerTests : BaseIntegrationTest
     public async Task GetChainIncludeStores_WithExistingChainAndStores_ReturnsOkWithChainAndStores()
     {
         // Arrange
-        var chain = ChainEntity.Create("Test Chain").Value;
-        var stores = new List<StoreEntity>
-        {
-            StoreEntity.Create(chain.Id, 1, "Store 1", Address.Create("123 Test St", "12345", "Test City"), PhoneNumber.Create("+1", "5551234567"), Email.Create("store1@test.com"), FullName.Create("Test", "Manager1")).Value,
-            StoreEntity.Create(chain.Id, 2, "Store 2", Address.Create("456 Test St", "67890", "Test City"), PhoneNumber.Create("+1", "5559876543"), Email.Create("store2@test.com"), FullName.Create("Test", "Manager2")).Value
-        };
-        await using var transaction = await DbContext.Database.BeginTransactionAsync();
-        await DbContext.ChainEntities.AddAsync(chain);
-        await DbContext.StoreEntities.AddRangeAsync(stores);
-        await DbContext.SaveChangesAsync();
-        await transaction.CommitAsync();
+        var chainId = await ApiHelper.CreateChainAndGetId(_client, StringRandom.GetRandomString(10));
+        _output.WriteLine($"Created Chain ID: {chainId}");
+
+        // Create two stores for the chain
+        var createStore1Dto = new CreateStoreDto(chainId, 1, "Test Store 1", "123 Main St", "12345", "Test City", "1", "5551234567", "test1@store.com", "John", "Doe");
+        var store1Response = await _client.PostAsJsonAsync("/api/store/createStore", createStore1Dto);
+        store1Response.EnsureSuccessStatusCode();
+
+        var createStore2Dto = new CreateStoreDto(chainId, 2, "Test Store 2", "456 Main St", "67890", "Test City", "1", "5559876543", "test2@store.com", "Jane", "Doe");
+        var store2Response = await _client.PostAsJsonAsync("/api/store/createStore", createStore2Dto);
+        store2Response.EnsureSuccessStatusCode();
 
         // Act
-        var response = await _client.GetAsync($"/api/chain/getChainAndStores/{chain.Id.Value}");
+        var response = await _client.GetAsync($"/api/chain/getChainAndStores/{chainId}");
         var responseBody = await response.Content.ReadAsStringAsync();
         _output.WriteLine(responseBody);
 
@@ -178,27 +172,24 @@ public class ChainControllerTests : BaseIntegrationTest
     }
 
     [Fact]
-    public async Task GetChainIncludeStores_WithExistingChainNoStores_ReturnsInternalServerError()
+    public async Task GetChainIncludeStores_WithExistingChainNoStores_ReturnsBadRequest()
     {
         // Arrange
-        var chain = ChainEntity.Create("Test Chain Without Stores").Value;
-        await using var transaction = await DbContext.Database.BeginTransactionAsync();
-        await DbContext.ChainEntities.AddAsync(chain);
-        await DbContext.SaveChangesAsync();
-        await transaction.CommitAsync();
+        var chainId = await ApiHelper.CreateChainAndGetId(_client, StringRandom.GetRandomString(10));
+        _output.WriteLine($"Created Chain ID: {chainId}");
 
         // Act
-        var response = await _client.GetAsync($"/api/chain/getChainAndStores/{chain.Id.Value}");
+        var response = await _client.GetAsync($"/api/chain/getChainAndStores/{chainId}");
         var responseBody = await response.Content.ReadAsStringAsync();
         _output.WriteLine(responseBody);
 
         // Assert 
-        Assert.Equal(HttpStatusCode.InternalServerError, response.StatusCode);
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
         Assert.NotEmpty(responseBody);
     }
 
     [Fact]
-    public async Task GetChainIncludeStores_WithNonExistingChainId_ThrowsKeyNotFoundException()
+    public async Task GetChainIncludeStores_WithNonExistingChainId_ReturnsBadRequest()
     {
         // Arrange
         var nonExistingId = Guid.NewGuid();
@@ -209,7 +200,7 @@ public class ChainControllerTests : BaseIntegrationTest
         _output.WriteLine(responseBody);
 
         // Assert
-        Assert.Equal(HttpStatusCode.InternalServerError, response.StatusCode);
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
     }
 
     #endregion
@@ -220,13 +211,10 @@ public class ChainControllerTests : BaseIntegrationTest
     public async Task UpdateChain_WithValidData_ReturnsOkResult()
     {
         // Arrange
-        var chain = ChainEntity.Create("Original Chain Name").Value;
-        await using var transaction = await DbContext.Database.BeginTransactionAsync();
-        await DbContext.ChainEntities.AddAsync(chain);
-        await DbContext.SaveChangesAsync();
-        await transaction.CommitAsync();
+        var chain = await ApiHelper.CreateChain(_client, StringRandom.GetRandomString(10));
+        _output.WriteLine($"Created Chain ID: {chain.Result.Id}");
 
-        var request = new UpdateChainDto(chain.Id.Value, "Updated Chain Name", chain.CreatedOn, DateTime.UtcNow);
+        var request = new UpdateChainDto(chain.Result.Id, "Updated Chain Name", chain.Result.CreatedOn, chain.Result.ModifiedOn);
 
         // Act
         var response = await _client.PutAsJsonAsync("/api/chain/updateChain", request);
@@ -235,6 +223,8 @@ public class ChainControllerTests : BaseIntegrationTest
 
         // Assert
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.NotEmpty(responseBody);
+        Assert.Contains("Updated Chain Name", responseBody);
     }
 
     [Fact]
@@ -258,13 +248,10 @@ public class ChainControllerTests : BaseIntegrationTest
     public async Task UpdateChain_WithEmptyName_ReturnsBadRequest(string name)
     {
         // Arrange
-        var chain = ChainEntity.Create("Test Chain").Value;
-        await using var transaction = await DbContext.Database.BeginTransactionAsync();
-        await DbContext.ChainEntities.AddAsync(chain);
-        await DbContext.SaveChangesAsync();
-        await transaction.CommitAsync();
+        var chain = await ApiHelper.CreateChain(_client, StringRandom.GetRandomString(10));
+        _output.WriteLine($"Created Chain ID: {chain.Result.Id}");
 
-        var request = new UpdateChainDto(chain.Id.Value, name, chain.CreatedOn, DateTime.UtcNow);
+        var request = new UpdateChainDto(chain.Result.Id, name, chain.Result.CreatedOn, chain.Result.ModifiedOn);
 
         // Act
         var response = await _client.PutAsJsonAsync("/api/chain/updateChain", request);
@@ -279,13 +266,10 @@ public class ChainControllerTests : BaseIntegrationTest
     public async Task UpdateChain_WithNameExceeding100Characters_ReturnsBadRequest()
     {
         // Arrange
-        var chain = ChainEntity.Create("Test Chain").Value;
-        await using var transaction = await DbContext.Database.BeginTransactionAsync();
-        await DbContext.ChainEntities.AddAsync(chain);
-        await DbContext.SaveChangesAsync();
-        await transaction.CommitAsync();
+        var chain = await ApiHelper.CreateChain(_client, StringRandom.GetRandomString(10));
+        _output.WriteLine($"Created Chain ID: {chain.Result.Id}");
 
-        var request = new UpdateChainDto(chain.Id.Value, StringRandom.GetRandomString(101), chain.CreatedOn, DateTime.UtcNow);
+        var request = new UpdateChainDto(chain.Result.Id, StringRandom.GetRandomString(101), chain.Result.CreatedOn, chain.Result.ModifiedOn);
 
         // Act
         var response = await _client.PutAsJsonAsync("/api/chain/updateChain", request);
@@ -308,7 +292,7 @@ public class ChainControllerTests : BaseIntegrationTest
         _output.WriteLine(responseBody);
 
         // Assert
-        Assert.Equal(HttpStatusCode.InternalServerError, response.StatusCode);
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
     }
 
     #endregion
@@ -319,13 +303,10 @@ public class ChainControllerTests : BaseIntegrationTest
     public async Task DeleteChain_WithValidChainNoStores_ReturnsOkResult()
     {
         // Arrange
-        var chain = ChainEntity.Create("Chain To Delete").Value;
-        await using var transaction = await DbContext.Database.BeginTransactionAsync();
-        await DbContext.ChainEntities.AddAsync(chain);
-        await DbContext.SaveChangesAsync();
-        await transaction.CommitAsync();
+        var chain = await ApiHelper.CreateChain(_client, StringRandom.GetRandomString(10));
+        _output.WriteLine($"Created Chain ID: {chain.Result.Id}");
 
-        var request = new DeleteChainDto(chain.Id.Value, chain.CreatedOn, DateTime.UtcNow);
+        var request = new DeleteChainDto(chain.Result.Id, chain.Result.CreatedOn, chain.Result.ModifiedOn);
 
         // Act
         var httpRequestMessage = new HttpRequestMessage
@@ -389,15 +370,17 @@ public class ChainControllerTests : BaseIntegrationTest
     public async Task DeleteChain_WithAssociatedStores_ReturnsBadRequest()
     {
         // Arrange - A chain can only be deleted if it has no associated stores
-        var chain = ChainEntity.Create("Chain With Stores").Value;
-        var store = StoreEntity.Create(chain.Id, 1, "Store 1", Address.Create("123 Test St", "12345", "Test City"), PhoneNumber.Create("1", "5551234567"), Email.Create("store1@test.com"), FullName.Create("Test", "Manager")).Value;
-        await using var transaction = await DbContext.Database.BeginTransactionAsync();
-        await DbContext.ChainEntities.AddAsync(chain);
-        await DbContext.StoreEntities.AddAsync(store);
-        await DbContext.SaveChangesAsync();
-        await transaction.CommitAsync();
+        var chain = await ApiHelper.CreateChain(_client, StringRandom.GetRandomString(10));
+        _output.WriteLine($"Created Chain ID: {chain.Result.Id}");
+        var createStore1Dto = new CreateStoreDto(chain.Result.Id, 1, "Test Store 1", "123 Main St", "12345", "Test City", "1", "5551234567", "test1@store.com", "John", "Doe");
+        var store1Response = await _client.PostAsJsonAsync("/api/store/createStore", createStore1Dto);
+        store1Response.EnsureSuccessStatusCode();
 
-        var request = new DeleteChainDto(chain.Id.Value, chain.CreatedOn, DateTime.UtcNow);
+        var createStore2Dto = new CreateStoreDto(chain.Result.Id, 2, "Test Store 2", "456 Main St", "67890", "Test City", "1", "5559876543", "test2@store.com", "Jane", "Doe");
+        var store2Response = await _client.PostAsJsonAsync("/api/store/createStore", createStore2Dto);
+        store2Response.EnsureSuccessStatusCode();
+
+        var request = new DeleteChainDto(chain.Result.Id, chain.Result.CreatedOn, chain.Result.ModifiedOn);
 
         // Act
         var httpRequestMessage = new HttpRequestMessage

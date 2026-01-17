@@ -6,8 +6,6 @@ using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.DependencyInjection;
 using StoreManager.Persistence;
 using Testcontainers.MsSql;
-using Testcontainers;
-using DotNet.Testcontainers.Images;
 
 namespace StoreManager.API.IntegrationTests;
 
@@ -51,22 +49,23 @@ public class StoreManagerWebApplicationFactory : WebApplicationFactory<Program>,
 
     public async Task EnsureDatabaseCreatedAsync(ApplicationDbContext context)
     {
-        if (!_databaseInitialized)
-        {
-            await _initLock.WaitAsync();
-            try
-            {
-                if (!_databaseInitialized)
-                {
-                    await context.Database.EnsureCreatedAsync();
-                    _databaseInitialized = true;
-                }
-            }
-            finally
-            {
-                _initLock.Release();
-            }
-        }
+        //if (!_databaseInitialized)
+        //{
+        //    await _initLock.WaitAsync();
+        //    try
+        //    {
+        //        if (!_databaseInitialized)
+        //        {
+        //            await context.Database.EnsureCreatedAsync();
+        //            _databaseInitialized = true;
+        //        }
+        //    }
+        //    finally
+        //    {
+        //        _initLock.Release();
+        //    }
+        //}
+        await context.Database.EnsureCreatedAsync();
     }
 
     public Task InitializeAsync()

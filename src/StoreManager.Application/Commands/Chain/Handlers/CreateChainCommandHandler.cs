@@ -50,7 +50,7 @@ public class CreateChainCommandHandler : ICommandHandler<CreateChainCommand, Cha
                 Stores = stores.Select(s => new StoreResponseDto
                 {
                     Id = s.Id.Value,
-                    ChainId = s.ChainId.Value,
+                    ChainId = s.ChainId?.Value,
                     Number = s.Number,
                     Name = s.Name,
                     Street = s.Address.Street,

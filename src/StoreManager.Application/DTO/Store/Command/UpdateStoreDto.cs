@@ -46,7 +46,6 @@ public record UpdateStoreDto
         public Validator()
         {
             RuleFor(x => x.Id).NotEmpty().NotNull().WithMessage("Store ID must not be empty.");
-            RuleFor(x => x.ChainId).NotEmpty().WithMessage("Chain ID must not be empty.");
             RuleFor(x => x.Number).NotNull().WithMessage("Store number is required.");
             RuleFor(x => x.Name).NotEmpty().NotNull().WithMessage("Store name is required.").MaximumLength(100).WithMessage("Store name must not exceed 100 characters.");
             RuleFor(x => x.Street).NotEmpty().NotNull().WithMessage("Street is required.").MaximumLength(200).WithMessage("Street must not exceed 200 characters.");

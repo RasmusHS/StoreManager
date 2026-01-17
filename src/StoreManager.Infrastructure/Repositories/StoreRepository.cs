@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage;
 using StoreManager.Application.Data;
 using StoreManager.Application.Data.Infrastructure;
 using StoreManager.Domain.Chain.ValueObjects;
@@ -43,18 +44,34 @@ public class StoreRepository : IStoreRepository
             .Where(s => s.ChainId != null && s.ChainId == chainIdValue)
             .ToListAsync();
 
-        if (result.Count < 1)
-        {
-            throw new KeyNotFoundException($"No stores found for ChainId: {chainId}");
-        }
+        //if (result.Count < 1)
+        //{
+        //    throw new KeyNotFoundException($"No stores found for ChainId: {chainId}");
+        //}
 
         return result;
     }
 
     public async Task UpdateAsync(StoreEntity entity, CancellationToken cancellationToken = default)
     {
-        _dbContext.StoreEntities.Update(entity);
-        await _dbContext.SaveChangesAsync(cancellationToken);
+        await using var transaction = await _dbContext.Database.BeginTransactionAsync(IsolationLevel.ReadCommitted, cancellationToken);
+        try 
+        {
+            
+            //_dbContext.StoreEntities.Update(entity);
+            await _dbContext.SaveChangesAsync(cancellationToken);
+            if (_dbContext.StoreEntities.Entry(entity).Context.ChangeTracker.Entries().Count() == 0) // Check how many rows were affected
+            {
+                throw new DbUpdateConcurrencyException("The store was modified by another process.");
+            }
+
+            await transaction.CommitAsync(cancellationToken);
+        }
+        catch
+        {
+            await transaction.RollbackAsync(cancellationToken);
+            throw;
+        }
     }
 
     public async Task DeleteAsync(object id, CancellationToken cancellationToken = default)
