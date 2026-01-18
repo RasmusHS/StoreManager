@@ -51,10 +51,6 @@ public class GetAllStoresByChainQueryHandlerTests
 
         var stores = new List<StoreEntity> { store1, store2 };
 
-        _mockChainRepository
-            .Setup(r => r.GetByIdAsync(chainEntity.Id))
-            .ReturnsAsync(chainEntity);
-
         _mockStoreRepository
             .Setup(r => r.GetAllByChainIdAsync(chainEntity.Id))
             .ReturnsAsync(stores);
@@ -96,7 +92,6 @@ public class GetAllStoresByChainQueryHandlerTests
         Assert.Equal(store2.Number, storeDto2.Number);
         Assert.Equal(store2.Name, storeDto2.Name);
 
-        _mockChainRepository.Verify(r => r.GetByIdAsync(chainEntity.Id), Times.Once);
         _mockStoreRepository.Verify(r => r.GetAllByChainIdAsync(chainEntity.Id), Times.Once);
     }
 
@@ -106,9 +101,10 @@ public class GetAllStoresByChainQueryHandlerTests
         // Arrange
         var chainId = ChainId.GetExisting(Guid.NewGuid()).Value;
 
-        _mockChainRepository
-            .Setup(r => r.GetByIdAsync(chainId))
-            .ReturnsAsync((ChainEntity)null);
+        // Handler will try to get stores and find none
+        _mockStoreRepository
+            .Setup(r => r.GetAllByChainIdAsync(chainId))
+            .ReturnsAsync(new List<StoreEntity>());
 
         var query = new GetAllStoresByChainQuery(chainId);
 
@@ -118,9 +114,10 @@ public class GetAllStoresByChainQueryHandlerTests
         // Assert
         Assert.False(result.Success);
         Assert.NotNull(result.Error);
+        // The error message has changed - now it's "chain has no stores" instead of "not found"
+        Assert.Contains("has no stores", result.Error.Message.ToLower());
 
-        _mockChainRepository.Verify(r => r.GetByIdAsync(chainId), Times.Once);
-        _mockStoreRepository.Verify(r => r.GetAllByChainIdAsync(It.IsAny<ChainId>()), Times.Never);
+        _mockStoreRepository.Verify(r => r.GetAllByChainIdAsync(chainId), Times.Once);
     }
 
     [Fact]
@@ -129,10 +126,6 @@ public class GetAllStoresByChainQueryHandlerTests
         // Arrange
         var chainEntity = ChainEntity.Create("Empty Chain").Value;
         var emptyStoreList = new List<StoreEntity>();
-
-        _mockChainRepository
-            .Setup(r => r.GetByIdAsync(chainEntity.Id))
-            .ReturnsAsync(chainEntity);
 
         _mockStoreRepository
             .Setup(r => r.GetAllByChainIdAsync(chainEntity.Id))
@@ -148,7 +141,6 @@ public class GetAllStoresByChainQueryHandlerTests
         Assert.NotNull(result.Error);
         Assert.Contains("has no stores", result.Error.Message.ToLower());
 
-        _mockChainRepository.Verify(r => r.GetByIdAsync(chainEntity.Id), Times.Once);
         _mockStoreRepository.Verify(r => r.GetAllByChainIdAsync(chainEntity.Id), Times.Once);
     }
 
@@ -167,10 +159,6 @@ public class GetAllStoresByChainQueryHandlerTests
             FullName.Create("Alice", "Johnson").Value).Value;
 
         var stores = new List<StoreEntity> { store };
-
-        _mockChainRepository
-            .Setup(r => r.GetByIdAsync(chainEntity.Id))
-            .ReturnsAsync(chainEntity);
 
         _mockStoreRepository
             .Setup(r => r.GetAllByChainIdAsync(chainEntity.Id))
@@ -203,7 +191,6 @@ public class GetAllStoresByChainQueryHandlerTests
         Assert.Equal(store.CreatedOn, storeDto.CreatedOn);
         Assert.Equal(store.ModifiedOn, storeDto.ModifiedOn);
 
-        _mockChainRepository.Verify(r => r.GetByIdAsync(chainEntity.Id), Times.Once);
         _mockStoreRepository.Verify(r => r.GetAllByChainIdAsync(chainEntity.Id), Times.Once);
     }
 
@@ -241,10 +228,6 @@ public class GetAllStoresByChainQueryHandlerTests
 
         var stores = new List<StoreEntity> { store1, store2, store3 };
 
-        _mockChainRepository
-            .Setup(r => r.GetByIdAsync(chainEntity.Id))
-            .ReturnsAsync(chainEntity);
-
         _mockStoreRepository
             .Setup(r => r.GetAllByChainIdAsync(chainEntity.Id))
             .ReturnsAsync(stores);
@@ -265,7 +248,6 @@ public class GetAllStoresByChainQueryHandlerTests
         Assert.Contains(result.Value.Data, s => s.Number == 3 && s.Name == "Store Three");
         Assert.Contains(result.Value.Data, s => s.Number == 1 && s.Name == "Store One");
 
-        _mockChainRepository.Verify(r => r.GetByIdAsync(chainEntity.Id), Times.Once);
         _mockStoreRepository.Verify(r => r.GetAllByChainIdAsync(chainEntity.Id), Times.Once);
     }
 
@@ -286,10 +268,6 @@ public class GetAllStoresByChainQueryHandlerTests
         var stores = new List<StoreEntity> { store };
         var cancellationToken = new CancellationToken();
 
-        _mockChainRepository
-            .Setup(r => r.GetByIdAsync(chainEntity.Id))
-            .ReturnsAsync(chainEntity);
-
         _mockStoreRepository
             .Setup(r => r.GetAllByChainIdAsync(chainEntity.Id))
             .ReturnsAsync(stores);
@@ -304,7 +282,39 @@ public class GetAllStoresByChainQueryHandlerTests
         Assert.NotNull(result.Value);
         Assert.Single(result.Value.Data);
 
-        _mockChainRepository.Verify(r => r.GetByIdAsync(chainEntity.Id), Times.Once);
         _mockStoreRepository.Verify(r => r.GetAllByChainIdAsync(chainEntity.Id), Times.Once);
+    }
+
+    [Fact]
+    public async Task Handle_WithNullChainId_ReturnsIndependentStores()
+    {
+        // Arrange
+        var store = StoreEntity.Create(
+            null, // Independent store
+            1,
+            "Independent Store",
+            Address.Create("123 Main St", "12345", "TestCity").Value,
+            PhoneNumber.Create("+1", "1234567890").Value,
+            Email.Create("test@example.com").Value,
+            FullName.Create("Test", "User").Value).Value;
+
+        var stores = new List<StoreEntity> { store };
+
+        _mockStoreRepository
+            .Setup(r => r.GetAllIndependentStoresAsync())
+            .ReturnsAsync(stores);
+
+        var query = new GetAllStoresByChainQuery(null);
+
+        // Act
+        var result = await _handler.Handle(query);
+
+        // Assert
+        Assert.True(result.Success);
+        Assert.NotNull(result.Value);
+        Assert.Single(result.Value.Data);
+        Assert.Null(result.Value.Data.First().ChainId);
+
+        _mockStoreRepository.Verify(r => r.GetAllIndependentStoresAsync(), Times.Once);
     }
 }

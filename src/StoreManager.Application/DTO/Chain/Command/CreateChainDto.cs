@@ -1,6 +1,5 @@
 ﻿using FluentValidation;
 using StoreManager.Application.DTO.Store.Command;
-using StoreManager.Domain.Store.ValueObjects;
 
 namespace StoreManager.Application.DTO.Chain.Command;
 

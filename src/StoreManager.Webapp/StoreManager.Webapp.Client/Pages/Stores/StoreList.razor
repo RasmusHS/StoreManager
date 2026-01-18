@@ -1,0 +1,59 @@
+﻿@page "/stores"
+@using StoreManager.Webapp.Client.Models.Store.Query
+@using StoreManager.Webapp.Client.Services
+@rendermode InteractiveWebAssembly
+@inject IStoreService StoreService
+
+<PageTitle>Stores</PageTitle>
+
+<h1>Store List</h1>
+
+@if (isLoading)
+{
+    <p>Loading stores...</p>
+}
+else if (stores == null || !stores.Any())
+{
+    <p>No stores found.</p>
+}
+else
+{
+    <div class="row">
+        @foreach (var store in stores)
+        {
+            <div class="col-md-4 mb-3">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">@store.Name</h5>
+                        <p class="card-text">
+                            @store.Street<br />
+                            @store.PostalCode @store.City<br />
+                            @store.PhoneNumber
+                        </p>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
+
+@code {
+    private List<QueryStoreDto> stores = new();
+    private bool isLoading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            //Check if GetAllIndependentStoresAsync should be called or if GetStoresByChainAsync should be called
+            // if ()
+            // {
+            // }
+            stores = await StoreService.GetAllIndependentStoresAsync();
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+}

@@ -75,20 +75,32 @@ public class ChainRepository : IChainRepository
         }
     }
 
-    public async Task<ChainEntity?> GetByIdIncludeStoresAsync(object id)
+    public async Task<ChainEntity?> GetByIdIncludeStoresAsync(object? id)
     {
         await using var transaction = await _dbContext.Database.BeginTransactionAsync(IsolationLevel.RepeatableRead);
         try
         {
             //var chainIdValue = id as ChainId ?? throw new ArgumentException("Invalid ChainId", nameof(id));
+            if (id == null)
+            {
+                var chain = await _dbContext.ChainEntities
+                    .AsNoTracking()
+                    .Include(s => s.Stores)
+                    .FirstOrDefaultAsync(s => s.Id == null);
 
-            var chain = await _dbContext.ChainEntities
-                .AsNoTracking()
-                .Include(s => s.Stores)
-                .FirstOrDefaultAsync(s => s.Id == (ChainId)id);
+                await transaction.CommitAsync();
+                return chain;
+            }
+            else
+            {
+                var chain = await _dbContext.ChainEntities
+                    .AsNoTracking()
+                    .Include(s => s.Stores)
+                    .FirstOrDefaultAsync(s => s.Id == (ChainId)id);
 
-            await transaction.CommitAsync();
-            return chain;
+                await transaction.CommitAsync();
+                return chain;
+            }
         }
         catch
         {
@@ -97,17 +109,29 @@ public class ChainRepository : IChainRepository
         }
     }
 
-    public async Task<int> GetCountofStoresByChainAsync(object id)
+    public async Task<int> GetCountofStoresByChainAsync(object? id)
     {
         await using var transaction = await _dbContext.Database.BeginTransactionAsync(IsolationLevel.RepeatableRead);
         try
         {
-            int stores = await _dbContext.StoreEntities
-                .AsNoTracking()
-                .CountAsync(c => c.ChainId != null && c.ChainId == (ChainId)id);
+            if (id == null)
+            {
+                int stores = await _dbContext.StoreEntities
+                    .AsNoTracking()
+                    .CountAsync(c => c.ChainId == null);
 
-            await transaction.CommitAsync();
-            return stores;
+                await transaction.CommitAsync();
+                return stores;
+            }
+            else
+            {
+                int stores = await _dbContext.StoreEntities
+                    .AsNoTracking()
+                    .CountAsync(c => c.ChainId != null && c.ChainId == (ChainId)id);
+
+                await transaction.CommitAsync();
+                return stores;
+            }
         }
         catch
         {

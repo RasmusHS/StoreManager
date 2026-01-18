@@ -1,4 +1,5 @@
 using StoreManager.Webapp.Client.Pages;
+using StoreManager.Webapp.Client.Services;
 using StoreManager.Webapp.Components;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -6,6 +7,8 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveWebAssemblyComponents();
+
+builder.Services.AddStoreManagerServices();
 
 var app = builder.Build();
 

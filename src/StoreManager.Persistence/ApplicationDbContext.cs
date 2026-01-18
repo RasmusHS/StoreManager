@@ -57,7 +57,8 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
         var environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
         if (environment != "Testing")
         {
-            // Seed data for Chains
+            #region OptiView
+            
             var chainOptiView = ChainId.GetExisting(Guid.Parse("5ec199f0-4c26-4d20-bbdd-39ac844237b8")).Value;
             modelBuilder.Entity<ChainEntity>().HasData(new
             {
@@ -66,42 +67,13 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
                 CreatedOn = DateTime.Parse("1/12/2026 4:22:44 PM"),
                 ModifiedOn = DateTime.Parse("1/12/2026 4:22:44 PM")
             });
-
-            var chainFocalPoint = ChainId.GetExisting(Guid.Parse("d3271c28-5e1d-4011-9f79-aa573a9f2e3c")).Value;
-            modelBuilder.Entity<ChainEntity>().HasData(new
-            {
-                Id = chainFocalPoint,
-                Name = "FocalPoint",
-                CreatedOn = DateTime.Parse("1/12/2026 4:22:44 PM"),
-                ModifiedOn = DateTime.Parse("1/12/2026 4:22:44 PM")
-            });
-
-            var chainFocusOptics = ChainId.GetExisting(Guid.Parse("e887f9ce-2096-4832-8587-f96d9c7d8bc7")).Value;
-            modelBuilder.Entity<ChainEntity>().HasData(new
-            {
-                Id = chainFocusOptics,
-                Name = "FocusOptics",
-                CreatedOn = DateTime.Parse("1/12/2026 4:22:44 PM"),
-                ModifiedOn = DateTime.Parse("1/12/2026 4:22:44 PM")
-            });
-
-            var chainClearSight = ChainId.GetExisting(Guid.Parse("7eaf61d2-6d20-4ef7-9e2c-3e230456ae3c")).Value;
-            modelBuilder.Entity<ChainEntity>().HasData(new
-            {
-                Id = chainClearSight,
-                Name = "ClearSight",
-                CreatedOn = DateTime.Parse("1/12/2026 4:22:44 PM"),
-                ModifiedOn = DateTime.Parse("1/12/2026 4:22:44 PM")
-            });
-
-            // Seed data for Stores
             var chainOptiViewStore1 = StoreId.GetExisting(Guid.Parse("82d72abf-0045-4aaa-9d8b-78f28b437052")).Value;
             modelBuilder.Entity<StoreEntity>().HasData(new
             {
                 Id = chainOptiViewStore1,
                 ChainId = chainOptiView,
                 Number = 1,
-                Name = "OptiView Downtown",
+                Name = "OptiView Downtown 1",
                 Email = Email.Create("TestMail@OptiView.dk").Value,
                 CreatedOn = DateTime.Parse("1/12/2026 4:22:44 PM"),
                 ModifiedOn = DateTime.Parse("1/12/2026 4:22:44 PM")
@@ -138,7 +110,7 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
                 Id = chainOptiViewStore2,
                 ChainId = chainOptiView,
                 Number = 2,
-                Name = "OptiView Downtown",
+                Name = "OptiView Downtown 2",
                 Email = Email.Create("TestMail@OptiView.dk").Value,
                 CreatedOn = DateTime.Parse("1/12/2026 4:22:44 PM"),
                 ModifiedOn = DateTime.Parse("1/12/2026 4:22:44 PM")
@@ -168,6 +140,18 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
                     FirstName = "John",
                     LastName = "Doe"
                 });
+            #endregion
+
+            #region FocalPoint
+
+            var chainFocalPoint = ChainId.GetExisting(Guid.Parse("d3271c28-5e1d-4011-9f79-aa573a9f2e3c")).Value;
+            modelBuilder.Entity<ChainEntity>().HasData(new
+            {
+                Id = chainFocalPoint,
+                Name = "FocalPoint",
+                CreatedOn = DateTime.Parse("1/12/2026 4:22:44 PM"),
+                ModifiedOn = DateTime.Parse("1/12/2026 4:22:44 PM")
+            });
 
             var chainFocalPointStore1 = StoreId.GetExisting(Guid.Parse("d84a8b08-7d18-4c23-a8ac-efc11c585d74")).Value;
             modelBuilder.Entity<StoreEntity>().HasData(new
@@ -175,8 +159,8 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
                 Id = chainFocalPointStore1,
                 ChainId = chainFocalPoint,
                 Number = 3,
-                Name = "OptiView Downtown",
-                Email = Email.Create("TestMail@OptiView.dk").Value,
+                Name = "FocalPoint Downtown 1",
+                Email = Email.Create("TestMail@FocalPoint.dk").Value,
                 CreatedOn = DateTime.Parse("1/12/2026 4:22:44 PM"),
                 ModifiedOn = DateTime.Parse("1/12/2026 4:22:44 PM")
             });
@@ -211,8 +195,8 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
                 Id = chainFocalPointStore2,
                 ChainId = chainFocalPoint,
                 Number = 4,
-                Name = "OptiView Downtown",
-                Email = Email.Create("TestMail@OptiView.dk").Value,
+                Name = "FocalPoint Downtown 2",
+                Email = Email.Create("TestMail@FocalPoint.dk").Value,
                 CreatedOn = DateTime.Parse("1/12/2026 4:22:44 PM"),
                 ModifiedOn = DateTime.Parse("1/12/2026 4:22:44 PM")
             });
@@ -241,6 +225,18 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
                     FirstName = "John",
                     LastName = "Doe"
                 });
+            #endregion
+
+            #region FocusOptics
+
+            var chainFocusOptics = ChainId.GetExisting(Guid.Parse("e887f9ce-2096-4832-8587-f96d9c7d8bc7")).Value;
+            modelBuilder.Entity<ChainEntity>().HasData(new
+            {
+                Id = chainFocusOptics,
+                Name = "FocusOptics",
+                CreatedOn = DateTime.Parse("1/12/2026 4:22:44 PM"),
+                ModifiedOn = DateTime.Parse("1/12/2026 4:22:44 PM")
+            });
 
             var chainFocusOpticsStore1 = StoreId.GetExisting(Guid.Parse("2ecacee5-f3c8-43e0-9ca6-379c49248afb")).Value;
             modelBuilder.Entity<StoreEntity>().HasData(new
@@ -248,8 +244,8 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
                 Id = chainFocusOpticsStore1,
                 ChainId = chainFocusOptics,
                 Number = 5,
-                Name = "OptiView Downtown",
-                Email = Email.Create("TestMail@OptiView.dk").Value,
+                Name = "FocusOptics Downtown 1",
+                Email = Email.Create("TestMail@FocusOptics.dk").Value,
                 CreatedOn = DateTime.Parse("1/12/2026 4:22:44 PM"),
                 ModifiedOn = DateTime.Parse("1/12/2026 4:22:44 PM")
             });
@@ -284,8 +280,8 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
                 Id = chainFocusOpticsStore2,
                 ChainId = chainFocusOptics,
                 Number = 6,
-                Name = "OptiView Downtown",
-                Email = Email.Create("TestMail@OptiView.dk").Value,
+                Name = "FocusOptics Downtown 2",
+                Email = Email.Create("TestMail@FocusOptics.dk").Value,
                 CreatedOn = DateTime.Parse("1/12/2026 4:22:44 PM"),
                 ModifiedOn = DateTime.Parse("1/12/2026 4:22:44 PM")
             });
@@ -314,6 +310,18 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
                     FirstName = "John",
                     LastName = "Doe"
                 });
+            #endregion
+
+            #region ClearSight
+
+            var chainClearSight = ChainId.GetExisting(Guid.Parse("7eaf61d2-6d20-4ef7-9e2c-3e230456ae3c")).Value;
+            modelBuilder.Entity<ChainEntity>().HasData(new
+            {
+                Id = chainClearSight,
+                Name = "ClearSight",
+                CreatedOn = DateTime.Parse("1/12/2026 4:22:44 PM"),
+                ModifiedOn = DateTime.Parse("1/12/2026 4:22:44 PM")
+            });
 
             var chainClearSightStore1 = StoreId.GetExisting(Guid.Parse("4a15bcc2-9104-46e7-8a6c-b2030c1d573b")).Value;
             modelBuilder.Entity<StoreEntity>().HasData(new
@@ -321,8 +329,8 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
                 Id = chainClearSightStore1,
                 ChainId = chainClearSight,
                 Number = 7,
-                Name = "OptiView Downtown",
-                Email = Email.Create("TestMail@OptiView.dk").Value,
+                Name = "ClearSight Downtown 1",
+                Email = Email.Create("TestMail@ClearSight.dk").Value,
                 CreatedOn = DateTime.Parse("1/12/2026 4:22:44 PM"),
                 ModifiedOn = DateTime.Parse("1/12/2026 4:22:44 PM")
             });
@@ -357,8 +365,8 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
                 Id = chainClearSightStore2,
                 ChainId = chainClearSight,
                 Number = 8,
-                Name = "OptiView Downtown",
-                Email = Email.Create("TestMail@OptiView.dk").Value,
+                Name = "ClearSight Downtown 2",
+                Email = Email.Create("TestMail@ClearSight.dk").Value,
                 CreatedOn = DateTime.Parse("1/12/2026 4:22:44 PM"),
                 ModifiedOn = DateTime.Parse("1/12/2026 4:22:44 PM")
             });
@@ -387,6 +395,9 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
                     FirstName = "John",
                     LastName = "Doe"
                 });
+            #endregion
+
+            #region Stores without Chain
 
             var NoChainStore1 = StoreId.GetExisting(Guid.Parse("1e8d0a09-b7b9-4a94-a293-cff36e767bea")).Value;
             modelBuilder.Entity<StoreEntity>().HasData(new
@@ -394,8 +405,8 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
                 Id = NoChainStore1,
                 //ChainId = ,
                 Number = 9,
-                Name = "OptiView Downtown",
-                Email = Email.Create("TestMail@OptiView.dk").Value,
+                Name = "Independent Downtown 1",
+                Email = Email.Create("TestMail@Independent1.dk").Value,
                 CreatedOn = DateTime.Parse("1/12/2026 4:22:44 PM"),
                 ModifiedOn = DateTime.Parse("1/12/2026 4:22:44 PM")
             });
@@ -430,8 +441,8 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
                 Id = NoChainStore2,
                 //ChainId = ,
                 Number = 10,
-                Name = "OptiView Downtown",
-                Email = Email.Create("TestMail@OptiView.dk").Value,
+                Name = "Independent Downtown 2",
+                Email = Email.Create("TestMail@Independent2.dk").Value,
                 CreatedOn = DateTime.Parse("1/12/2026 4:22:44 PM"),
                 ModifiedOn = DateTime.Parse("1/12/2026 4:22:44 PM")
             });
@@ -466,8 +477,8 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
                 Id = NoChainStore3,
                 //ChainId = ,
                 Number = 11,
-                Name = "OptiView Downtown",
-                Email = Email.Create("TestMail@OptiView.dk").Value,
+                Name = "Independent Downtown 3",
+                Email = Email.Create("TestMail@Independent3.dk").Value,
                 CreatedOn = DateTime.Parse("1/12/2026 4:22:44 PM"),
                 ModifiedOn = DateTime.Parse("1/12/2026 4:22:44 PM")
             });
@@ -502,8 +513,8 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
                 Id = NoChainStore4,
                 //ChainId = ,
                 Number = 12,
-                Name = "OptiView Downtown",
-                Email = Email.Create("TestMail@OptiView.dk").Value,
+                Name = "Independent Downtown 4",
+                Email = Email.Create("TestMail@Independent4.dk").Value,
                 CreatedOn = DateTime.Parse("1/12/2026 4:22:44 PM"),
                 ModifiedOn = DateTime.Parse("1/12/2026 4:22:44 PM")
             });
@@ -532,6 +543,8 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
                     FirstName = "John",
                     LastName = "Doe"
                 });
+
+            #endregion
         }
     }
 

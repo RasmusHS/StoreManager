@@ -1,4 +1,6 @@
-﻿@inherits LayoutComponentBase
+﻿@using StoreManager.Webapp.Client.Components.Layout
+@inherits LayoutComponentBase
+@inject IJSRuntime JS
 
 <div class="page">
     <div class="sidebar">
@@ -6,8 +8,13 @@
     </div>
 
     <main>
-        <div class="top-row px-4">
-            <a href="https://learn.microsoft.com/aspnet/core/" target="_blank">About</a>
+        <div class="top-row px-4 ">
+            @* <button class="nav-toggle-btn @(isSidebarVisible ? "active" : "")" type="button"
+                 style="background-color:green;color:white;border-radius:12px;font-size:20px;padding:5px 20px" 
+                    @onclick="ToggleSidebar">
+                @(isSidebarVisible ? "Close" : "Menu")
+            </button> *@
+            <NavToggle />
         </div>
 
         <article class="content px-4">
@@ -21,3 +28,4 @@
     <a href="." class="reload">Reload</a>
     <span class="dismiss">🗙</span>
 </div>
+

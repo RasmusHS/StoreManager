@@ -1,0 +1,57 @@
+﻿@rendermode InteractiveWebAssembly
+@using StoreManager.Webapp.Client.Services
+@inject NavState NavState
+@implements IDisposable
+
+<div class="top-row ps-3 navbar navbar-dark">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="">StoreManager.Webapp</a>
+    </div>
+</div>
+
+<input type="checkbox" title="Navigation menu" class="navbar-toggler" />
+
+@if (NavState.IsVisible)
+{
+    <div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
+        <nav class="nav flex-column">
+            @* Home page should now say something like Please login or something *@
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
+                    <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Home
+                </NavLink>
+            </div>
+
+            <div class="nav-item px-3"> @* Page for viewing all Chains *@
+                <NavLink class="nav-link" href="counter">
+                    <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> Counter
+                </NavLink>
+            </div>
+
+            <div class="nav-item px-3"> @* Page for creating a Chain *@
+                <NavLink class="nav-link" href="weather">
+                    <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Weather
+                </NavLink>
+            </div>
+
+            <div class="nav-item px-3"> @* Page for creating a Store (independent by default through this route) *@
+                <NavLink class="nav-link" href="weather">
+                    <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Weather
+                </NavLink>
+            </div>
+        </nav>
+    </div>
+}
+
+@code {
+    protected override void OnInitialized()
+    {
+        NavState.OnChange += StateHasChanged;
+    }
+
+    public void Dispose()
+    {
+        NavState.OnChange -= StateHasChanged;
+    }
+}
+

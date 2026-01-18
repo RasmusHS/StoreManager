@@ -58,3 +58,22 @@ h1:focus {
 .form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
     text-align: start;
 }
+
+.nav-toggle-btn {
+    background-color: green;
+    color: white;
+    border-radius: 12px;
+    font-size: 20px;
+    padding: 5px 20px;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+    .nav-toggle-btn.active {
+        background-color: red;
+    }
+
+    .nav-toggle-btn:hover {
+        opacity: 0.9;
+    }

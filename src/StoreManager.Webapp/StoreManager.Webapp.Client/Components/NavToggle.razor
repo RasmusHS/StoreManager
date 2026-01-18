@@ -1,0 +1,34 @@
+﻿@using StoreManager.Webapp.Client.Services
+@rendermode InteractiveWebAssembly
+@inject NavState NavState
+@inject NavigationManager Navigation
+
+<button type="button"
+        class="nav-toggle-btn @(NavState.IsVisible ? "active" : "")"
+        @onclick="Toggle">
+    @(NavState.IsVisible ? "Logout" : "Login")
+</button>
+
+@code {
+    private void Toggle()
+    {
+        bool wasVisible = NavState.IsVisible;
+        NavState.IsVisible = !NavState.IsVisible;
+
+        // If we're closing the menu (was visible, now hidden), navigate to home
+        if (wasVisible)
+        {
+            Navigation.NavigateTo("/", forceLoad: false);
+        }
+    }
+
+    protected override void OnInitialized()
+    {
+        NavState.OnChange += StateHasChanged;
+    }
+
+    public void Dispose()
+    {
+        NavState.OnChange -= StateHasChanged;
+    }
+}

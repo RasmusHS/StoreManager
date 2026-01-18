@@ -30,5 +30,6 @@ public static class Errors
     public static class StoreErrors
     {
         public static Error StoreNumberAlreadyExists(int storeNumber) => new Error("store.number.already.exists", $"A store with number '{storeNumber}' already exists.");
+        public static Error NoIndependentStoresFound() => new Error("no.independent.stores.found", $"No independent stores (stores without a chain) were found.");
     }
 }

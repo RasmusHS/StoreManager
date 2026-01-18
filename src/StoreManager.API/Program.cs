@@ -19,6 +19,15 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddPersistence(builder.Configuration);
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure();
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowBlazorClient", policy =>
+    {
+        policy.WithOrigins(/*"https://localhost:7077",*/ "http://localhost:5001")
+              .AllowAnyMethod()
+              .AllowAnyHeader();
+    });
+});
 
 var app = builder.Build();
 
@@ -32,6 +41,8 @@ if (app.Environment.IsDevelopment())
 
 // Register exception handling middleware
 app.UseMiddleware<ExceptionHandler>();
+
+app.UseCors("AllowBlazorClient");
 
 app.UseHttpsRedirection();
 

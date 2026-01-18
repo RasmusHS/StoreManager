@@ -12,8 +12,8 @@ using StoreManager.Persistence;
 namespace StoreManager.Persistence.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20260117203157_PendingModelChanges")]
-    partial class PendingModelChanges
+    [Migration("20260118121212_Initial")]
+    partial class Initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -146,7 +146,7 @@ namespace StoreManager.Persistence.Migrations
                             CreatedOn = new DateTime(2026, 12, 1, 16, 22, 44, 0, DateTimeKind.Unspecified),
                             Email = "TestMail@OptiView.dk",
                             ModifiedOn = new DateTime(2026, 12, 1, 16, 22, 44, 0, DateTimeKind.Unspecified),
-                            Name = "OptiView Downtown",
+                            Name = "OptiView Downtown 1",
                             Number = 1
                         },
                         new
@@ -156,7 +156,7 @@ namespace StoreManager.Persistence.Migrations
                             CreatedOn = new DateTime(2026, 12, 1, 16, 22, 44, 0, DateTimeKind.Unspecified),
                             Email = "TestMail@OptiView.dk",
                             ModifiedOn = new DateTime(2026, 12, 1, 16, 22, 44, 0, DateTimeKind.Unspecified),
-                            Name = "OptiView Downtown",
+                            Name = "OptiView Downtown 2",
                             Number = 2
                         },
                         new
@@ -164,9 +164,9 @@ namespace StoreManager.Persistence.Migrations
                             Id = new Guid("d84a8b08-7d18-4c23-a8ac-efc11c585d74"),
                             ChainId = new Guid("d3271c28-5e1d-4011-9f79-aa573a9f2e3c"),
                             CreatedOn = new DateTime(2026, 12, 1, 16, 22, 44, 0, DateTimeKind.Unspecified),
-                            Email = "TestMail@OptiView.dk",
+                            Email = "TestMail@FocalPoint.dk",
                             ModifiedOn = new DateTime(2026, 12, 1, 16, 22, 44, 0, DateTimeKind.Unspecified),
-                            Name = "OptiView Downtown",
+                            Name = "FocalPoint Downtown 1",
                             Number = 3
                         },
                         new
@@ -174,9 +174,9 @@ namespace StoreManager.Persistence.Migrations
                             Id = new Guid("7d7e8194-b981-478a-baee-57982fa3f699"),
                             ChainId = new Guid("d3271c28-5e1d-4011-9f79-aa573a9f2e3c"),
                             CreatedOn = new DateTime(2026, 12, 1, 16, 22, 44, 0, DateTimeKind.Unspecified),
-                            Email = "TestMail@OptiView.dk",
+                            Email = "TestMail@FocalPoint.dk",
                             ModifiedOn = new DateTime(2026, 12, 1, 16, 22, 44, 0, DateTimeKind.Unspecified),
-                            Name = "OptiView Downtown",
+                            Name = "FocalPoint Downtown 2",
                             Number = 4
                         },
                         new
@@ -184,9 +184,9 @@ namespace StoreManager.Persistence.Migrations
                             Id = new Guid("2ecacee5-f3c8-43e0-9ca6-379c49248afb"),
                             ChainId = new Guid("e887f9ce-2096-4832-8587-f96d9c7d8bc7"),
                             CreatedOn = new DateTime(2026, 12, 1, 16, 22, 44, 0, DateTimeKind.Unspecified),
-                            Email = "TestMail@OptiView.dk",
+                            Email = "TestMail@FocusOptics.dk",
                             ModifiedOn = new DateTime(2026, 12, 1, 16, 22, 44, 0, DateTimeKind.Unspecified),
-                            Name = "OptiView Downtown",
+                            Name = "FocusOptics Downtown 1",
                             Number = 5
                         },
                         new
@@ -194,9 +194,9 @@ namespace StoreManager.Persistence.Migrations
                             Id = new Guid("2277a2ce-6623-4879-a3b5-709ba9fa625e"),
                             ChainId = new Guid("e887f9ce-2096-4832-8587-f96d9c7d8bc7"),
                             CreatedOn = new DateTime(2026, 12, 1, 16, 22, 44, 0, DateTimeKind.Unspecified),
-                            Email = "TestMail@OptiView.dk",
+                            Email = "TestMail@FocusOptics.dk",
                             ModifiedOn = new DateTime(2026, 12, 1, 16, 22, 44, 0, DateTimeKind.Unspecified),
-                            Name = "OptiView Downtown",
+                            Name = "FocusOptics Downtown 2",
                             Number = 6
                         },
                         new
@@ -204,9 +204,9 @@ namespace StoreManager.Persistence.Migrations
                             Id = new Guid("4a15bcc2-9104-46e7-8a6c-b2030c1d573b"),
                             ChainId = new Guid("7eaf61d2-6d20-4ef7-9e2c-3e230456ae3c"),
                             CreatedOn = new DateTime(2026, 12, 1, 16, 22, 44, 0, DateTimeKind.Unspecified),
-                            Email = "TestMail@OptiView.dk",
+                            Email = "TestMail@ClearSight.dk",
                             ModifiedOn = new DateTime(2026, 12, 1, 16, 22, 44, 0, DateTimeKind.Unspecified),
-                            Name = "OptiView Downtown",
+                            Name = "ClearSight Downtown 1",
                             Number = 7
                         },
                         new
@@ -214,45 +214,45 @@ namespace StoreManager.Persistence.Migrations
                             Id = new Guid("23273be7-91ad-4095-a891-f10f0633a420"),
                             ChainId = new Guid("7eaf61d2-6d20-4ef7-9e2c-3e230456ae3c"),
                             CreatedOn = new DateTime(2026, 12, 1, 16, 22, 44, 0, DateTimeKind.Unspecified),
-                            Email = "TestMail@OptiView.dk",
+                            Email = "TestMail@ClearSight.dk",
                             ModifiedOn = new DateTime(2026, 12, 1, 16, 22, 44, 0, DateTimeKind.Unspecified),
-                            Name = "OptiView Downtown",
+                            Name = "ClearSight Downtown 2",
                             Number = 8
                         },
                         new
                         {
                             Id = new Guid("1e8d0a09-b7b9-4a94-a293-cff36e767bea"),
                             CreatedOn = new DateTime(2026, 12, 1, 16, 22, 44, 0, DateTimeKind.Unspecified),
-                            Email = "TestMail@OptiView.dk",
+                            Email = "TestMail@Independent1.dk",
                             ModifiedOn = new DateTime(2026, 12, 1, 16, 22, 44, 0, DateTimeKind.Unspecified),
-                            Name = "OptiView Downtown",
+                            Name = "Independent Downtown 1",
                             Number = 9
                         },
                         new
                         {
                             Id = new Guid("a2f309d9-e908-4ee1-9365-b72f7d088764"),
                             CreatedOn = new DateTime(2026, 12, 1, 16, 22, 44, 0, DateTimeKind.Unspecified),
-                            Email = "TestMail@OptiView.dk",
+                            Email = "TestMail@Independent2.dk",
                             ModifiedOn = new DateTime(2026, 12, 1, 16, 22, 44, 0, DateTimeKind.Unspecified),
-                            Name = "OptiView Downtown",
+                            Name = "Independent Downtown 2",
                             Number = 10
                         },
                         new
                         {
                             Id = new Guid("e0aa46d0-3e3f-43e3-beb0-d71dfbc8500a"),
                             CreatedOn = new DateTime(2026, 12, 1, 16, 22, 44, 0, DateTimeKind.Unspecified),
-                            Email = "TestMail@OptiView.dk",
+                            Email = "TestMail@Independent3.dk",
                             ModifiedOn = new DateTime(2026, 12, 1, 16, 22, 44, 0, DateTimeKind.Unspecified),
-                            Name = "OptiView Downtown",
+                            Name = "Independent Downtown 3",
                             Number = 11
                         },
                         new
                         {
                             Id = new Guid("ea911dd7-044d-45ff-b380-e04b5a8c1aa9"),
                             CreatedOn = new DateTime(2026, 12, 1, 16, 22, 44, 0, DateTimeKind.Unspecified),
-                            Email = "TestMail@OptiView.dk",
+                            Email = "TestMail@Independent4.dk",
                             ModifiedOn = new DateTime(2026, 12, 1, 16, 22, 44, 0, DateTimeKind.Unspecified),
-                            Name = "OptiView Downtown",
+                            Name = "Independent Downtown 4",
                             Number = 12
                         });
                 });

@@ -7,13 +7,16 @@ namespace StoreManager.Application.Queries.Store;
 
 public record GetAllStoresByChainQuery : IQuery<CollectionResponseBase<QueryStoreDto>>
 {
-    public GetAllStoresByChainQuery(ChainId chainId)
+    public GetAllStoresByChainQuery(ChainId? chainId)
     {
-        Ensure.That(chainId.Value, nameof(chainId.Value)).IsNotEmpty();
+        if (chainId != null)
+        {
+            Ensure.That(chainId.Value, nameof(chainId.Value));
+        }
         ChainId = chainId;
     }
 
     public GetAllStoresByChainQuery() { }
 
-    public ChainId ChainId { get; }
+    public ChainId? ChainId { get; }
 }

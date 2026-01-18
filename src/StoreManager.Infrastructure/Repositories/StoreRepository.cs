@@ -37,24 +37,21 @@ public class StoreRepository : IStoreRepository
 
     public async Task<IReadOnlyList<StoreEntity>> GetAllByChainIdAsync(object chainId)
     {
-        if (chainId == null)
-        {
-            var result = await _dbContext.StoreEntities.AsNoTracking()
-                .Where(s => s.ChainId == null)
-                .ToListAsync();
+        var chainIdValue = chainId as ChainId ?? throw new ArgumentException("Invalid ChainId", nameof(chainId));
 
-            return result;
-        }
-        else
-        {
-            var chainIdValue = chainId as ChainId ?? throw new ArgumentException("Invalid ChainId", nameof(chainId));
+        var result = await _dbContext.StoreEntities.AsNoTracking()
+            .Where(s => s.ChainId != null && s.ChainId == chainIdValue)
+            .ToListAsync();
 
-            var result = await _dbContext.StoreEntities.AsNoTracking()
-                .Where(s => s.ChainId != null && s.ChainId == chainIdValue)
-                .ToListAsync();
+        return result;
+    }
 
-            return result;
-        }
+    public async Task<IReadOnlyList<StoreEntity>> GetAllIndependentStoresAsync()
+    {
+        return await _dbContext.StoreEntities
+            .AsNoTracking()
+            .Where(s => s.ChainId == null)
+            .ToListAsync();
     }
 
     public async Task UpdateAsync(StoreEntity entity, CancellationToken cancellationToken = default)
@@ -106,5 +103,5 @@ public class StoreRepository : IStoreRepository
     public void Save(CancellationToken cancellationToken = default)
     {
         _dbContext.SaveChanges(cancellationToken);
-    }    
+    }
 }

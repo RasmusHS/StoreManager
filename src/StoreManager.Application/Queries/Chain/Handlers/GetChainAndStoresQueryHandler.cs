@@ -29,7 +29,6 @@ public class GetChainAndStoresQueryHandler : IQueryHandler<GetChainAndStoresQuer
             {
                 return Result.Fail<QueryChainDto>(Errors.ChainErrors.ChainHasNoStores<ChainId>(query.Id));
             }
-
             var chainDto = new QueryChainDto
             {
                 Id = chainResult.Id.Value,
@@ -52,7 +51,7 @@ public class GetChainAndStoresQueryHandler : IQueryHandler<GetChainAndStoresQuer
                 CreatedOn = chainResult.CreatedOn,
                 ModifiedOn = chainResult.ModifiedOn
             };
-            return Result.Ok(chainDto); 
+            return Result.Ok(chainDto);
         }
         catch (Exception ex)
         {

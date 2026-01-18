@@ -1,6 +1,4 @@
-﻿using FluentValidation;
-
-namespace StoreManager.Application.DTO.Store.Command;
+﻿namespace StoreManager.Webapp.Client.Models.Store.Command;
 
 public record DeleteAllStoresDto
 {
@@ -14,12 +12,4 @@ public record DeleteAllStoresDto
     public Guid ChainId { get; set; } // Associated Chain Identifier
     public DateTime CreatedOn { get; set; }
     public DateTime ModifiedOn { get; set; }
-
-    public class Validator : AbstractValidator<DeleteAllStoresDto>
-    {
-        public Validator()
-        {
-            RuleFor(x => x.ChainId).NotEmpty().NotNull().WithMessage("Chain ID must not be empty.");
-        }
-    }
 }

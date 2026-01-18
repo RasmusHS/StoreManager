@@ -21,23 +21,26 @@ public class GetAllStoresByChainQueryHandler : IQueryHandler<GetAllStoresByChain
     {
         try 
         {
-            if (await _chainRepository.GetByIdAsync(query.ChainId) == null)
-            {
-                return Result.Fail<CollectionResponseBase<QueryStoreDto>>(Errors.General.NotFound<ChainId>(query.ChainId));
-            }
-
             List<QueryStoreDto> stores = new List<QueryStoreDto>();
-            var storesResult = await _storeRepository.GetAllByChainIdAsync(query.ChainId);
+
+            // Get stores - either for a specific chain or independent stores (no chain)
+            var storesResult = (query.ChainId?.Value == Guid.Empty || query.ChainId == null)
+                ? await _storeRepository.GetAllIndependentStoresAsync()  // New method for stores where chainId IS NULL
+                : await _storeRepository.GetAllByChainIdAsync(query.ChainId);
+
             if (storesResult.Count() < 1)
             {
-                return Result.Fail<CollectionResponseBase<QueryStoreDto>>(Errors.ChainErrors.ChainHasNoStores<ChainId>(query.ChainId));
+                return Result.Fail<CollectionResponseBase<QueryStoreDto>>(
+                    query.ChainId == null || query.ChainId.Value == Guid.Empty
+                        ? Errors.StoreErrors.NoIndependentStoresFound()  // Or appropriate error
+                        : Errors.ChainErrors.ChainHasNoStores<ChainId>(query.ChainId));
             }
 
             foreach (var store in storesResult)
             {
                 QueryStoreDto storeDto = new QueryStoreDto(
                     store.Id.Value,
-                    store.ChainId!.Value,
+                    store.ChainId?.Value ?? null,
                     store.Number,
                     store.Name,
                     store.Address.Street,
@@ -56,7 +59,7 @@ public class GetAllStoresByChainQueryHandler : IQueryHandler<GetAllStoresByChain
             return new CollectionResponseBase<QueryStoreDto>()
             {
                 Data = stores
-            }; 
+            };
         }
         catch (Exception ex)
         {
