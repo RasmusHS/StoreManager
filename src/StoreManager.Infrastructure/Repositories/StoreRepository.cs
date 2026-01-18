@@ -1,5 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Storage;
 using StoreManager.Application.Data;
 using StoreManager.Application.Data.Infrastructure;
 using StoreManager.Domain.Chain.ValueObjects;
@@ -38,18 +37,24 @@ public class StoreRepository : IStoreRepository
 
     public async Task<IReadOnlyList<StoreEntity>> GetAllByChainIdAsync(object chainId)
     {
-        var chainIdValue = chainId as ChainId ?? throw new ArgumentException("Invalid ChainId", nameof(chainId));
+        if (chainId == null)
+        {
+            var result = await _dbContext.StoreEntities.AsNoTracking()
+                .Where(s => s.ChainId == null)
+                .ToListAsync();
 
-        var result = await _dbContext.StoreEntities.AsNoTracking()
-            .Where(s => s.ChainId != null && s.ChainId == chainIdValue)
-            .ToListAsync();
+            return result;
+        }
+        else
+        {
+            var chainIdValue = chainId as ChainId ?? throw new ArgumentException("Invalid ChainId", nameof(chainId));
 
-        //if (result.Count < 1)
-        //{
-        //    throw new KeyNotFoundException($"No stores found for ChainId: {chainId}");
-        //}
+            var result = await _dbContext.StoreEntities.AsNoTracking()
+                .Where(s => s.ChainId != null && s.ChainId == chainIdValue)
+                .ToListAsync();
 
-        return result;
+            return result;
+        }
     }
 
     public async Task UpdateAsync(StoreEntity entity, CancellationToken cancellationToken = default)

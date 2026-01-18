@@ -3,7 +3,6 @@ using StoreManager.Application.Data;
 using StoreManager.Application.Data.Infrastructure;
 using StoreManager.Domain.Chain;
 using StoreManager.Domain.Chain.ValueObjects;
-using StoreManager.Domain.Store;
 using System.Data;
 
 namespace StoreManager.Infrastructure.Repositories;
@@ -117,6 +116,24 @@ public class ChainRepository : IChainRepository
         }
     }
 
+    public async Task<IReadOnlyList<ChainEntity>> GetAllChainsAsync()
+    {
+        await using var transaction = await _dbContext.Database.BeginTransactionAsync(IsolationLevel.RepeatableRead);
+        try
+        {
+            var result = await _dbContext.ChainEntities
+                .AsNoTracking()
+                .ToListAsync();
+            await transaction.CommitAsync();
+            return result;
+        }
+        catch
+        {
+            await transaction.RollbackAsync();
+            throw;
+        }
+    }
+
     public async Task UpdateAsync(ChainEntity entity, CancellationToken cancellationToken = default)
     {
         await using var transaction = await _dbContext.Database.BeginTransactionAsync(IsolationLevel.ReadCommitted, cancellationToken);
@@ -133,24 +150,6 @@ public class ChainRepository : IChainRepository
             throw;
         }
     }
-
-    //public async Task AddStoresToChainAsync(ChainEntity chain, List<StoreEntity> stores, CancellationToken cancellationToken = default)
-    //{
-    //    await using var transaction = await _dbContext.Database.BeginTransactionAsync(IsolationLevel.ReadCommitted, cancellationToken);
-    //    try
-    //    {
-    //        //chain.AddRangeStoresToChain(stores);
-    //        _dbContext.ChainEntities.Update(chain);
-    //        _dbContext.StoreEntities.UpdateRange(stores);
-    //        await _dbContext.SaveChangesAsync(cancellationToken);
-    //        await transaction.CommitAsync(cancellationToken);
-    //    }
-    //    catch
-    //    {
-    //        await transaction.RollbackAsync(cancellationToken);
-    //        throw;
-    //    }
-    //}
 
     public async Task DeleteAsync(object id, CancellationToken cancellationToken = default)
     {

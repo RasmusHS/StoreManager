@@ -98,6 +98,18 @@ public class ChainController : BaseController
         return BadRequest(result.Error.Code);
     }
 
+    [HttpGet]
+    [Route("getAllChains")]
+    public async Task<IActionResult> GetAllChains()
+    {
+        var result = await _dispatcher.Dispatch(new GetAllChainsQuery());
+        if (result.Success)
+        {
+            return Ok(result.Value);
+        }
+        return BadRequest(result.Error.Code);
+    }
+
     [HttpPut]
     [Route("updateChain")]
     public async Task<IActionResult> UpdateChain(UpdateChainDto request)
