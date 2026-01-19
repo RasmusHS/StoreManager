@@ -10,7 +10,7 @@ The creation of unit tests and integration tests were heavily assisted by AI, fo
 The TestContainers setup making integration testing possible was implemented mainly by a human, with some AI debugging assistance. \
 The frontend code was almost entirely generated with AI assistance, with a human developer providing structure, requirements, and manual review to ensure the code met the desired functionality and design. \
 Due to the purpose of this project being to demonstrate my own skills as a developer to OptikIT as part of their interview process, I have chosen to focus on areas where my strenghts lie, namely backend development. \
-As for unfamiliar areas such as writing tests and frontend development, I have chosen to leverage AI tools to generate code, while leaning heavily on my own knowledge of the domain to guide the AI, review its output, and make necessary adjustments. \ 
+As for unfamiliar areas such as writing tests and frontend development, I have chosen to leverage AI tools to generate code, while leaning heavily on my own knowledge of the domain to guide the AI, review its output, and make necessary adjustments.  
 
 # Docker Compose Setup
 To run the application using Docker Compose, ensure you have Docker and Docker Compose installed on your machine. Then, follow these steps:
@@ -18,8 +18,8 @@ To run the application using Docker Compose, ensure you have Docker and Docker C
 2. Navigate to the project directory.
 3. Run the following command to build and start the containers:
     - ```
-       docker compose up
-       ```
+      docker compose up
+      ```
 4. The api may need to be manually restarted (retry logic have yet to be implemented). Otherwise the swagger ui should be available at: http://localhost:5088/swagger/
 5. The db should have seed data already populated to demo.
 
@@ -28,9 +28,10 @@ To run the application using Docker Compose, ensure you have Docker and Docker C
     - ```
       docker run --name storemanager_dev.db -e ACCEPT_EULA=Y -e MSSQL_SA_PASSWORD=yourStrong(!)Password -e MSSQL_PID=Developer -p 1433:1433 -d mcr.microsoft.com/mssql/server:2022-latest
       ```
-    - Connectionstring: ```
-                        MSSQL connectionstring: Data Source=localhost,1433;Database=rhs_dev.db;Application Name=RHS;Integrated Security=false;User ID=SA;Password=yourStrong(!)Password;TrustServerCertificate=True;
-                        ```
+2. Connectionstring (MSSQL):
+    - ```
+      Data Source=localhost,1433;Database=rhs_dev.db;Application Name=RHS;Integrated Security=false;User ID=SA;Password=yourStrong(!)Password;TrustServerCertificate=True;
+      ```
 
 # Personal thoughts
 This project is currently being designed with DDD, SOLID and other design principles in mind because that's currently what's fresh in my mind from working on my portfolio project, where I try to push myself to adhere to theory as close as possible. It also doesn't help that the requirements to application were close enough to my portfolio project that I could get away copying a lot of code from that project as a jumping off point. \
