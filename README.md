@@ -20,8 +20,10 @@ To run the application using Docker Compose, ensure you have Docker and Docker C
     - ```
       docker compose up
       ```
-4. The api may need to be manually restarted (retry logic have yet to be implemented). Otherwise the swagger ui should be available at: http://localhost:5088/swagger/
-5. The db should have seed data already populated to demo.
+4. The api may need to be manually restarted (retry logic have yet to be implemented).
+   - Blazor frontend: http://localhost:5001/
+   - Swagger UI: http://localhost:5088/swagger/
+6. The db should have seed data already populated to demo.
 
 ## For running just the database locally in docker:
 1. Use the following command:
