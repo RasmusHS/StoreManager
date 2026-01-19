@@ -1,6 +1,17 @@
 # StoreManager 
 Currently working in branch: master 
 
+# Use of AI/LLMs
+This project has utilized AI tools to assist in code generation and problem-solving.
+Most notably, GitHub Copilot (using Claude Sonnet 4.5) has been used to help generate boilerplate code and suggest improvements throughout the development process.
+Most of the initial state of the backend code was made with little to no AI assistance, whatever AI was used amounted to little more than "fancy auto-complete".
+The backend requirements and rules given were implemented by a human developer.
+The creation of unit tests and integration tests were heavily assisted by AI, followed by manual human review and edits to ensure correctness and adherence to project requirements.
+The TestContainers setup making integration testing possible was implemented mainly by a human, with some AI debugging assistance.
+The frontend code was almost entirely generated with AI assistance, with a human developer providing structure, requirements, and manual review to ensure the code met the desired functionality and design.
+Due to the purpose of this project being to demonstrate my own skills as a developer to OptikIT as part of their interview process, I have chosen to focus on areas where my strenghts lie, namely backend development.
+As for unfamiliar areas such as writing tests and frontend development, I have chosen to leverage AI tools to generate code, while leaning heavily on my own knowledge of the domain to guide the AI, review its output, and make necessary adjustments. 
+
 # Docker Compose Setup
 To run the application using Docker Compose, ensure you have Docker and Docker Compose installed on your machine. Then, follow these steps:
 1. Clone the repository to your local machine.
