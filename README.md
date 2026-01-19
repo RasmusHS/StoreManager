@@ -17,7 +17,7 @@ To run the application using Docker Compose, ensure you have Docker and Docker C
 1. Clone the repository to your local machine.
 2. Navigate to the project directory.
 3. Run the following command to build and start the containers:
-    3.1. ```bash
+    3.1. ```
        docker compose up
        ```
 4. The api may need to be manually restarted (retry logic have yet to be implemented). Otherwise the swagger ui should be available at: http://localhost:5088/swagger/
