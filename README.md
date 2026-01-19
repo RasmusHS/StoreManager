@@ -51,7 +51,7 @@ Would I be done faster and have more time for other parts of the project, like l
   - [x] Setup logic to facilitate writing and running integration tests
   - [x] Write integration tests for the api
   - [x] Setup docker compose and write instructions for how to run the application in docker
-- [ ] Setup frontend
+- [x] Setup frontend
   - [x] Dummy login section that doesn't work unless if I get to the bonus task
   - [x] Multibutton layout
     - [x] A "Create Chain" page with input text field for the Chain entity and Store entity.
