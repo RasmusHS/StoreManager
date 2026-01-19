@@ -23,6 +23,12 @@ To run the application using Docker Compose, ensure you have Docker and Docker C
 4. The api may need to be manually restarted (retry logic have yet to be implemented). Otherwise the swagger ui should be available at: http://localhost:5088/swagger/
 5. The db should have seed data already populated to demo.
 
+# Personal thoughts
+This project is currently being designed with DDD, SOLID and other design principles in mind because that's currently what's fresh in my mind from working on my portfolio project, where I try to push myself to adhere to theory as close as possible. It also doesn't help that the requirements to application were close enough to my portfolio project that I could get away copying a lot of code from that project as a jumping off point. \
+I have learned some things during this process that will be emulated/copied in my portfolio project when this is done. \
+If there wasn't such a pressure to perform, then this project wouldn't be so over -engineered/-designed, and instead it would be consisting of a frontend project, an api project, a persistence layer, and a db. \
+Would I be done faster and have more time for other parts of the project, like login functionality? Yes, but whatever time I would end up spending on the login functionality would be the same because I don't trust AI to setup security for me, especially not after hearing about the countless stories of vibecoders fumbling it. For security I would rather be responsible for it than a slot machine.
+
 # Plans
 - [x] Setup backend
   - [x] Configure EFCore in the persistence layer so it knows how to map the domain entities to sql tables and vice versa
