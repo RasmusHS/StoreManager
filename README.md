@@ -2,7 +2,7 @@
 Currently working in branch: Frontend 
 
 # Use of AI/LLMs
-This project has utilized AI tools to assist in code generation and problem-solving.
+This project has utilized AI tools to assist in code generation and problem-solving. \
 Most notably, GitHub Copilot (using Claude Sonnet 4.5) has been used to help generate boilerplate code and suggest improvements throughout the development process.
 Most of the initial state of the backend code was made with little to no AI assistance, whatever AI was used amounted to little more than "fancy auto-complete".
 The backend requirements and rules given were implemented by a human developer.
