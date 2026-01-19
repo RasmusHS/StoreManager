@@ -20,7 +20,7 @@ To run the application using Docker Compose, ensure you have Docker and Docker C
     - ```
       docker compose up
       ```
-4. The api may need to be manually restarted (retry logic have yet to be implemented).
+4. The api/frontend may need to be manually restarted (retry logic have yet to be implemented).
    - Blazor frontend: http://localhost:5001/
    - Swagger UI: http://localhost:5088/swagger/
 6. The db should have seed data already populated to demo.
