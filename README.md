@@ -23,6 +23,15 @@ To run the application using Docker Compose, ensure you have Docker and Docker C
 4. The api may need to be manually restarted (retry logic have yet to be implemented). Otherwise the swagger ui should be available at: http://localhost:5088/swagger/
 5. The db should have seed data already populated to demo.
 
+## For running just the database locally in docker:
+1. Use the following command:
+    - ```
+      docker run --name storemanager_dev.db -e ACCEPT_EULA=Y -e MSSQL_SA_PASSWORD=yourStrong(!)Password -e MSSQL_PID=Developer -p 1433:1433 -d mcr.microsoft.com/mssql/server:2022-latest
+      ```
+    - Connectionstring: ```
+                        MSSQL connectionstring: Data Source=localhost,1433;Database=rhs_dev.db;Application Name=RHS;Integrated Security=false;User ID=SA;Password=yourStrong(!)Password;TrustServerCertificate=True;
+                        ```
+
 # Personal thoughts
 This project is currently being designed with DDD, SOLID and other design principles in mind because that's currently what's fresh in my mind from working on my portfolio project, where I try to push myself to adhere to theory as close as possible. It also doesn't help that the requirements to application were close enough to my portfolio project that I could get away copying a lot of code from that project as a jumping off point. \
 I have learned some things during this process that will be emulated/copied in my portfolio project when this is done. \
@@ -44,14 +53,14 @@ Would I be done faster and have more time for other parts of the project, like l
   - [x] Setup docker compose and write instructions for how to run the application in docker
 - [ ] Setup frontend
   - [x] Dummy login section that doesn't work unless if I get to the bonus task
-  - [ ] Multibutton layout
+  - [x] Multibutton layout
     - [x] A "Create Chain" page with input text field for the Chain entity and Store entity.
-    - [ ] A "Create Store" with text fields for each of the required properties and a pair of radio buttons that turn on/off a searchable dropdown menu for if the store belongs to a chain. If store doesn't belong to a chain then it will appear as "independent"
+    - [x] A "Create Store" with text fields for each of the required properties and a pair of radio buttons that turn on/off a searchable dropdown menu for if the store belongs to a chain. If store doesn't belong to a chain then it will appear as "independent"
     - [x] A page that lets the user view a list of chains
       - [x] Subpages for each chain that shows a list of stores belonging to said chain
-        - [ ] Create button for adding 1 or more stores to the selected chain, as well as update and delete buttons for each entry
+        - [x] Create button for adding 1 or more stores to the selected chain, as well as update and delete buttons for each entry
       - [x] Update buttons for each chain
-      - [ ] Delete button for each chain
+      - [x] Delete button for each chain
   - [ ] Bonus: Working login functionality
     - [ ] Login with email and password
     - [ ] Rule: Email must be unique

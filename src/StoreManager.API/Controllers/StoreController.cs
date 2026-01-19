@@ -1,13 +1,9 @@
-﻿using Azure.Core;
-using MediatR;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using StoreManager.Application.Commands.Store;
 using StoreManager.Application.Data;
 using StoreManager.Application.DTO.Store.Command;
 using StoreManager.Application.Queries.Store;
-using StoreManager.Application.Queries.Store.Handlers;
 using StoreManager.Domain.Chain.ValueObjects;
-using StoreManager.Domain.Common;
 using StoreManager.Domain.Common.ValueObjects;
 using StoreManager.Domain.Store.ValueObjects;
 
@@ -51,7 +47,7 @@ public class StoreController : BaseController
         if (!nameResult.Success)
             return BadRequest(nameResult.Error.Code);
 
-        if (request.ChainId == null)
+        if (request.ChainId == null || request.ChainId == Guid.Empty)
         {
             CreateStoreCommand command = new CreateStoreCommand(
                 null,

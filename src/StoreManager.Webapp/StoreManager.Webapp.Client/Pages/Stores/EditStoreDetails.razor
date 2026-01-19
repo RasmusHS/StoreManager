@@ -1,0 +1,344 @@
+﻿@page "/stores/edit/{StoreId:guid}"
+@using StoreManager.Webapp.Client.Models.Store.Command
+@using StoreManager.Webapp.Client.Models.Store.Query
+@using StoreManager.Webapp.Client.Models.Chain.Query
+@using StoreManager.Webapp.Client.Services
+@rendermode InteractiveWebAssembly
+@inject IStoreService StoreService
+@inject IChainService ChainService
+@inject NavigationManager Navigation
+
+<PageTitle>Edit Store</PageTitle>
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Edit Store</h1>
+        <button class="btn btn-secondary" @onclick="Cancel">
+            <i class="bi bi-arrow-left"></i> Back
+        </button>
+    </div>
+
+    @if (isLoading)
+    {
+        <div class="text-center">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <p>Loading store details...</p>
+        </div>
+    }
+    else if (store == null)
+    {
+        <div class="alert alert-danger">
+            Store not found.
+        </div>
+        <button class="btn btn-secondary" @onclick='() => Navigation.NavigateTo("/stores")'>
+            Back to Stores
+        </button>
+    }
+    else
+    {
+        <EditForm Model="updateRequest" OnValidSubmit="HandleSubmit" FormName="editStoreForm">
+            <DataAnnotationsValidator />
+
+            <!-- Chain Selection Card -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bi bi-link-45deg"></i> Chain Association</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label class="form-label">Store Type</label>
+                        <div class="btn-group w-100" role="group">
+                            <input type="radio" class="btn-check" name="storeType" id="independentStore"
+                                   checked="@isIndependent" @onchange="() => SetStoreType(true)">
+                            <label class="btn btn-outline-primary" for="independentStore">
+                                <i class="bi bi-shop"></i> Independent Store
+                            </label>
+
+                            <input type="radio" class="btn-check" name="storeType" id="chainStore"
+                                   checked="@(!isIndependent)" @onchange="() => SetStoreType(false)">
+                            <label class="btn btn-outline-primary" for="chainStore">
+                                <i class="bi bi-link-45deg"></i> Part of Chain
+                            </label>
+                        </div>
+                    </div>
+
+                    @if (!isIndependent)
+                    {
+                        <div class="mb-3">
+                            <label class="form-label">Select Chain *</label>
+                            <InputSelect class="form-select" @bind-Value="selectedChainId">
+                                <option value="">-- Select a chain --</option>
+                                @foreach (var chain in availableChains)
+                                {
+                                    <option value="@chain.Id">@chain.Name</option>
+                                }
+                            </InputSelect>
+                            @if (string.IsNullOrEmpty(selectedChainId) && attemptedSubmit)
+                            {
+                                <div class="text-danger mt-1">Please select a chain</div>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="alert alert-info">
+                            <i class="bi bi-info-circle"></i> This store will be independent (not affiliated with any chain).
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- Store Information Card -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bi bi-shop"></i> Store Information</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Store Number *</label>
+                            <InputNumber class="form-control" @bind-Value="updateRequest.Number" />
+                            <ValidationMessage For="() => updateRequest.Number" />
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Store Name *</label>
+                            <InputText class="form-control" @bind-Value="updateRequest.Name" />
+                            <ValidationMessage For="() => updateRequest.Name" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Address Card -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bi bi-geo-alt"></i> Address</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label class="form-label">Street Address *</label>
+                        <InputText class="form-control" @bind-Value="updateRequest.Street" />
+                        <ValidationMessage For="() => updateRequest.Street" />
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Postal Code *</label>
+                            <InputText class="form-control" @bind-Value="updateRequest.PostalCode" />
+                            <ValidationMessage For="() => updateRequest.PostalCode" />
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">City *</label>
+                            <InputText class="form-control" @bind-Value="updateRequest.City" />
+                            <ValidationMessage For="() => updateRequest.City" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Contact Information Card -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bi bi-telephone"></i> Contact Information</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Country Code *</label>
+                            <InputText class="form-control" @bind-Value="updateRequest.CountryCode" />
+                            <ValidationMessage For="() => updateRequest.CountryCode" />
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Phone Number *</label>
+                            <InputText class="form-control" @bind-Value="updateRequest.PhoneNumber" />
+                            <ValidationMessage For="() => updateRequest.PhoneNumber" />
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Email *</label>
+                        <InputText class="form-control" @bind-Value="updateRequest.Email" type="email" />
+                        <ValidationMessage For="() => updateRequest.Email" />
+                    </div>
+                </div>
+            </div>
+
+            <!-- Store Manager Card -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bi bi-person"></i> Store Manager</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">First Name *</label>
+                            <InputText class="form-control" @bind-Value="updateRequest.FirstName" />
+                            <ValidationMessage For="() => updateRequest.FirstName" />
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Last Name *</label>
+                            <InputText class="form-control" @bind-Value="updateRequest.LastName" />
+                            <ValidationMessage For="() => updateRequest.LastName" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            @if (errorMessage != null)
+            {
+                <div class="alert alert-danger alert-dismissible fade show">
+                    <strong>Error:</strong> @errorMessage
+                    <button type="button" class="btn-close" @onclick="() => errorMessage = null"></button>
+                </div>
+            }
+
+            <!-- Action Buttons -->
+            <div class="d-flex gap-2 mb-4">
+                <button type="submit" class="btn btn-success btn-lg" disabled="@isSaving">
+                    @if (isSaving)
+                    {
+                        <span class="spinner-border spinner-border-sm me-2"></span>
+                    }
+                    <i class="bi bi-check-circle"></i> Save Changes
+                </button>
+                <button type="button" class="btn btn-secondary btn-lg" @onclick="Cancel" disabled="@isSaving">
+                    Cancel
+                </button>
+            </div>
+        </EditForm>
+    }
+</div>
+
+@code {
+    [Parameter]
+    public Guid StoreId { get; set; }
+
+    private QueryStoreDto? store;
+    private UpdateStoreDto updateRequest = new();
+    private List<QueryChainDto> availableChains = new();
+    private bool isIndependent = true;
+    private string selectedChainId = string.Empty;
+    private bool isLoading = true;
+    private bool isSaving = false;
+    private bool attemptedSubmit = false;
+    private string? errorMessage;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadStoreAsync();
+    }
+
+    private async Task LoadStoreAsync()
+    {
+        try
+        {
+            isLoading = true;
+            errorMessage = null;
+
+            // Load available chains
+            availableChains = await ChainService.GetAllChainsAsync();
+
+            // Load the store
+            store = await StoreService.GetStoreByIdAsync(StoreId);
+
+            if (store != null)
+            {
+                // Determine if independent or chain store
+                if (store.ChainId.HasValue && store.ChainId != Guid.Empty)
+                {
+                    isIndependent = false;
+                    selectedChainId = store.ChainId.Value.ToString();
+                }
+                else
+                {
+                    isIndependent = true;
+                    selectedChainId = string.Empty;
+                }
+
+                // Initialize the UpdateStoreDto with all required values from the loaded store
+                updateRequest = new UpdateStoreDto(
+                    store.Id,
+                    store.ChainId ?? Guid.Empty,
+                    store.Number,
+                    store.Name,
+                    store.Street,
+                    store.PostalCode,
+                    store.City,
+                    store.CountryCode,
+                    store.PhoneNumber,
+                    store.Email,
+                    store.FirstName,
+                    store.LastName,
+                    store.CreatedOn,
+                    store.ModifiedOn
+                );
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Failed to load store: {ex.Message}";
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private void SetStoreType(bool independent)
+    {
+        isIndependent = independent;
+        if (independent)
+        {
+            selectedChainId = string.Empty;
+        }
+    }
+
+    private async Task HandleSubmit()
+    {
+        attemptedSubmit = true;
+
+        // Validate chain selection if not independent
+        if (!isIndependent && string.IsNullOrEmpty(selectedChainId))
+        {
+            errorMessage = "Please select a chain or mark the store as independent.";
+            return;
+        }
+
+        try
+        {
+            isSaving = true;
+            errorMessage = null;
+
+            // Set ChainId based on selection
+            if (isIndependent)
+            {
+                updateRequest.ChainId = Guid.Empty;
+            }
+            else
+            {
+                updateRequest.ChainId = Guid.Parse(selectedChainId);
+            }
+
+            Console.WriteLine($"Updating store: {updateRequest.Name}, ChainId: {updateRequest.ChainId}");
+
+            await StoreService.UpdateStoreAsync(updateRequest);
+
+            // Navigate back to store details
+            Navigation.NavigateTo($"/stores/{StoreId}");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error updating store: {ex.Message}");
+            errorMessage = $"Failed to update store: {ex.Message}";
+        }
+        finally
+        {
+            isSaving = false;
+        }
+    }
+
+    private void Cancel()
+    {
+        Navigation.NavigateTo($"/stores/{StoreId}");
+    }
+}

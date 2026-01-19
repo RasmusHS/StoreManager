@@ -8,8 +8,9 @@ if (builder.HostEnvironment.IsDevelopment()) // Check if development or producti
 {
     builder.Services.AddScoped(sp => new HttpClient
     {
-        BaseAddress = new Uri("http://localhost:5088")
-        //BaseAddress = new Uri("https://localhost:7157")
+        //BaseAddress = new Uri("http://localhost:5088")
+        BaseAddress = new Uri(builder.Configuration["ApiSettings:BaseUrl"] ?? "http://localhost:5088")
+        //BaseAddress = new Uri(builder.Configuration["ApiSettings:BaseUrl"] ?? "http://localhost:7157")
     });
 }
 else

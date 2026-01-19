@@ -5,12 +5,8 @@ using System.Text.Json.Serialization;
 
 namespace Helpers;
 
-public class ResponseDtos
-{
-}
+public class ResponseDtos { }
 
-// Response wrapper for Chain operations
-// Envelope wrapper for Chain operations
 public class ChainResponseDto
 {
     [JsonPropertyName("result")]
