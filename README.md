@@ -1,5 +1,5 @@
 # StoreManager 
-Currently working in branch: master 
+Currently working in branch: Frontend 
 
 # Use of AI/LLMs
 This project has utilized AI tools to assist in code generation and problem-solving.
