@@ -1,5 +1,332 @@
-﻿<h3>StoreDetails</h3>
+﻿@page "/stores/{StoreId:guid}"
+@using StoreManager.Webapp.Client.Components.Shared
+@using StoreManager.Webapp.Client.Models.Store.Query
+@using StoreManager.Webapp.Client.Models.Store.Command
+@using StoreManager.Webapp.Client.Models.Chain.Query
+@using StoreManager.Webapp.Client.Services
+@rendermode InteractiveWebAssembly
+@inject IStoreService StoreService
+@inject IChainService ChainService
+@inject NavigationManager Navigation
+
+<PageTitle>Store Details</PageTitle>
+
+<div class="container-fluid mt-4">
+    @if (isLoading)
+    {
+        <div class="text-center">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <p>Loading store details...</p>
+        </div>
+    }
+    else if (errorMessage != null)
+    {
+        <div class="alert alert-danger">
+            <strong>Error:</strong> @errorMessage
+        </div>
+        <button class="btn btn-secondary" @onclick='() => Navigation.NavigateTo("/stores")'>
+            Back to Stores
+        </button>
+    }
+    else if (store == null)
+    {
+        <div class="alert alert-warning">
+            Store not found.
+        </div>
+        <button class="btn btn-secondary" @onclick='() => Navigation.NavigateTo("/stores")'>
+            Back to Stores
+        </button>
+    }
+    else
+    {
+        <!-- Store Header -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h1 class="mb-2">@store.Name</h1>
+                <div class="d-flex gap-2 align-items-center">
+                    <small class="text-muted">Store #@store.Number</small>
+                    <span class="text-muted">•</span>
+                    <small class="text-muted">ID: @store.Id</small>
+                    @if (store.ChainId.HasValue && store.ChainId != Guid.Empty)
+                    {
+                        <span class="text-muted">•</span>
+                        @if (chain != null)
+                        {
+                            <button class="btn btn-sm btn-link p-0" @onclick='() => Navigation.NavigateTo($"/chains/{chain.Id}")'>
+                                <span class="badge bg-primary">🔗 @chain.Name</span>
+                            </button>
+                        }
+                        else
+                        {
+                            <span class="badge bg-secondary">Chain</span>
+                        }
+                    }
+                    else
+                    {
+                        <span class="text-muted">•</span>
+                        <span class="badge bg-success">Independent Store</span>
+                    }
+                </div>
+            </div>
+            <div class="btn-group">
+                <button class="btn btn-success" @onclick="EditStore">
+                    <i class="bi bi-pencil"></i> Edit
+                </button>
+                <button class="btn btn-danger" @onclick="ShowDeleteConfirmation">
+                    <i class="bi bi-trash"></i> Delete
+                </button>
+                <button class="btn btn-secondary" @onclick='() => Navigation.NavigateTo("/stores")'>
+                    <i class="bi bi-arrow-left"></i> Back
+                </button>
+            </div>
+        </div>
+
+        <!-- Store Information Card -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-shop"></i> Store Information</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <div class="info-group">
+                            <label class="info-label">Store Number</label>
+                            <p class="info-value">#@store.Number</p>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <div class="info-group">
+                            <label class="info-label">Store Name</label>
+                            <p class="info-value">@store.Name</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <div class="info-group">
+                            <label class="info-label">Chain Affiliation</label>
+                            <p class="info-value">
+                                @if (store.ChainId.HasValue && store.ChainId != Guid.Empty)
+                                {
+                                    if (chain != null)
+                                    {
+                                        <button class="btn btn-sm btn-outline-primary" @onclick='() => Navigation.NavigateTo($"/chains/{chain.Id}")'>
+                                            <i class="bi bi-link-45deg"></i> @chain.Name
+                                        </button>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">Part of chain</span>
+                                    }
+                                }
+                                else
+                                {
+                                    <span class="badge bg-success">Independent</span>
+                                }
+                            </p>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <div class="info-group">
+                            <label class="info-label">Created On</label>
+                            <p class="info-value">@store.CreatedOn.ToString("yyyy-MM-dd HH:mm")</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Address Card -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-geo-alt"></i> Address</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-12 mb-3">
+                        <div class="info-group">
+                            <label class="info-label">Street Address</label>
+                            <p class="info-value">@store.Street</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <div class="info-group">
+                            <label class="info-label">Postal Code</label>
+                            <p class="info-value">@store.PostalCode</p>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <div class="info-group">
+                            <label class="info-label">City</label>
+                            <p class="info-value">@store.City</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="map-placeholder">
+                            <i class="bi bi-geo-alt-fill map-icon"></i>
+                            <p class="mb-0">@store.Street, @store.PostalCode @store.City</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Contact Information Card -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-telephone"></i> Contact Information</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <div class="info-group">
+                            <label class="info-label">Phone Number</label>
+                            <p class="info-value">
+                                <a href='tel:@($"{store.CountryCode}{store.PhoneNumber}")' class="contact-link">
+                                    <i class="bi bi-telephone-fill"></i> @store.CountryCode @store.PhoneNumber
+                                </a>
+                            </p>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <div class="info-group">
+                            <label class="info-label">Email Address</label>
+                            <p class="info-value">
+                                <a href='mailto:@store.Email' class="contact-link">
+                                    <i class="bi bi-envelope-fill"></i> @store.Email
+                                </a>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Store Manager Card -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-person"></i> Store Manager</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="manager-info">
+                            <div class="manager-avatar">
+                                <i class="bi bi-person-circle"></i>
+                            </div>
+                            <div class="manager-details">
+                                <h6 class="mb-1">@store.FirstName @store.LastName</h6>
+                                <p class="text-muted mb-0">Store Manager</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+<ConfirmationModal IsVisible="showDeleteModal"
+                   Title="@modalTitle"
+                   Message="@modalMessage"
+                   CanConfirm="true"
+                   OnConfirm="ConfirmDelete"
+                   OnCancel="CancelDelete" />
 
 @code {
+    [Parameter]
+    public Guid StoreId { get; set; }
 
+    private QueryStoreDto? store;
+    private QueryChainDto? chain;
+    private bool isLoading = true;
+    private string? errorMessage;
+
+    // Modal state
+    private bool showDeleteModal = false;
+    private string modalTitle = string.Empty;
+    private string modalMessage = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadStoreAsync();
+    }
+
+    private async Task LoadStoreAsync()
+    {
+        try
+        {
+            isLoading = true;
+            errorMessage = null;
+
+            store = await StoreService.GetStoreByIdAsync(StoreId);
+
+            // Load chain info if store belongs to a chain
+            if (store?.ChainId.HasValue == true && store.ChainId != Guid.Empty)
+            {
+                try
+                {
+                    chain = await ChainService.GetChainByIdAsync(store.ChainId.Value);
+                }
+                catch
+                {
+                    // Chain loading failed, but continue showing store
+                    chain = null;
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Failed to load store: {ex.Message}";
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private void EditStore()
+    {
+        Navigation.NavigateTo($"/stores/edit/{StoreId}");
+    }
+
+    private void ShowDeleteConfirmation()
+    {
+        modalTitle = "Confirm Deletion";
+        modalMessage = $"Are you sure you want to delete the store '{store?.Name}' (#{store?.Number})? This action cannot be undone.";
+        showDeleteModal = true;
+    }
+
+    private async Task ConfirmDelete()
+    {
+        if (store == null)
+            return;
+
+        try
+        {
+            var deleteRequest = new DeleteStoreDto(store.Id, store.CreatedOn, store.ModifiedOn);
+            await StoreService.DeleteStoreAsync(deleteRequest);
+
+            showDeleteModal = false;
+
+            // Navigate back to stores list
+            Navigation.NavigateTo("/stores");
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Failed to delete store: {ex.Message}";
+            showDeleteModal = false;
+        }
+    }
+
+    private void CancelDelete()
+    {
+        showDeleteModal = false;
+    }
 }

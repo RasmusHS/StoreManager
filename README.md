@@ -23,6 +23,15 @@ To run the application using Docker Compose, ensure you have Docker and Docker C
 4. The api may need to be manually restarted (retry logic have yet to be implemented). Otherwise the swagger ui should be available at: http://localhost:5088/swagger/
 5. The db should have seed data already populated to demo.
 
+## For running just the database locally in docker:
+1. Use the following command:
+    - ```
+      docker run --name storemanager_dev.db -e ACCEPT_EULA=Y -e MSSQL_SA_PASSWORD=yourStrong(!)Password -e MSSQL_PID=Developer -p 1433:1433 -d mcr.microsoft.com/mssql/server:2022-latest
+      ```
+    - Connectionstring: ```
+                        MSSQL connectionstring: Data Source=localhost,1433;Database=rhs_dev.db;Application Name=RHS;Integrated Security=false;User ID=SA;Password=yourStrong(!)Password;TrustServerCertificate=True;
+                        ```
+
 # Plans
 - [x] Setup backend
   - [x] Configure EFCore in the persistence layer so it knows how to map the domain entities to sql tables and vice versa

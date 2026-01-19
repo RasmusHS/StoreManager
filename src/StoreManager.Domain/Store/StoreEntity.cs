@@ -4,7 +4,6 @@ using StoreManager.Domain.Chain.ValueObjects;
 using StoreManager.Domain.Common;
 using StoreManager.Domain.Common.ValueObjects;
 using StoreManager.Domain.Store.ValueObjects;
-using System.Net;
 
 namespace StoreManager.Domain.Store;
 

@@ -1,7 +1,414 @@
-﻿@page "/store/create"
+﻿@page "/stores/create"
+@using StoreManager.Webapp.Client.Models.Store.Command
+@using StoreManager.Webapp.Client.Models.Chain.Query
+@using StoreManager.Webapp.Client.Services
+@using Microsoft.AspNetCore.Components
+@rendermode InteractiveWebAssembly
+@inject IStoreService StoreService
+@inject IChainService ChainService
+@inject NavigationManager Navigation
 
-<h3>CreateStore</h3>
+<PageTitle>Create Stores</PageTitle>
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Create New Store(s)</h1>
+        <button class="btn btn-secondary" @onclick="Cancel">
+            <i class="bi bi-arrow-left"></i> Back
+        </button>
+    </div>
+
+    @if (isLoadingChains)
+    {
+        <div class="text-center">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <p>Loading chains...</p>
+        </div>
+    }
+    else
+    {
+        <EditForm Model="this" OnValidSubmit="HandleSubmit" FormName="createStoresForm">
+            <DataAnnotationsValidator />
+
+            <!-- Chain Selection Card -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bi bi-link-45deg"></i> Chain Association</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label class="form-label">Store Type</label>
+                        <div class="btn-group w-100" role="group">
+                            <input type="radio" class="btn-check" name="storeType" id="independentStore"
+                                   checked="@isIndependent" @onchange="() => SetStoreType(true)">
+                            <label class="btn btn-outline-primary" for="independentStore">
+                                <i class="bi bi-shop"></i> Independent Store(s)
+                            </label>
+
+                            <input type="radio" class="btn-check" name="storeType" id="chainStore"
+                                   checked="@(!isIndependent)" @onchange="() => SetStoreType(false)">
+                            <label class="btn btn-outline-primary" for="chainStore">
+                                <i class="bi bi-link-45deg"></i> Part of Chain
+                            </label>
+                        </div>
+                    </div>
+
+                    @if (!isIndependent)
+                    {
+                        <div class="mb-3">
+                            <label class="form-label">Select Chain *</label>
+                            <InputSelect class="form-select" @bind-Value="selectedChainId">
+                                <option value="">-- Select a chain --</option>
+                                @foreach (var chain in availableChains)
+                                {
+                                    <option value="@chain.Id">@chain.Name</option>
+                                }
+                            </InputSelect>
+                            @if (string.IsNullOrEmpty(selectedChainId) && attemptedSubmit)
+                            {
+                                <div class="text-danger mt-1">Please select a chain</div>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="alert alert-info">
+                            <i class="bi bi-info-circle"></i> All stores will be created as independent stores (not affiliated with any chain).
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- Stores Section -->
+            <div class="card mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="bi bi-shop"></i> Stores</h5>
+                    <button type="button" class="btn btn-sm btn-success" @onclick="AddStore">
+                        <i class="bi bi-plus-circle"></i> Add Store
+                    </button>
+                </div>
+                <div class="card-body">
+                    @if (stores == null || !stores.Any())
+                    {
+                        <div class="alert alert-warning">
+                            <i class="bi bi-exclamation-triangle"></i> No stores added yet. Click "Add Store" to create at least one store.
+                        </div>
+                    }
+                    else
+                    {
+                        @for (int i = 0; i < stores.Count; i++)
+                        {
+                            var index = i; // Capture for lambda
+                            var store = stores[i];
+
+                            <div class="store-form-card mb-3 @GetStoreValidationClass(store)">
+                                <div class="store-header">
+                                    <h6 class="mb-0">Store #@(index + 1)</h6>
+                                    <button type="button" class="btn btn-sm btn-danger" @onclick="() => RemoveStore(index)">
+                                        <i class="bi bi-trash"></i> Remove
+                                    </button>
+                                </div>
+                                <div class="store-body">
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">Store Number *</label>
+                                            <InputNumber class="form-control" @bind-Value="store.Number" placeholder="1" />
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">Store Name *</label>
+                                            <InputText class="form-control" @bind-Value="store.Name" placeholder="Downtown Location" />
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-md-12 mb-3">
+                                            <label class="form-label">Street Address *</label>
+                                            <InputText class="form-control" @bind-Value="store.Street" placeholder="123 Main Street" />
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">Postal Code *</label>
+                                            <InputText class="form-control" @bind-Value="store.PostalCode" placeholder="12345" />
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">City *</label>
+                                            <InputText class="form-control" @bind-Value="store.City" placeholder="Copenhagen" />
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">Country Code *</label>
+                                            <InputText class="form-control" @bind-Value="store.CountryCode" placeholder="+45" />
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">Phone Number *</label>
+                                            <InputText class="form-control" @bind-Value="store.PhoneNumber" placeholder="12345678" />
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-md-12 mb-3">
+                                            <label class="form-label">Email *</label>
+                                            <InputText class="form-control" @bind-Value="store.Email" placeholder="store@example.com" type="email" />
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">Manager First Name *</label>
+                                            <InputText class="form-control" @bind-Value="store.FirstName" placeholder="John" />
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">Manager Last Name *</label>
+                                            <InputText class="form-control" @bind-Value="store.LastName" placeholder="Doe" />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    }
+                </div>
+            </div>
+
+            @if (errorMessage != null)
+            {
+                <div class="alert alert-danger alert-dismissible fade show">
+                    <strong>Error:</strong> @errorMessage
+                    <button type="button" class="btn-close" @onclick="() => errorMessage = null"></button>
+                </div>
+            }
+
+            <!-- Action Buttons -->
+            <div class="d-flex gap-2 mb-4">
+                <button type="submit" class="btn btn-primary btn-lg" disabled="@(isSaving || !stores.Any())">
+                    @if (isSaving)
+                    {
+                        <span class="spinner-border spinner-border-sm me-2"></span>
+                    }
+                    <i class="bi bi-check-circle"></i> Create @(stores.Count) Store@(stores.Count != 1 ? "s" : "")
+                </button>
+                <button type="button" class="btn btn-secondary btn-lg" @onclick="Cancel" disabled="@isSaving">
+                    Cancel
+                </button>
+            </div>
+        </EditForm>
+    }
+</div>
 
 @code {
+    [SupplyParameterFromQuery(Name = "chainId")]
+    public string? ChainIdParam { get; set; }
 
+    private List<CreateStoreDto> stores = new();
+    private List<QueryChainDto> availableChains = new();
+    private bool isIndependent = true;
+    private string selectedChainId = string.Empty;  // Changed from Guid to string
+    private bool isLoadingChains = true;
+    private bool isSaving = false;
+    private bool attemptedSubmit = false;
+    private string? errorMessage;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            // Load available chains
+            availableChains = await ChainService.GetAllChainsAsync();
+
+            // If chainId is provided in query string, pre-select it
+            if (!string.IsNullOrEmpty(ChainIdParam))
+            {
+                selectedChainId = ChainIdParam;  // Now works correctly
+                isIndependent = false;
+                Console.WriteLine($"Pre-selecting chain: {ChainIdParam}");
+            }
+
+            // Initialize with one empty store
+            AddStore();
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Failed to load chains: {ex.Message}";
+        }
+        finally
+        {
+            isLoadingChains = false;
+        }
+    }
+
+    private void AddStore()
+    {
+        var newStore = new CreateStoreDto
+        {
+            Number = stores.Count + 1,
+            CountryCode = "+45",
+            Name = string.Empty,
+            Street = string.Empty,
+            PostalCode = string.Empty,
+            City = string.Empty,
+            PhoneNumber = string.Empty,
+            Email = string.Empty,
+            FirstName = string.Empty,
+            LastName = string.Empty
+        };
+        stores.Add(newStore);
+    }
+
+    private void RemoveStore(int index)
+    {
+        if (index >= 0 && index < stores.Count)
+        {
+            stores.RemoveAt(index);
+
+            // Renumber remaining stores
+            for (int i = 0; i < stores.Count; i++)
+            {
+                stores[i].Number = i + 1;
+            }
+        }
+    }
+
+    private void SetStoreType(bool independent)
+    {
+        isIndependent = independent;
+        if (independent)
+        {
+            selectedChainId = string.Empty;  // Changed from Guid.Empty
+        }
+    }
+
+    private bool IsStoreValid(CreateStoreDto store)
+    {
+        return !string.IsNullOrWhiteSpace(store.Name) &&
+               !string.IsNullOrWhiteSpace(store.Street) &&
+               !string.IsNullOrWhiteSpace(store.PostalCode) &&
+               !string.IsNullOrWhiteSpace(store.City) &&
+               !string.IsNullOrWhiteSpace(store.CountryCode) &&
+               !string.IsNullOrWhiteSpace(store.PhoneNumber) &&
+               !string.IsNullOrWhiteSpace(store.Email) &&
+               !string.IsNullOrWhiteSpace(store.FirstName) &&
+               !string.IsNullOrWhiteSpace(store.LastName);
+    }
+
+    private string GetStoreValidationClass(CreateStoreDto store)
+    {
+        if (string.IsNullOrWhiteSpace(store.Name) &&
+            string.IsNullOrWhiteSpace(store.Street))
+        {
+            return "store-empty";
+        }
+
+        if (!IsStoreValid(store))
+        {
+            return "store-incomplete";
+        }
+
+        return "store-complete";
+    }
+
+    private async Task HandleSubmit()
+    {
+        attemptedSubmit = true;
+
+        // Validate chain selection if not independent
+        if (!isIndependent && string.IsNullOrEmpty(selectedChainId))
+        {
+            errorMessage = "Please select a chain or mark the stores as independent.";
+            return;
+        }
+
+        // Validate that at least one store is added
+        if (!stores.Any())
+        {
+            errorMessage = "Please add at least one store.";
+            return;
+        }
+
+        // Filter valid stores
+        var validStores = stores.Where(s => IsStoreValid(s)).ToList();
+
+        if (!validStores.Any())
+        {
+            errorMessage = "Please complete at least one store with all required fields.";
+            return;
+        }
+
+        if (validStores.Count < stores.Count)
+        {
+            errorMessage = $"Only {validStores.Count} of {stores.Count} store(s) have all required fields filled. Incomplete stores will be skipped.";
+            // Don't return - allow partial submission
+        }
+
+        try
+        {
+            isSaving = true;
+            errorMessage = null;
+
+            // Set ChainId for all stores
+            // Independent stores get Guid.Empty, chain stores get the selected chain's ID
+            Guid? chainId = isIndependent ? Guid.Empty : Guid.Parse(selectedChainId);
+
+            int successCount = 0;
+            List<string> errors = new();
+
+            foreach (var store in validStores)
+            {
+                try
+                {
+                    store.ChainId = chainId;
+                    Console.WriteLine($"Creating store: {store.Name}, ChainId: {store.ChainId}, IsIndependent: {isIndependent}");
+                    await StoreService.CreateStoreAsync(store);
+                    successCount++;
+                }
+                catch (Exception ex)
+                {
+                    errors.Add($"Store '{store.Name}': {ex.Message}");
+                    Console.WriteLine($"Error creating store {store.Name}: {ex.Message}");
+                }
+            }
+
+            if (successCount > 0)
+            {
+                // Navigate based on context
+                if (!isIndependent && !string.IsNullOrEmpty(selectedChainId))
+                {
+                    Navigation.NavigateTo($"/chains/{selectedChainId}");
+                }
+                else
+                {
+                    Navigation.NavigateTo("/stores");
+                }
+            }
+            else
+            {
+                errorMessage = $"Failed to create stores:\n{string.Join("\n", errors)}";
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error creating stores: {ex.Message}");
+            errorMessage = $"Failed to create stores: {ex.Message}";
+        }
+        finally
+        {
+            isSaving = false;
+        }
+    }
+
+    private void Cancel()
+    {
+        if (!string.IsNullOrEmpty(ChainIdParam))
+        {
+            Navigation.NavigateTo($"/chains/{ChainIdParam}");
+        }
+        else
+        {
+            Navigation.NavigateTo("/stores");
+        }
+    }
 }

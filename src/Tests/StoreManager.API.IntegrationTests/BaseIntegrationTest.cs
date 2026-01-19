@@ -32,14 +32,9 @@ public abstract class BaseIntegrationTest : IClassFixture<StoreManagerWebApplica
 
     private async Task CleanDatabaseAsync()
     {
-        // Use raw SQL for efficient bulk deletion respecting FK constraints
         // Delete in order: child tables first (Stores), then parent tables (Chains)
         await DbContext.Database.ExecuteSqlRawAsync("DELETE FROM store_entities");
         await DbContext.Database.ExecuteSqlRawAsync("DELETE FROM chain_entities");
-
-        // Alternative if ExecuteSqlRaw doesn't work, use ExecuteDeleteAsync (EF Core 7+):
-        // await DbContext.StoreEntities.ExecuteDeleteAsync();
-        // await DbContext.ChainEntities.ExecuteDeleteAsync();
 
         await DbContext.SaveChangesAsync();
     }
