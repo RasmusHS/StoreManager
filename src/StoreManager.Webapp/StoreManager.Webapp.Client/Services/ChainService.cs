@@ -1,5 +1,6 @@
 ﻿using StoreManager.Webapp.Client.Models.Chain.Command;
 using StoreManager.Webapp.Client.Models.Chain.Query;
+using StoreManager.Webapp.Client.Models;
 using System.Net.Http.Json;
 
 namespace StoreManager.Webapp.Client.Services;
@@ -17,33 +18,40 @@ public class ChainService : IChainService
     {
         var response = await _httpClient.PostAsJsonAsync("api/chain/createChain", request);
         response.EnsureSuccessStatusCode();
-        return await response.Content.ReadFromJsonAsync<ChainResponseDto>()
-            ?? throw new Exception("Failed to create store");
+        var envelope = await response.Content.ReadFromJsonAsync<Envelope<ChainResponseDto>>();
+        return envelope?.Result ?? throw new Exception("Failed to create store");
     }
 
     public async Task<QueryChainDto?> GetChainByIdAsync(Guid id)
     {
-        return await _httpClient.GetFromJsonAsync<QueryChainDto>($"api/chain/getChain/{id}");
+        var envelope = await _httpClient.GetFromJsonAsync<Envelope<QueryChainDto>>($"api/chain/getChain/{id}");
+        return envelope?.Result;
     }
 
     public async Task<List<QueryChainDto>> GetAllChainsAsync()
     {
-        var response = await _httpClient.GetFromJsonAsync<List<QueryChainDto>>("api/chain/getAllChains");
-        return response ?? new List<QueryChainDto>();
+        var envelope = await _httpClient.GetFromJsonAsync<Envelope<CollectionResponseBase<QueryChainDto>>>("api/chain/getAllChains");
+        return envelope?.Result?.Data?.ToList() ?? new List<QueryChainDto>();
     }
 
     public async Task<List<QueryChainDto>> GetByIdIncludeStoresAsync(Guid id)
     {
-        var response = await _httpClient.GetFromJsonAsync<List<QueryChainDto>>($"api/chain/getChainAndStores/{id}");
-        return response ?? new List<QueryChainDto>();
+        // API returns a single chain with stores, not a collection
+        var envelope = await _httpClient.GetFromJsonAsync<Envelope<QueryChainDto>>($"api/chain/getChainAndStores/{id}");
+
+        if (envelope?.Result == null)
+            return new List<QueryChainDto>();
+
+        // Return a list with the single chain that includes stores
+        return new List<QueryChainDto> { envelope.Result };
     }
 
     public async Task<ChainResponseDto> UpdateChainAsync(UpdateChainDto request)
     {
         var response = await _httpClient.PutAsJsonAsync("api/chain/updateChain", request);
         response.EnsureSuccessStatusCode();
-        return await response.Content.ReadFromJsonAsync<ChainResponseDto>()
-            ?? throw new Exception("Failed to update chain");
+        var envelope = await response.Content.ReadFromJsonAsync<Envelope<ChainResponseDto>>();
+        return envelope?.Result ?? throw new Exception("Failed to update chain");
     }
 
     public async Task DeleteChainAsync(DeleteChainDto request)

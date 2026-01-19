@@ -1,4 +1,5 @@
-﻿using StoreManager.Webapp.Client.Models.Store.Command;
+﻿using StoreManager.Webapp.Client.Models;
+using StoreManager.Webapp.Client.Models.Store.Command;
 using StoreManager.Webapp.Client.Models.Store.Query;
 using System.Net.Http.Json;
 
@@ -17,33 +18,34 @@ public class StoreService : IStoreService
     {
         var response = await _httpClient.PostAsJsonAsync("api/store/createStore", request);
         response.EnsureSuccessStatusCode();
-        return await response.Content.ReadFromJsonAsync<StoreResponseDto>()
-            ?? throw new Exception("Failed to create store");
+        var envelope = await response.Content.ReadFromJsonAsync<Envelope<StoreResponseDto>>();
+        return envelope?.Result ?? throw new Exception("Failed to create store");
     }
 
     public async Task<QueryStoreDto?> GetStoreByIdAsync(Guid storeId)
     {
-        return await _httpClient.GetFromJsonAsync<QueryStoreDto>($"api/store/getStore/{storeId}");
+        var envelope = await _httpClient.GetFromJsonAsync<Envelope<QueryStoreDto>>($"api/store/getStore/{storeId}");
+        return envelope?.Result;
     }
 
     public async Task<List<QueryStoreDto>> GetAllIndependentStoresAsync()
     {
-        var response = await _httpClient.GetFromJsonAsync<List<QueryStoreDto>>($"api/store/getStoresByChain/{Guid.Empty}");
-        return response ?? new List<QueryStoreDto>();
+        var envelope = await _httpClient.GetFromJsonAsync<Envelope<CollectionResponseBase<QueryStoreDto>>>($"api/store/getStoresByChain/{Guid.Empty}");
+        return envelope?.Result?.Data?.ToList() ?? new List<QueryStoreDto>();
     }
 
     public async Task<List<QueryStoreDto>> GetStoresByChainAsync(Guid chainId)
     {
-        var response = await _httpClient.GetFromJsonAsync<List<QueryStoreDto>>($"api/store/getStoresByChain/{chainId}");
-        return response ?? new List<QueryStoreDto>();
+        var envelope = await _httpClient.GetFromJsonAsync<Envelope<CollectionResponseBase<QueryStoreDto>>>($"api/store/getStoresByChain/{chainId}");
+        return envelope?.Result?.Data?.ToList() ?? new List<QueryStoreDto>();
     }
 
     public async Task<StoreResponseDto> UpdateStoreAsync(UpdateStoreDto request)
     {
         var response = await _httpClient.PutAsJsonAsync("api/store/updateStore", request);
         response.EnsureSuccessStatusCode();
-        return await response.Content.ReadFromJsonAsync<StoreResponseDto>()
-            ?? throw new Exception("Failed to update store");
+        var envelope = await response.Content.ReadFromJsonAsync<Envelope<StoreResponseDto>>();
+        return envelope?.Result ?? throw new Exception("Failed to update store");
     }
 
     public async Task DeleteStoreAsync(DeleteStoreDto request)

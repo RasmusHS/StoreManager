@@ -24,6 +24,16 @@
     font-size: 1.1rem;
 }
 
+.logo {
+    object-fit: cover;
+    width: auto;
+    height: auto;
+    margin-left: auto;
+    margin-right: auto;
+    display: flex;
+    max-height: 56px;
+}
+
 .bi {
     display: inline-block;
     position: relative;

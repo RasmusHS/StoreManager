@@ -3,9 +3,9 @@
 @inject NavState NavState
 @implements IDisposable
 
-<div class="top-row ps-3 navbar navbar-dark">
-    <div class="container-fluid">
-        <a class="navbar-brand" href="">StoreManager.Webapp</a>
+<div class="top-row navbar-dark" styling="padding-right:1rem;">
+    <div class="container-fluid" styling="max-height:56px;">
+        <a class="navbar-brand" href=""><img class="logo" src="img\OptikITlogoCMYK-WHITE-_1_.svg" /></a>
     </div>
 </div>
 
@@ -22,21 +22,27 @@
                 </NavLink>
             </div>
 
-            <div class="nav-item px-3"> @* Page for viewing all Chains *@
-                <NavLink class="nav-link" href="counter">
-                    <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> Counter
+            <div class="nav-item px-3"> @* Page for creating a Chain *@
+                <NavLink class="nav-link" href="createchain">
+                    <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> Create Chain
                 </NavLink>
             </div>
 
-            <div class="nav-item px-3"> @* Page for creating a Chain *@
-                <NavLink class="nav-link" href="weather">
-                    <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Weather
+            <div class="nav-item px-3"> @* Page for viewing all Chains *@
+                <NavLink class="nav-link" href="chains">
+                    <span class="bi bi-link-45deg" aria-hidden="true"></span> View Chains
                 </NavLink>
             </div>
 
             <div class="nav-item px-3"> @* Page for creating a Store (independent by default through this route) *@
-                <NavLink class="nav-link" href="weather">
-                    <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Weather
+                <NavLink class="nav-link" href="createstore">
+                    <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Create Store
+                </NavLink>
+            </div>
+
+            <div class="nav-item px-3"> @* Page for viewing Stores *@
+                <NavLink class="nav-link" href="stores">
+                    <span class="bi bi-shop" aria-hidden="true"></span> View Stores
                 </NavLink>
             </div>
         </nav>

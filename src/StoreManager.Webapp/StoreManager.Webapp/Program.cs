@@ -10,6 +10,12 @@ builder.Services.AddRazorComponents()
 
 builder.Services.AddStoreManagerServices();
 
+builder.Services.AddHttpClient<IChainService, ChainService>(
+    client => client.BaseAddress = new Uri(builder.Configuration["StoreManagerDevUrl"]));
+
+builder.Services.AddHttpClient<IStoreService, StoreService>(
+    client => client.BaseAddress = new Uri(builder.Configuration["StoreManagerDevUrl"]));
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

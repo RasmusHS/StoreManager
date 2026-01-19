@@ -14,7 +14,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Components\Shared\" />
+    <Folder Include="wwwroot\img\" />
   </ItemGroup>
 
 </Project>

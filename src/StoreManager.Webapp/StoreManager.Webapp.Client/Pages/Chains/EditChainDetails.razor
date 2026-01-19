@@ -1,0 +1,132 @@
+﻿@page "/chains/edit/{chainId:guid}"
+@using StoreManager.Webapp.Client.Models.Chain.Command
+@using StoreManager.Webapp.Client.Models.Chain.Query
+@using StoreManager.Webapp.Client.Services
+@rendermode InteractiveWebAssembly
+@inject IChainService ChainService
+@inject NavigationManager Navigation
+
+<PageTitle>Edit Chain</PageTitle>
+
+<div class="container mt-4">
+    <h1>Edit Chain</h1>
+
+    @if (isLoading)
+    {
+        <div class="text-center">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+        </div>
+    }
+    else if (chain == null)
+    {
+        <div class="alert alert-danger">
+            Chain not found.
+        </div>
+        <button class="btn btn-secondary" @onclick='() => Navigation.NavigateTo("/chains")'>
+            Back to Chains
+        </button>
+    }
+    else
+    {
+        <EditForm Model="updateRequest" OnValidSubmit="HandleSubmit" FormName="editChainForm">
+            <DataAnnotationsValidator />
+            <ValidationSummary class="text-danger" />
+
+            <div class="mb-3">
+                <label class="form-label">Chain Name</label>
+                <InputText class="form-control" @bind-Value="updateRequest.Name" />
+                <ValidationMessage For="() => updateRequest.Name" />
+            </div>
+
+            @if (errorMessage != null)
+            {
+                <div class="alert alert-danger">@errorMessage</div>
+            }
+
+            <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-success" disabled="@isSaving">
+                    @if (isSaving)
+                    {
+                        <span class="spinner-border spinner-border-sm me-2"></span>
+                    }
+                    Save Changes
+                </button>
+                <button type="button" class="btn btn-secondary" @onclick="Cancel">
+                    Cancel
+                </button>
+            </div>
+        </EditForm>
+    }
+</div>
+
+@code {
+    [Parameter]
+    public Guid ChainId { get; set; }
+
+    private QueryChainDto? chain;
+    private UpdateChainDto updateRequest = new();
+    private bool isLoading = true;
+    private bool isSaving = false;
+    private string? errorMessage;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadChainAsync();
+    }
+
+    private async Task LoadChainAsync()
+    {
+        try
+        {
+            isLoading = true;
+            errorMessage = null;
+
+            chain = await ChainService.GetChainByIdAsync(ChainId);
+
+            if (chain != null)
+            {
+                // Initialize the UpdateChainDto with all required values from the loaded chain
+                updateRequest = new UpdateChainDto(
+                    chain.Id,
+                    chain.Name,
+                    chain.CreatedOn,
+                    chain.ModifiedOn
+                );
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Failed to load chain: {ex.Message}";
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private async Task HandleSubmit()
+    {
+        try
+        {
+            isSaving = true;
+            errorMessage = null;
+            await ChainService.UpdateChainAsync(updateRequest);
+            Navigation.NavigateTo("/chains");
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Failed to update chain: {ex.Message}";
+        }
+        finally
+        {
+            isSaving = false;
+        }
+    }
+
+    private void Cancel()
+    {
+        Navigation.NavigateTo("/chains");
+    }
+}

@@ -29,11 +29,10 @@ public class GetChainAndStoresQueryHandler : IQueryHandler<GetChainAndStoresQuer
             {
                 return Result.Fail<QueryChainDto>(Errors.ChainErrors.ChainHasNoStores<ChainId>(query.Id));
             }
-            var chainDto = new QueryChainDto
-            {
-                Id = chainResult.Id.Value,
-                Name = chainResult.Name,
-                Stores = chainResult.Stores!.Select(s => new QueryStoreDto(
+            var chainDto = new QueryChainDto(
+                chainResult.Id.Value,
+                chainResult.Name,
+                chainResult.Stores!.Select(s => new QueryStoreDto(
                     s.Id.Value,
                     s.ChainId!.Value,
                     s.Number,
@@ -48,9 +47,9 @@ public class GetChainAndStoresQueryHandler : IQueryHandler<GetChainAndStoresQuer
                     s.StoreOwner.LastName,
                     s.CreatedOn,
                     s.ModifiedOn)).ToList(),
-                CreatedOn = chainResult.CreatedOn,
-                ModifiedOn = chainResult.ModifiedOn
-            };
+                await _chainRepository.GetCountofStoresByChainAsync(chainResult.Id),
+                chainResult.CreatedOn,
+                chainResult.ModifiedOn);
             return Result.Ok(chainDto);
         }
         catch (Exception ex)

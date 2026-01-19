@@ -26,15 +26,15 @@ To run the application using Docker Compose, ensure you have Docker and Docker C
   - [x] Write integration tests for the api
   - [x] Setup docker compose and write instructions for how to run the application in docker
 - [ ] Setup frontend
-  - [ ] Dummy login page that doesn't work unless if I get to the bonus task
+  - [x] Dummy login section that doesn't work unless if I get to the bonus task
   - [ ] Multibutton layout
-    - [ ] A "Create Chain" page with input text field for the Chain entity and Store entity. At least one store has to be created along with the chain.
+    - [x] A "Create Chain" page with input text field for the Chain entity and Store entity.
     - [ ] A "Create Store" with text fields for each of the required properties and a pair of radio buttons that turn on/off a searchable dropdown menu for if the store belongs to a chain. If store doesn't belong to a chain then it will appear as "independent"
-    - [ ] A page that lets the user view a list of chains
-      - [ ] Subpages for each chain that shows a list of stores belonging to said chain
+    - [x] A page that lets the user view a list of chains
+      - [x] Subpages for each chain that shows a list of stores belonging to said chain
         - [ ] Create button for adding 1 or more stores to the selected chain, as well as update and delete buttons for each entry
-      - [ ] Searchbar
-      - [ ] Update and delete buttons for each entry
+      - [x] Update buttons for each chain
+      - [ ] Delete button for each chain
   - [ ] Bonus: Working login functionality
     - [ ] Login with email and password
     - [ ] Rule: Email must be unique
