@@ -29,13 +29,17 @@ public sealed class StoreEntity : Entity<StoreId>
 
     public static Result<StoreEntity> Create(ChainId? chainId, int number, string name, Address address, PhoneNumber phoneNumber, Email email, FullName storeOwner)
     {
+        List<Error> errors = new List<Error>();
         //Ensure.That(, nameof());
         if (chainId != null)
         {
             Ensure.That(chainId.Value, nameof(chainId.Value)).IsNotEmpty();
         }  
         Ensure.That(number, nameof(number));
-        Ensure.That(name, nameof(name)).IsNotNullOrEmpty().IsNotNullOrWhiteSpace();
+
+        //var temp = (!string.IsNullOrEmpty(name) && !string.IsNullOrWhiteSpace(name)) ? name : errors.Add(Errors.General.ValueIsNullOrEmptyOrWhiteSpace(nameof(name)));
+        Ensure.That(name, nameof(name)).IsNotNullOrEmpty().IsNotNullOrWhiteSpace(); 
+        
         Ensure.That(address.Street, nameof(address.Street)).IsNotNullOrEmpty().IsNotNullOrWhiteSpace();
         Ensure.That(address.PostalCode, nameof(address.PostalCode)).IsNotNullOrEmpty().IsNotNullOrWhiteSpace();
         Ensure.That(address.City, nameof(address.City)).IsNotNullOrEmpty().IsNotNullOrWhiteSpace();

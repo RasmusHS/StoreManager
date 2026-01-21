@@ -18,6 +18,7 @@ public static class Errors
 
         public static Error CreateEntityFailed(object entity) => new Error("create.entity.failed", $"Failed to create entity {entity} due to an unexpected error.");
         public static Error ExceptionThrown(string exceptionMessage) => new Error("exception.thrown", $"An exception was thrown: {exceptionMessage}");
+        public static Error ValueIsNullOrEmptyOrWhiteSpace(string typeName) => new Error("value.is.null.or.empty.or.whitespace", $"The value of type '{typeName}' is null, empty, or whitespace.");
     }
 
     public static class ChainErrors

@@ -28,6 +28,20 @@ public class Result
         return new Result<T>(default, false, error);
     }
 
+    public static Result Fail(List<Error> errors)
+    {
+        var combinedMessage = string.Join("; ", errors.Select(e => e.Message));
+        var combinedError = new Error("MultipleErrors", combinedMessage);
+        return Fail(combinedError);
+    }
+
+    public static Result<T> Fail<T>(List<Error> errors)
+    {
+        var combinedMessage = string.Join("; ", errors.Select(e => e.Message));
+        var combinedError = new Error("MultipleErrors", combinedMessage);
+        return Fail<T>(combinedError);
+    }
+
     public static Result Ok()
     {
         return new Result(true, null);

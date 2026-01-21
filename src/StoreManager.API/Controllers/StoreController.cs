@@ -151,7 +151,8 @@ public class StoreController : BaseController
                     nameResult.Value));
             }
         }
-        var commandResults = await _dispatcher.Dispatch(commands);
+        var bulkCommand = new BulkCreateStoresCommand(commands);
+        var commandResults = await _dispatcher.Dispatch(bulkCommand);
         if (commandResults.Success)
         {
             return Ok(commandResults.Value);

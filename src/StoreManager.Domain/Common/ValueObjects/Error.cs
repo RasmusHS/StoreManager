@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace StoreManager.Domain.Common.ValueObjects;
+﻿namespace StoreManager.Domain.Common.ValueObjects;
 
 public class Error : ValueObject
 {
@@ -20,6 +16,8 @@ public class Error : ValueObject
     protected override IEnumerable<object> GetEqualityComponents()
     {
         yield return Code;
+        yield return Message;
+        yield return StatusCode;
     }
 
     public override int GetHashCode()

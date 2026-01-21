@@ -9,5 +9,5 @@ public interface IDispatcher
     Task<Result<TResult>> Dispatch<TResult>(ICommand<TResult> command, CancellationToken cancellationToken = default);
 
     // Method to dispatch multiple commands in a single transaction
-    //Task<Result<TResult>> Dispatch<TResult>();
+    //Task<Result<TResult>> Dispatch<TResult>(IList<ICommand<TResult>> command, CancellationToken cancellationToken = default);
 }
