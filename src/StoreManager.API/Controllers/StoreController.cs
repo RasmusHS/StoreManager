@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Azure.Core;
+using Microsoft.AspNetCore.Mvc;
 using StoreManager.Application.Commands.Store;
 using StoreManager.Application.Data;
 using StoreManager.Application.DTO.Store.Command;
@@ -6,6 +7,7 @@ using StoreManager.Application.Queries.Store;
 using StoreManager.Domain.Chain.ValueObjects;
 using StoreManager.Domain.Common.ValueObjects;
 using StoreManager.Domain.Store.ValueObjects;
+using System.Linq;
 
 namespace StoreManager.API.Controllers;
 
@@ -81,6 +83,80 @@ public class StoreController : BaseController
             }
             return BadRequest(commandResult.Error.Code);
         }
+    }
+
+    [HttpPost]
+    [Route("bulkCreateStores")]
+    public async Task<IActionResult> BulkCreateStores(List<CreateStoreDto> requests)
+    {
+        List<CreateStoreDto.Validator> validators = requests.Select(_ => new CreateStoreDto.Validator()).ToList();
+        List<CreateStoreCommand> commands = new List<CreateStoreCommand>();
+        List<string> errors = new List<string>();
+        
+        // Check if all ChainIds are identical
+        bool hasIdenticalChainIds = requests.Select(r => r.ChainId).Distinct().Count() <= 1;
+
+        if (!hasIdenticalChainIds)
+        {
+            return Error("All stores in bulk creation must either share the same ChainId or none at all.");
+        }
+
+        // Get ChainId value
+        Guid? commonChainId = requests.First().ChainId;
+
+        for (int i = 0; i < requests.Count; i++)
+        {
+            var result = await validators[i].ValidateAsync(requests[i]);
+            if (!result.IsValid)
+            {
+                errors.AddRange(result.Errors.Select(e => e.ErrorMessage));
+                continue;
+            }
+
+            // Validate value objects
+            var addressResult = Address.Create(requests[i].Street, requests[i].PostalCode, requests[i].City);
+            var phoneResult = PhoneNumber.Create(requests[i].CountryCode, requests[i].PhoneNumber);
+            var emailResult = Email.Create(requests[i].Email);
+            var nameResult = FullName.Create(requests[i].FirstName, requests[i].LastName);
+
+            if (!addressResult.Success)
+                return BadRequest(addressResult.Error.Code);
+            if (!phoneResult.Success)
+                return BadRequest(phoneResult.Error.Code);
+            if (!emailResult.Success)
+                return BadRequest(emailResult.Error.Code);
+            if (!nameResult.Success)
+                return BadRequest(nameResult.Error.Code);
+
+            if (commonChainId == null || commonChainId == Guid.Empty)
+            {
+                commands.Add(new CreateStoreCommand(
+                    null,
+                    requests[i].Number,
+                    requests[i].Name,
+                    addressResult.Value,
+                    phoneResult.Value,
+                    emailResult.Value,
+                    nameResult.Value));
+            }
+            else
+            {
+                commands.Add(new CreateStoreCommand(
+                    ChainId.GetExisting(commonChainId!.Value).Value,
+                    requests[i].Number,
+                    requests[i].Name,
+                    addressResult.Value,
+                    phoneResult.Value,
+                    emailResult.Value,
+                    nameResult.Value));
+            }
+        }
+        var commandResults = await _dispatcher.Dispatch(commands);
+        if (commandResults.Success)
+        {
+            return Ok(commandResults.Value);
+        }
+        return Error(string.Join("; ", errors));
     }
 
     [HttpGet]

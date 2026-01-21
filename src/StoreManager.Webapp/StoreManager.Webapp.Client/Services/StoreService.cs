@@ -22,6 +22,14 @@ public class StoreService : IStoreService
         return envelope?.Result ?? throw new Exception("Failed to create store");
     }
 
+    public async Task<List<StoreResponseDto>> BulkCreateStoresAsync(List<CreateStoreDto> requests)
+    {
+        var response = await _httpClient.PostAsJsonAsync("api/store/bulkCreateStores", requests);
+        response.EnsureSuccessStatusCode();
+        var envelope = await response.Content.ReadFromJsonAsync<Envelope<List<StoreResponseDto>>>();
+        return envelope?.Result ?? throw new Exception("Failed to bulk create stores");
+    }
+
     public async Task<QueryStoreDto?> GetStoreByIdAsync(Guid storeId)
     {
         var envelope = await _httpClient.GetFromJsonAsync<Envelope<QueryStoreDto>>($"api/store/getStore/{storeId}");
