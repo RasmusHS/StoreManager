@@ -356,26 +356,23 @@
             int successCount = 0;
             List<string> errors = new();
 
-            foreach (var store in validStores)
+            Console.WriteLine($"Starting store creation. Total valid stores: {validStores.Count}, ChainId: {chainId}, IsIndependent: {isIndependent}");
+            try
             {
-                try
-                {
-                    store.ChainId = chainId;
-                    Console.WriteLine($"Creating store: {store.Name}, ChainId: {store.ChainId}, IsIndependent: {isIndependent}");
-                    await StoreService.CreateStoreAsync(store);
-                    successCount++;
-                }
-                catch (Exception ex)
-                {
-                    errors.Add($"Store '{store.Name}': {ex.Message}");
-                    Console.WriteLine($"Error creating store {store.Name}: {ex.Message}");
-                }
+                await StoreService.PostBulkStoresAsync(validStores);
+                successCount = validStores.Count;
+                Console.WriteLine($"Bulk store creation successful. Created {successCount} stores.");
+            }
+            catch (Exception ex)
+            {
+                errors.Add($"Bulk creation error: {ex.Message}");
+                Console.WriteLine($"Error during bulk store creation: {ex.Message}");
             }
 
             if (successCount > 0)
             {
                 // Navigate based on context
-                if (!isIndependent && !string.IsNullOrEmpty(selectedChainId))
+                if (!isIndependent && !string.IsNullOrWhiteSpace(selectedChainId))
                 {
                     Navigation.NavigateTo($"/chains/{selectedChainId}");
                 }

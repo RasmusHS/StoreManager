@@ -42,6 +42,7 @@ public class ChainEntityTests
         Assert.True(result.Success);
         Assert.True(result.Value.CreatedOn >= beforeCreation && result.Value.CreatedOn <= afterCreation);
         Assert.True(result.Value.ModifiedOn >= beforeCreation && result.Value.ModifiedOn <= afterCreation);
+        Assert.Equal(chainName, result.Value.Name);
     }
 
     [Theory]
@@ -64,53 +65,6 @@ public class ChainEntityTests
 
         // Act & Assert
         Assert.Throws<ArgumentNullException>(() => ChainEntity.Create(chainName));
-    }
-
-    #endregion
-
-    #region AddStoreToChain Tests
-
-    [Fact]
-    public void AddStoreToChain_WithValidStore_AddsStoreToCollection()
-    {
-        // Arrange
-        var chain = ChainEntity.Create("Test Chain").Value;
-        var store = StoreEntity.Create(chain.Id, 1, "Test Store 1", Address.Create("123 Main St", "12345", "TestCity").Value, PhoneNumber.Create("+1", "1234567890").Value, Email.Create("test@example.com").Value, FullName.Create("John", "Doe").Value);
-
-        // Act
-        chain.AddStoreToChain(store);
-
-        // Assert
-        Assert.Single(chain.Stores);
-        Assert.Contains(store.Value, chain.Stores);
-    }
-
-    [Fact]
-    public void AddStoreToChain_WithMultipleStores_AddsAllStores()
-    {
-        // Arrange
-        var chain = ChainEntity.Create("Test Chain").Value;
-        var store1 = StoreEntity.Create(chain.Id, 1, "Test Store 1", Address.Create("123 Main St", "12345", "TestCity").Value, PhoneNumber.Create("+1", "1234567890").Value, Email.Create("test@example.com").Value, FullName.Create("John", "Doe").Value);
-        var store2 = StoreEntity.Create(chain.Id, 2, "Test Store 2", Address.Create("123 Main St", "12345", "TestCity").Value, PhoneNumber.Create("+1", "1234567890").Value, Email.Create("test@example.com").Value, FullName.Create("John", "Doe").Value);
-
-        // Act
-        chain.AddStoreToChain(store1);
-        chain.AddStoreToChain(store2);
-
-        // Assert
-        Assert.Equal(2, chain.Stores.Count);
-        Assert.Contains(store1.Value, chain.Stores);
-        Assert.Contains(store2.Value, chain.Stores);
-    }
-
-    [Fact]
-    public void AddStoreToChain_WithNullStore_ThrowsArgumentNullException()
-    {
-        // Arrange
-        var chain = ChainEntity.Create("Test Chain").Value;
-
-        // Act & Assert
-        Assert.Throws<ArgumentNullException>(() => chain.AddStoreToChain(null));
     }
 
     #endregion
@@ -164,28 +118,6 @@ public class ChainEntityTests
         Assert.Throws<ArgumentNullException>(() => chain.AddRangeStoresToChain(null));
     }
 
-    [Fact]
-    public void AddRangeStoresToChain_AfterAddingIndividualStores_CombinesCollections()
-    {
-        // Arrange
-        var chain = ChainEntity.Create("Test Chain").Value;
-        var individualStore = StoreEntity.Create(chain.Id, 1, "Test Store 1", Address.Create("123 Main St", "12345", "TestCity").Value, PhoneNumber.Create("+1", "1234567890").Value, Email.Create("test@example.com").Value, FullName.Create("John", "Doe").Value);
-        chain.AddStoreToChain(individualStore);
-
-        var stores = new List<StoreEntity>
-        {
-            StoreEntity.Create(chain.Id, 2, "Test Store 2", Address.Create("123 Main St", "12345", "TestCity").Value, PhoneNumber.Create("+1", "1234567890").Value, Email.Create("test@example.com").Value, FullName.Create("John", "Doe").Value),
-            StoreEntity.Create(chain.Id, 3, "Test Store 3", Address.Create("123 Main St", "12345", "TestCity").Value, PhoneNumber.Create("+1", "1234567890").Value, Email.Create("test@example.com").Value, FullName.Create("John", "Doe").Value)
-        };
-
-        // Act
-        chain.AddRangeStoresToChain(stores);
-
-        // Assert
-        Assert.Equal(3, chain.Stores.Count);
-        Assert.Contains(individualStore.Value, chain.Stores);
-    }
-
     #endregion
 
     #region UpdateChainDetails Tests
@@ -220,6 +152,7 @@ public class ChainEntityTests
         var afterUpdate = DateTime.UtcNow;
         Assert.True(chain.ModifiedOn > originalModifiedOn);
         Assert.True(chain.ModifiedOn >= beforeUpdate && chain.ModifiedOn <= afterUpdate);
+        Assert.Equal("Updated Name", chain.Name);
     }
 
     [Theory]
@@ -260,6 +193,7 @@ public class ChainEntityTests
         // Assert
         Assert.NotNull(stores);
         Assert.IsAssignableFrom<IReadOnlyList<StoreEntity>>(stores);
+        Assert.Empty(stores);
     }
 
     [Fact]

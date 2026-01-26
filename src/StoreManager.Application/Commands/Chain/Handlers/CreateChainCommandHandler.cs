@@ -4,6 +4,7 @@ using StoreManager.Application.DTO.Chain.Command;
 using StoreManager.Application.DTO.Store.Command;
 using StoreManager.Domain.Chain;
 using StoreManager.Domain.Common;
+using StoreManager.Domain.Common.ValueObjects;
 using StoreManager.Domain.Store;
 
 namespace StoreManager.Application.Commands.Chain.Handlers;
@@ -19,12 +20,14 @@ public class CreateChainCommandHandler : ICommandHandler<CreateChainCommand, Cha
 
     public async Task<Result<ChainResponseDto>> Handle(CreateChainCommand command, CancellationToken cancellationToken = default)
     {
+        List<Error> errors = new List<Error>();
         try
         {
             if (command.Stores != null && command.Stores.Count() >= 1)
             {
                 Result<ChainEntity> chainResult = ChainEntity.Create(command.Name);
-                if (chainResult.Failure) return Result.Fail<ChainResponseDto>(Errors.General.CreateEntityFailed(chainResult));
+                if (chainResult.Failure) 
+                    errors.Add(Errors.General.CreateEntityFailed(chainResult.Error));
 
 
                 List<StoreEntity> stores = new List<StoreEntity>();
@@ -38,10 +41,14 @@ public class CreateChainCommandHandler : ICommandHandler<CreateChainCommand, Cha
                         store.PhoneNumber,
                         store.Email,
                         store.StoreOwner);
-                    if (storeResult.Failure) return Result.Fail<ChainResponseDto>(Errors.General.CreateEntityFailed(storeResult));
-
-                    stores.Add(storeResult.Value);
+                    if (storeResult.Failure)
+                        errors.Add(Errors.General.CreateEntityFailed(storeResult.Error));
+                    else
+                        stores.Add(storeResult.Value);
                 }
+                if (errors.Count > 0)
+                    return Result.Fail<ChainResponseDto>(errors);
+
                 chainResult.Value.AddRangeStoresToChain(stores);
                 await _chainRepository.AddAsync(chainResult.Value, cancellationToken);
 
@@ -74,9 +81,9 @@ public class CreateChainCommandHandler : ICommandHandler<CreateChainCommand, Cha
             }
             else
             {
-                Result<ChainEntity> chainResult = ChainEntity.Create(
-                    command.Name);
-                if (chainResult.Failure) return Result.Fail<ChainResponseDto>(Errors.General.CreateEntityFailed(chainResult));
+                Result<ChainEntity> chainResult = ChainEntity.Create(command.Name);
+                if (chainResult.Failure) return Result.Fail<ChainResponseDto>(Errors.General.CreateEntityFailed(chainResult.Error));
+
                 await _chainRepository.AddAsync(chainResult.Value, cancellationToken);
 
                 var responseDto = new ChainResponseDto

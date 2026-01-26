@@ -9,12 +9,10 @@ namespace StoreManager.Application.Queries.Store.Handlers;
 public class GetAllStoresByChainQueryHandler : IQueryHandler<GetAllStoresByChainQuery, CollectionResponseBase<QueryStoreDto>>
 {
     private readonly IStoreRepository _storeRepository;
-    private readonly IChainRepository _chainRepository;
 
-    public GetAllStoresByChainQueryHandler(IStoreRepository storeRepository, IChainRepository chainRepository)
+    public GetAllStoresByChainQueryHandler(IStoreRepository storeRepository)
     {
         _storeRepository = storeRepository;
-        _chainRepository = chainRepository;
     }
 
     public async Task<Result<CollectionResponseBase<QueryStoreDto>>> Handle(GetAllStoresByChainQuery query, CancellationToken cancellationToken = default)

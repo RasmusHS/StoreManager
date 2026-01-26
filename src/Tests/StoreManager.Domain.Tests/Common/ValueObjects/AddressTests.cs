@@ -1,6 +1,7 @@
 ﻿using Assert = Xunit.Assert;
 using Helpers;
 using StoreManager.Domain.Common.ValueObjects;
+using StoreManager.Domain.Common;
 
 namespace StoreManager.Domain.Tests.Common.ValueObjects;
 
@@ -31,7 +32,8 @@ public class AddressTests
     public void Create_WithInvalidStreet_ThrowsArgumentException(string street, string postalCode, string city)
     {
         // Act & Assert
-        Assert.Throws<ArgumentException>(() => Address.Create(street, postalCode, city));
+        Assert.Contains<Error>(Errors.General.ValueIsRequired(nameof(street)), (IEnumerable<Error>)Address.Create(street, postalCode, city).Error);
+        //Assert.Throws<ArgumentException>(() => Address.Create(street, postalCode, city));
     }
 
     [Theory]
@@ -40,7 +42,8 @@ public class AddressTests
     public void Create_WithInvalidPostalCode_ThrowsArgumentException(string street, string postalCode, string city)
     {
         // Act & Assert
-        Assert.Throws<ArgumentException>(() => Address.Create(street, postalCode, city));
+        Assert.Contains<Error>(Errors.General.ValueIsRequired(nameof(postalCode)), (IEnumerable<Error>)Address.Create(street, postalCode, city).Error);
+        //Assert.Throws<ArgumentException>(() => Address.Create(street, postalCode, city));
     }
 
     [Theory]
@@ -49,7 +52,8 @@ public class AddressTests
     public void Create_WithInvalidCity_ThrowsArgumentException(string street, string postalCode, string city)
     {
         // Act & Assert
-        Assert.Throws<ArgumentException>(() => Address.Create(street, postalCode, city));
+        Assert.Contains<Error>(Errors.General.ValueIsRequired(nameof(city)), (IEnumerable<Error>)Address.Create(street, postalCode, city).Error);
+        //Assert.Throws<ArgumentException>(() => Address.Create(street, postalCode, city));
     }
 
     [Theory]
@@ -63,7 +67,10 @@ public class AddressTests
     public void Create_WithNullValues_ThrowsArgumentNullException(string street, string postalCode, string city)
     {
         // Act & Assert
-        Assert.Throws<ArgumentNullException>(() => Address.Create(street, postalCode, city));
+        Assert.Contains<Error>(Errors.General.ValueIsRequired(nameof(street)), (IEnumerable<Error>)Address.Create(street, postalCode, city).Error);
+        Assert.Contains<Error>(Errors.General.ValueIsRequired(nameof(postalCode)), (IEnumerable<Error>)Address.Create(street, postalCode, city).Error);
+        Assert.Contains<Error>(Errors.General.ValueIsRequired(nameof(city)), (IEnumerable<Error>)Address.Create(street, postalCode, city).Error);
+        //Assert.Throws<ArgumentNullException>(() => Address.Create(street, postalCode, city));
     }
 
     [Fact]

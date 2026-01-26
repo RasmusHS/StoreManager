@@ -1,7 +1,4 @@
-﻿using EnsureThat;
-using StoreManager.Domain.Common;
-
-namespace StoreManager.Domain.Common.ValueObjects;
+﻿namespace StoreManager.Domain.Common.ValueObjects;
 
 public class FullName : ValueObject
 {
@@ -18,10 +15,17 @@ public class FullName : ValueObject
 
     public static Result<FullName> Create(string firstName, string lastName)
     {
-        Ensure.That(firstName, nameof(firstName)).IsNotNullOrEmpty().IsNotNullOrWhiteSpace();
-        Ensure.That(lastName, nameof(lastName)).IsNotNullOrEmpty().IsNotNullOrWhiteSpace();
+        List<Error> errors = new List<Error>();
 
-        return Result.Ok<FullName>(new FullName(firstName, lastName));
+        if (string.IsNullOrWhiteSpace(firstName))
+            errors.Add(Errors.General.ValueIsRequired(nameof(firstName)));
+        if (string.IsNullOrWhiteSpace(lastName))
+            errors.Add(Errors.General.ValueIsRequired(nameof(lastName)));
+
+        if (errors.Any())
+            return Result.Fail<FullName>(errors);
+        else
+            return Result.Ok<FullName>(new FullName(firstName, lastName));
     }
 
     protected override IEnumerable<object> GetEqualityComponents()

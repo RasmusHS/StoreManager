@@ -15,20 +15,34 @@ public class PhoneNumber : ValueObject
 
     public static Result<PhoneNumber> Create(string countryCode, string number)
     {
+        List<Error> errors = new List<Error>();
+
         // Basic validation for phone number format
+        if (string.IsNullOrWhiteSpace(countryCode))
+        {
+            errors.Add(Errors.General.ValueIsRequired(countryCode));
+        }
         if (string.IsNullOrWhiteSpace(number))
         {
-            return Result.Fail<PhoneNumber>(Errors.General.ValueIsRequired(number));
-        }
-
-        if (!Int64.TryParse(number.Trim(), out _))
-        {
-            return Result.Fail<PhoneNumber>(Errors.General.UnexpectedValue($"Value {number} is not a number"));
+            errors.Add(Errors.General.ValueIsRequired(number));
         }
 
         var cleanedCountryCode = countryCode.Trim().Replace("+", "").Replace("(", "").Replace(")", "");
+        if (!Int64.TryParse(cleanedCountryCode, out _))
+        {
+            errors.Add(Errors.General.UnexpectedValue(nameof(countryCode)));
+        }
+        if (!Int64.TryParse(number.Trim(), out _))
+        {
+            errors.Add(Errors.General.UnexpectedValue(nameof(number)));
+        }
 
-        return Result.Ok(new PhoneNumber($"+{cleanedCountryCode}", number));
+        if (errors.Any())
+            return Result.Fail<PhoneNumber>(errors);
+        else
+        {
+            return Result.Ok(new PhoneNumber($"+{cleanedCountryCode}", number));
+        }
     }
 
     protected override IEnumerable<object> GetEqualityComponents()

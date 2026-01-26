@@ -23,20 +23,26 @@ public class Email : ValueObject
     /// <returns></returns>
     public static Result<Email> Create(string email, bool isRequired = false)
     {
+        List<Error> errors = new List<Error>();
+
         email = (email ?? string.Empty).Trim();
-        if (isRequired && string.IsNullOrEmpty(email))
+        if (isRequired && string.IsNullOrWhiteSpace(email))
         {
-            return Result.Fail<Email>(Errors.General.ValueIsRequired(nameof(email)));
+            errors.Add(Errors.General.ValueIsRequired(nameof(email)));
         }
         if (email.Length >= 100)
         {
-            return Result.Fail<Email>(Errors.General.ValueTooLarge(nameof(email), 100));
+            errors.Add(Errors.General.ValueTooLarge(nameof(email), 100));
         }
         if (!Regex.IsMatch(email, @"^(.+)@(.+)$"))
         {
-            return Result.Fail<Email>(Errors.General.UnexpectedValue(nameof(email)));
+            errors.Add(Errors.General.UnexpectedValue(nameof(email)));
         }
-        return Result.Ok<Email>(new Email(email));
+
+        if (errors.Any())
+            return Result.Fail<Email>(errors);
+        else
+            return Result.Ok<Email>(new Email(email));
     }
 
     /// <summary>

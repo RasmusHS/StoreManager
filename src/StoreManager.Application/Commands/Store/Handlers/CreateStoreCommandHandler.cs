@@ -2,6 +2,7 @@
 using StoreManager.Application.Data.Infrastructure;
 using StoreManager.Application.DTO.Store.Command;
 using StoreManager.Domain.Common;
+using StoreManager.Domain.Common.ValueObjects;
 using StoreManager.Domain.Store;
 
 namespace StoreManager.Application.Commands.Store.Handlers;
@@ -17,6 +18,7 @@ public class CreateStoreCommandHandler : ICommandHandler<CreateStoreCommand, Sto
 
     public async Task<Result<StoreResponseDto>> Handle(CreateStoreCommand command, CancellationToken cancellationToken = default)
     {
+        List<Error> errors = new List<Error>();
         try
         {
             Result<StoreEntity> storeResult = StoreEntity.Create(
@@ -27,7 +29,11 @@ public class CreateStoreCommandHandler : ICommandHandler<CreateStoreCommand, Sto
                 command.PhoneNumber,
                 command.Email,
                 command.StoreOwner);
-            if (storeResult.Failure) return Result.Fail<StoreResponseDto>(Errors.General.CreateEntityFailed(storeResult));
+            if (storeResult.Failure) 
+                errors.AddRange(storeResult.Error);
+
+            if (errors.Any())
+                return Result.Fail<StoreResponseDto>(errors);
 
             await _storeRepository.AddAsync(storeResult.Value, cancellationToken);
 

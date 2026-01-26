@@ -298,7 +298,7 @@
         attemptedSubmit = true;
 
         // Validate chain selection if not independent
-        if (!isIndependent && string.IsNullOrEmpty(selectedChainId))
+        if (!isIndependent && string.IsNullOrWhiteSpace(selectedChainId))
         {
             errorMessage = "Please select a chain or mark the store as independent.";
             return;
@@ -321,7 +321,7 @@
 
             Console.WriteLine($"Updating store: {updateRequest.Name}, ChainId: {updateRequest.ChainId}");
 
-            await StoreService.UpdateStoreAsync(updateRequest);
+            await StoreService.PutStoreAsync(updateRequest);
 
             // Navigate back to store details
             Navigation.NavigateTo($"/stores/{StoreId}");

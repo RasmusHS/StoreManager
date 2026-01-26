@@ -5,10 +5,10 @@ namespace StoreManager.Webapp.Client.Services;
 
 public interface IChainService
 {
-    Task<ChainResponseDto> CreateChainAsync(CreateChainDto request);
+    Task<ChainResponseDto> PostChainAsync(CreateChainDto request);
     Task<QueryChainDto?> GetChainByIdAsync(Guid id);
     Task<List<QueryChainDto>> GetAllChainsAsync();
-    Task<List<QueryChainDto>> GetByIdIncludeStoresAsync(Guid id);
-    Task<ChainResponseDto> UpdateChainAsync(UpdateChainDto request);
-    Task DeleteChainAsync(DeleteChainDto request);
+    Task<List<QueryChainDto>> GetChainAndStores(Guid id);
+    Task<ChainResponseDto> PutChainAsync(UpdateChainDto request);
+    Task DeleteChainAsync(Guid chainId);
 }

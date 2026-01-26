@@ -59,6 +59,13 @@ public class StoreEntityTests
         Assert.True(result.Success);
         Assert.NotNull(result.Value);
         Assert.Null(result.Value.ChainId);
+        Assert.Equal(number, result.Value.Number);
+        Assert.Equal(name, result.Value.Name);
+        Assert.Equal(address, result.Value.Address);
+        Assert.Equal(phoneNumber, result.Value.PhoneNumber);
+        Assert.Equal(email, result.Value.Email);
+        Assert.Equal(storeOwner, result.Value.StoreOwner);
+        Assert.NotNull(result.Value.Id);
     }
 
     [Fact]
@@ -82,16 +89,23 @@ public class StoreEntityTests
         Assert.True(result.Success);
         Assert.True(result.Value.CreatedOn >= beforeCreation && result.Value.CreatedOn <= afterCreation);
         Assert.True(result.Value.ModifiedOn >= beforeCreation && result.Value.ModifiedOn <= afterCreation);
+        Assert.Equal(number, result.Value.Number);
+        Assert.Equal(name, result.Value.Name);
+        Assert.Equal(address, result.Value.Address);
+        Assert.Equal(phoneNumber, result.Value.PhoneNumber);
+        Assert.Equal(email, result.Value.Email);
+        Assert.Equal(storeOwner, result.Value.StoreOwner);
+        Assert.NotNull(result.Value.Id);
     }
 
     [Theory]
-    [InlineData(null, "")]
-    [InlineData(null, " ")]
-    public void Create_WithInvalidParameters_ThrowsArgumentException(int testNumber, string testName)
+    [InlineData("")]
+    [InlineData(" ")]
+    public void Create_WithInvalidParameters_ThrowsArgumentException(string testName)
     {
         // Arrange
         var chainId = ChainId.Create().Value;
-        var number = testNumber;
+        var number = 1;
         var name = testName;
         var address = Address.Create("123 Main St", "12345", "TestCity").Value;
         var phoneNumber = PhoneNumber.Create("+1", "1234567890").Value;
@@ -184,6 +198,13 @@ public class StoreEntityTests
 
         // Assert
         Assert.Null(store.ChainId);
+        Assert.Equal(2, store.Number);
+        Assert.Equal("Updated Store", store.Name);
+        Assert.Equal(newAddress, store.Address);
+        Assert.Equal(newPhoneNumber, store.PhoneNumber);
+        Assert.Equal(newEmail, store.Email);
+        Assert.Equal(newStoreOwner, store.StoreOwner);
+        Assert.NotEqual(store.CreatedOn, store.ModifiedOn);
     }
 
     [Fact]
@@ -210,6 +231,13 @@ public class StoreEntityTests
 
         // Assert
         Assert.Equal(newChainId, store.ChainId);
+        Assert.Equal(2, store.Number);
+        Assert.Equal("Updated Store", store.Name);
+        Assert.Equal(newAddress, store.Address);
+        Assert.Equal(newPhoneNumber, store.PhoneNumber);
+        Assert.Equal(newEmail, store.Email);
+        Assert.Equal(newStoreOwner, store.StoreOwner);
+        Assert.NotEqual(store.CreatedOn, store.ModifiedOn);
     }
 
     [Fact]
@@ -243,6 +271,12 @@ public class StoreEntityTests
         Assert.Equal(originalCreatedOn, store.CreatedOn);
         Assert.NotEqual(originalModifiedOn, store.ModifiedOn);
         Assert.True(store.ModifiedOn >= beforeUpdate && store.ModifiedOn <= afterUpdate);
+        Assert.Equal(2, store.Number);
+        Assert.Equal("Updated Store", store.Name);
+        Assert.Equal(newAddress, store.Address);
+        Assert.Equal(newPhoneNumber, store.PhoneNumber);
+        Assert.Equal(newEmail, store.Email);
+        Assert.Equal(newStoreOwner, store.StoreOwner);
     }
 
     #endregion

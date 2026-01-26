@@ -32,9 +32,10 @@ public class BulkCreateStoresCommandHandler : ICommandHandler<BulkCreateStoresCo
                     command.Stores[i].PhoneNumber,
                     command.Stores[i].Email,
                     command.Stores[i].StoreOwner);
-                if (store.Failure) errors.Add(Errors.General.CreateEntityFailed(store)); 
-
-                stores.Add(store.Value);
+                if (store.Failure) 
+                    errors.Add(Errors.General.CreateEntityFailed(store.Error));
+                else
+                    stores.Add(store.Value);
             }
 
             if (errors.Any())

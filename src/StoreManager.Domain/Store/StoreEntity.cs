@@ -1,5 +1,4 @@
-﻿using EnsureThat;
-using StoreManager.Domain.Chain;
+﻿using StoreManager.Domain.Chain;
 using StoreManager.Domain.Chain.ValueObjects;
 using StoreManager.Domain.Common;
 using StoreManager.Domain.Common.ValueObjects;
@@ -30,40 +29,32 @@ public sealed class StoreEntity : Entity<StoreId>
     public static Result<StoreEntity> Create(ChainId? chainId, int number, string name, Address address, PhoneNumber phoneNumber, Email email, FullName storeOwner)
     {
         List<Error> errors = new List<Error>();
-        //Ensure.That(, nameof());
         if (chainId != null)
         {
-            Ensure.That(chainId.Value, nameof(chainId.Value)).IsNotEmpty();
+            if (chainId.Value == Guid.Empty)
+                errors.Add(Errors.General.ValueIsRequired(nameof(chainId)));
         }  
-        Ensure.That(number, nameof(number));
+        if (string.IsNullOrWhiteSpace(name))
+            errors.Add(Errors.General.ValueIsRequired(nameof(name)));
+        // Value objects will/should validate themselves
 
-        //var temp = (!string.IsNullOrEmpty(name) && !string.IsNullOrWhiteSpace(name)) ? name : errors.Add(Errors.General.ValueIsNullOrEmptyOrWhiteSpace(nameof(name)));
-        Ensure.That(name, nameof(name)).IsNotNullOrEmpty().IsNotNullOrWhiteSpace(); 
-        
-        Ensure.That(address.Street, nameof(address.Street)).IsNotNullOrEmpty().IsNotNullOrWhiteSpace();
-        Ensure.That(address.PostalCode, nameof(address.PostalCode)).IsNotNullOrEmpty().IsNotNullOrWhiteSpace();
-        Ensure.That(address.City, nameof(address.City)).IsNotNullOrEmpty().IsNotNullOrWhiteSpace();
-        Ensure.That(phoneNumber.CountryCode, nameof(phoneNumber.CountryCode)).IsNotNullOrEmpty().IsNotNullOrWhiteSpace();
-        Ensure.That(phoneNumber.Number, nameof(phoneNumber.Number)).IsNotNullOrEmpty().IsNotNullOrWhiteSpace();
-        Ensure.That(email.Value, nameof(email.Value)).IsNotNullOrEmpty().IsNotNullOrWhiteSpace();
-        Ensure.That(storeOwner.FirstName, nameof(storeOwner.FirstName)).IsNotNullOrEmpty().IsNotNullOrWhiteSpace();
-        Ensure.That(storeOwner.LastName, nameof(storeOwner.LastName)).IsNotNullOrEmpty().IsNotNullOrWhiteSpace();
-
-        return Result.Ok<StoreEntity>(new StoreEntity(StoreId.Create().Value, chainId, number, name, address, phoneNumber, email, storeOwner));
+        if (errors.Any())
+            return Result.Fail<StoreEntity>(errors);
+        else
+            return Result.Ok<StoreEntity>(new StoreEntity(StoreId.Create().Value, chainId, number, name, address, phoneNumber, email, storeOwner));
     }
 
     public void UpdateStore(ChainId? chainId, int number, string name, Address address, PhoneNumber phoneNumber, Email email, FullName storeOwner)
     {
-        Ensure.That(number, nameof(number));
-        Ensure.That(name, nameof(name)).IsNotNullOrEmpty().IsNotNullOrWhiteSpace();
-        Ensure.That(address.Street, nameof(address.Street)).IsNotNullOrEmpty().IsNotNullOrWhiteSpace();
-        Ensure.That(address.PostalCode, nameof(address.PostalCode)).IsNotNullOrEmpty().IsNotNullOrWhiteSpace();
-        Ensure.That(address.City, nameof(address.City)).IsNotNullOrEmpty().IsNotNullOrWhiteSpace();
-        Ensure.That(phoneNumber.CountryCode, nameof(phoneNumber.CountryCode)).IsNotNullOrEmpty().IsNotNullOrWhiteSpace();
-        Ensure.That(phoneNumber.Number, nameof(phoneNumber.Number)).IsNotNullOrEmpty().IsNotNullOrWhiteSpace();
-        Ensure.That(email.Value, nameof(email.Value)).IsNotNullOrEmpty().IsNotNullOrWhiteSpace();
-        Ensure.That(storeOwner.FirstName, nameof(storeOwner.FirstName)).IsNotNullOrEmpty().IsNotNullOrWhiteSpace();
-        Ensure.That(storeOwner.LastName, nameof(storeOwner.LastName)).IsNotNullOrEmpty().IsNotNullOrWhiteSpace();
+        List<Error> errors = new List<Error>();
+        if (chainId?.Value == Guid.Empty)
+            errors.Add(Errors.General.ValueIsRequired(nameof(chainId)));
+        if (string.IsNullOrWhiteSpace(name))
+            errors.Add(Errors.General.ValueIsRequired(nameof(name)));
+        // Value objects will/should validate themselves
+
+        if (errors.Any()) // Throw ArgumentException for now, but should return Result type 
+            throw new ArgumentException(string.Join("; ", errors.Select(e => e.Code), errors.Select(e => e.Message), errors.Select(e => e.StatusCode)));
 
         ChainId = chainId;
         Number = number;

@@ -310,8 +310,7 @@
 
         try
         {
-            var deleteRequest = new DeleteStoreDto(store.Id, store.CreatedOn, store.ModifiedOn);
-            await StoreService.DeleteStoreAsync(deleteRequest);
+            await StoreService.DeleteStoreAsync(store.Id);
 
             showDeleteModal = false;
 

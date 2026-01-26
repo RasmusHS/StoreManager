@@ -27,7 +27,15 @@ public class GetChainAndStoresQueryHandler : IQueryHandler<GetChainAndStoresQuer
             }
             if (chainResult.Stores.Count() < 1)
             {
-                return Result.Fail<QueryChainDto>(Errors.ChainErrors.ChainHasNoStores<ChainId>(query.Id));
+                // If no stores, return chain info with empty store list
+                var emptyChainDto = new QueryChainDto(
+                    chainResult.Id.Value,
+                    chainResult.Name,
+                    new List<QueryStoreDto>(),
+                    0,
+                    chainResult.CreatedOn,
+                    chainResult.ModifiedOn);
+                return Result.Ok(emptyChainDto);
             }
             var chainDto = new QueryChainDto(
                 chainResult.Id.Value,
@@ -47,7 +55,7 @@ public class GetChainAndStoresQueryHandler : IQueryHandler<GetChainAndStoresQuer
                     s.StoreOwner.LastName,
                     s.CreatedOn,
                     s.ModifiedOn)).ToList(),
-                await _chainRepository.GetCountofStoresByChainAsync(chainResult.Id),
+                chainResult.Stores.Count(), // Potential optimization: Create a StoreCount property in Chain entity with a trigger in the database to maintain the count
                 chainResult.CreatedOn,
                 chainResult.ModifiedOn);
             return Result.Ok(chainDto);

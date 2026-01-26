@@ -1,6 +1,4 @@
-﻿using EnsureThat;
-
-namespace StoreManager.Domain.Common.ValueObjects;
+﻿namespace StoreManager.Domain.Common.ValueObjects;
 
 public class Address : ValueObject
 {
@@ -19,11 +17,19 @@ public class Address : ValueObject
 
     public static Result<Address> Create(string street, string postalcode, string city)
     {
-        Ensure.That(street, nameof(street)).IsNotNullOrEmpty().IsNotNullOrWhiteSpace();
-        Ensure.That(postalcode, nameof(postalcode)).IsNotNullOrEmpty().IsNotNullOrWhiteSpace();
-        Ensure.That(city, nameof(city)).IsNotNullOrEmpty().IsNotNullOrWhiteSpace();
+        List<Error> errors = new List<Error>();
 
-        return Result.Ok<Address>(new Address(street, postalcode, city));
+        if (string.IsNullOrWhiteSpace(street))
+            errors.Add(Errors.General.ValueIsRequired(nameof(street)));
+        if (string.IsNullOrWhiteSpace(postalcode))
+            errors.Add(Errors.General.ValueIsRequired(nameof(postalcode)));
+        if (string.IsNullOrWhiteSpace(city))
+            errors.Add(Errors.General.ValueIsRequired(nameof(city)));
+
+        if (errors.Any())
+            return Result.Fail<Address>(errors);
+        else
+            return Result.Ok<Address>(new Address(street, postalcode, city));
     }
 
     protected override IEnumerable<object> GetEqualityComponents()
