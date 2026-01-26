@@ -27,9 +27,4 @@
     <Using Include="Xunit" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Chain\ValueObjects\" />
-    <Folder Include="Store\ValueObjects\" />
-  </ItemGroup>
-
 </Project>
