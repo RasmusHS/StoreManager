@@ -1,5 +1,5 @@
 # StoreManager 
-Currently working in branch: master 
+Currently working in branch: Bulk-CreateStore 
 
 # Use of AI/LLMs
 This project has utilized AI tools to assist in code generation and problem-solving. \
