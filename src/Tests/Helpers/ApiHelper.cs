@@ -15,7 +15,7 @@ public static class ApiHelper
     public static async Task<Guid> CreateChainAndGetId(HttpClient client, string chainName)
     {
         var dto = new CreateChainDto(chainName);
-        var response = await client.PostAsJsonAsync("/api/chain/createChain", dto);
+        var response = await client.PostAsJsonAsync("/api/chains/postChain", dto);
         response.EnsureSuccessStatusCode();
 
         var responseBody = await response.Content.ReadAsStringAsync();
@@ -39,7 +39,7 @@ public static class ApiHelper
 
     public static async Task<Guid> CreateStoreAndGetId(HttpClient client, CreateStoreDto dto)
     {
-        var response = await client.PostAsJsonAsync("/api/store/createStore", dto);
+        var response = await client.PostAsJsonAsync("/api/stores/postStore", dto);
         response.EnsureSuccessStatusCode();
 
         var responseBody = await response.Content.ReadAsStringAsync();
@@ -64,7 +64,7 @@ public static class ApiHelper
     public static async Task<ChainResponseDto> CreateChain(HttpClient client, string chainName)
     {
         var dto = new CreateChainDto(chainName);
-        var response = await client.PostAsJsonAsync("/api/chain/createChain", dto);
+        var response = await client.PostAsJsonAsync("/api/chains/postChain", dto);
         response.EnsureSuccessStatusCode();
 
         var chainResponse = await response.Content.ReadFromJsonAsync<ChainResponseDto>(JsonOptions);
@@ -73,7 +73,7 @@ public static class ApiHelper
 
     public static async Task<StoreResponseDto> CreateStore(HttpClient client, CreateStoreDto dto)
     {
-        var response = await client.PostAsJsonAsync("/api/store/createStore", dto);
+        var response = await client.PostAsJsonAsync("/api/stores/postStore", dto);
         response.EnsureSuccessStatusCode();
 
         var storeResponse = await response.Content.ReadFromJsonAsync<StoreResponseDto>(JsonOptions);

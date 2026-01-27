@@ -29,48 +29,67 @@ public class AddressTests
     [Theory]
     [InlineData("", "12345", "Springfield")]
     [InlineData("   ", "12345", "Springfield")]
+    [InlineData(null, "12345", "Springfield")]
     public void Create_WithInvalidStreet_ThrowsArgumentException(string street, string postalCode, string city)
     {
-        // Act & Assert
-        Assert.Contains<Error>(Errors.General.ValueIsRequired(nameof(street)), (IEnumerable<Error>)Address.Create(street, postalCode, city).Error);
-        //Assert.Throws<ArgumentException>(() => Address.Create(street, postalCode, city));
+        // Act
+        var result = Address.Create(street, postalCode, city);
+
+        // Assert
+        Assert.True(result.Failure);
+        Assert.Equal("MultipleErrors", result.Error.Code);
+        Assert.Contains("Value 'street' is required.", result.Error.Message);
     }
 
     [Theory]
     [InlineData("123 Main St", "", "Springfield")]
     [InlineData("123 Main St", "   ", "Springfield")]
+    [InlineData("123 Main St", null, "Springfield")]
     public void Create_WithInvalidPostalCode_ThrowsArgumentException(string street, string postalCode, string city)
     {
-        // Act & Assert
-        Assert.Contains<Error>(Errors.General.ValueIsRequired(nameof(postalCode)), (IEnumerable<Error>)Address.Create(street, postalCode, city).Error);
-        //Assert.Throws<ArgumentException>(() => Address.Create(street, postalCode, city));
+        // Act
+        var result = Address.Create(street, postalCode, city);
+
+        // Assert
+        Assert.True(result.Failure);
+        Assert.Equal("MultipleErrors", result.Error.Code);
+        Assert.Contains("Value 'postalCode' is required.", result.Error.Message);
     }
 
     [Theory]
     [InlineData("123 Main St", "12345", "")]
     [InlineData("123 Main St", "12345", "   ")]
+    [InlineData("123 Main St", "12345", null)]
     public void Create_WithInvalidCity_ThrowsArgumentException(string street, string postalCode, string city)
     {
-        // Act & Assert
-        Assert.Contains<Error>(Errors.General.ValueIsRequired(nameof(city)), (IEnumerable<Error>)Address.Create(street, postalCode, city).Error);
-        //Assert.Throws<ArgumentException>(() => Address.Create(street, postalCode, city));
+        // Act
+        var result = Address.Create(street, postalCode, city);
+
+        // Assert
+        Assert.True(result.Failure);
+        Assert.Equal("MultipleErrors", result.Error.Code);
+        Assert.Contains("Value 'city' is required.", result.Error.Message);
     }
 
     [Theory]
-    [InlineData(null, "12345", "Springfield")]
-    [InlineData("123 Main St", null, "Springfield")]
-    [InlineData("123 Main St", "12345", null)]
     [InlineData(null, "12345", null)]
     [InlineData("123 Main St", null, null)]
     [InlineData(null, null, "Springfield")]
     [InlineData(null, null, null)]
     public void Create_WithNullValues_ThrowsArgumentNullException(string street, string postalCode, string city)
     {
-        // Act & Assert
-        Assert.Contains<Error>(Errors.General.ValueIsRequired(nameof(street)), (IEnumerable<Error>)Address.Create(street, postalCode, city).Error);
-        Assert.Contains<Error>(Errors.General.ValueIsRequired(nameof(postalCode)), (IEnumerable<Error>)Address.Create(street, postalCode, city).Error);
-        Assert.Contains<Error>(Errors.General.ValueIsRequired(nameof(city)), (IEnumerable<Error>)Address.Create(street, postalCode, city).Error);
-        //Assert.Throws<ArgumentNullException>(() => Address.Create(street, postalCode, city));
+        // Act
+        var result = Address.Create(street, postalCode, city);
+
+        // Assert
+        Assert.True(result.Failure);
+        Assert.Equal("MultipleErrors", result.Error.Code);
+        if (street == null)
+            Assert.Contains("Value 'street' is required.", result.Error.Message);
+        if (postalCode == null)
+            Assert.Contains("Value 'postalCode' is required.", result.Error.Message);
+        if (city == null)
+            Assert.Contains("Value 'city' is required.", result.Error.Message);
     }
 
     [Fact]

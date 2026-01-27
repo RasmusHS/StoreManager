@@ -27,7 +27,7 @@ public class ChainControllerTests : BaseIntegrationTest
         var request = new CreateChainDto("Test Chain");
 
         // Act
-        var response = await _client.PostAsJsonAsync("/api/chain/createChain", request);
+        var response = await _client.PostAsJsonAsync("/api/chains/postChain", request);
         var responseBody = await response.Content.ReadAsStringAsync();
         _output.WriteLine(responseBody);
 
@@ -46,7 +46,7 @@ public class ChainControllerTests : BaseIntegrationTest
         var request = new CreateChainDto("Test Chain With Stores", stores);
 
         // Act
-        var response = await _client.PostAsJsonAsync("/api/chain/createChain", request);
+        var response = await _client.PostAsJsonAsync("/api/chains/postChain", request);
         var responseBody = await response.Content.ReadAsStringAsync();
         _output.WriteLine(responseBody);
 
@@ -63,7 +63,7 @@ public class ChainControllerTests : BaseIntegrationTest
         var request = new CreateChainDto(name);
 
         // Act
-        var response = await _client.PostAsJsonAsync("/api/chain/createChain", request);
+        var response = await _client.PostAsJsonAsync("/api/chains/postChain", request);
         var responseBody = await response.Content.ReadAsStringAsync();
         _output.WriteLine(responseBody);
 
@@ -78,7 +78,7 @@ public class ChainControllerTests : BaseIntegrationTest
         var request = new CreateChainDto(StringRandom.GetRandomString(101));
 
         // Act
-        var response = await _client.PostAsJsonAsync("/api/chain/createChain", request);
+        var response = await _client.PostAsJsonAsync("/api/chains/postChain", request);
         var responseBody = await response.Content.ReadAsStringAsync();
         _output.WriteLine(responseBody);
 
@@ -97,7 +97,7 @@ public class ChainControllerTests : BaseIntegrationTest
         var request = new CreateChainDto("Test Chain With Stores", stores);
 
         // Act
-        var response = await _client.PostAsJsonAsync("/api/chain/createChain", request);
+        var response = await _client.PostAsJsonAsync("/api/chains/postChain", request);
         var responseBody = await response.Content.ReadAsStringAsync();
         _output.WriteLine(responseBody);
 
@@ -117,7 +117,7 @@ public class ChainControllerTests : BaseIntegrationTest
         _output.WriteLine($"Created Chain ID: {chainId}");
 
         // Act
-        var response = await _client.GetAsync($"/api/chain/getChain/{chainId}");
+        var response = await _client.GetAsync($"/api/chains/getChain/{chainId}");
         var responseBody = await response.Content.ReadAsStringAsync();
         _output.WriteLine(responseBody);
 
@@ -133,7 +133,7 @@ public class ChainControllerTests : BaseIntegrationTest
         var nonExistingId = Guid.NewGuid();
 
         // Act
-        var response = await _client.GetAsync($"/api/chain/getChain/{nonExistingId}");
+        var response = await _client.GetAsync($"/api/chains/getChain/{nonExistingId}");
         var responseBody = await response.Content.ReadAsStringAsync();
         _output.WriteLine(responseBody);
 
@@ -154,15 +154,15 @@ public class ChainControllerTests : BaseIntegrationTest
 
         // Create two stores for the chain
         var createStore1Dto = new CreateStoreDto(chainId, 1, "Test Store 1", "123 Main St", "12345", "Test City", "1", "5551234567", "test1@store.com", "John", "Doe");
-        var store1Response = await _client.PostAsJsonAsync("/api/store/createStore", createStore1Dto);
+        var store1Response = await _client.PostAsJsonAsync("/api/stores/postStore", createStore1Dto);
         store1Response.EnsureSuccessStatusCode();
 
         var createStore2Dto = new CreateStoreDto(chainId, 2, "Test Store 2", "456 Main St", "67890", "Test City", "1", "5559876543", "test2@store.com", "Jane", "Doe");
-        var store2Response = await _client.PostAsJsonAsync("/api/store/createStore", createStore2Dto);
+        var store2Response = await _client.PostAsJsonAsync("/api/stores/postStore", createStore2Dto);
         store2Response.EnsureSuccessStatusCode();
 
         // Act
-        var response = await _client.GetAsync($"/api/chain/getChainAndStores/{chainId}");
+        var response = await _client.GetAsync($"/api/chains/getChainAndStores/{chainId}");
         var responseBody = await response.Content.ReadAsStringAsync();
         _output.WriteLine(responseBody);
 
@@ -179,7 +179,7 @@ public class ChainControllerTests : BaseIntegrationTest
         _output.WriteLine($"Created Chain ID: {chainId}");
 
         // Act
-        var response = await _client.GetAsync($"/api/chain/getChainAndStores/{chainId}");
+        var response = await _client.GetAsync($"/api/chains/getChainAndStores/{chainId}");
         var responseBody = await response.Content.ReadAsStringAsync();
         _output.WriteLine(responseBody);
 
@@ -195,7 +195,7 @@ public class ChainControllerTests : BaseIntegrationTest
         var nonExistingId = Guid.NewGuid();
 
         // Act
-        var response = await _client.GetAsync($"/api/chain/getChainAndStores/{nonExistingId}");
+        var response = await _client.GetAsync($"/api/chains/getChainAndStores/{nonExistingId}");
         var responseBody = await response.Content.ReadAsStringAsync();
         _output.WriteLine(responseBody);
 
@@ -217,7 +217,7 @@ public class ChainControllerTests : BaseIntegrationTest
         var request = new UpdateChainDto(chain.Result.Id, "Updated Chain Name", chain.Result.CreatedOn, chain.Result.ModifiedOn);
 
         // Act
-        var response = await _client.PutAsJsonAsync("/api/chain/updateChain", request);
+        var response = await _client.PutAsJsonAsync("/api/chains/putChain", request);
         var responseBody = await response.Content.ReadAsStringAsync();
         _output.WriteLine(responseBody);
 
@@ -234,7 +234,7 @@ public class ChainControllerTests : BaseIntegrationTest
         var request = new UpdateChainDto(Guid.Empty, "Updated Chain Name", DateTime.UtcNow, DateTime.UtcNow);
 
         // Act
-        var response = await _client.PutAsJsonAsync("/api/chain/updateChain", request);
+        var response = await _client.PutAsJsonAsync("/api/chains/putChain", request);
         var responseBody = await response.Content.ReadAsStringAsync();
         _output.WriteLine(responseBody);
 
@@ -254,7 +254,7 @@ public class ChainControllerTests : BaseIntegrationTest
         var request = new UpdateChainDto(chain.Result.Id, name, chain.Result.CreatedOn, chain.Result.ModifiedOn);
 
         // Act
-        var response = await _client.PutAsJsonAsync("/api/chain/updateChain", request);
+        var response = await _client.PutAsJsonAsync("/api/chains/putChain", request);
         var responseBody = await response.Content.ReadAsStringAsync();
         _output.WriteLine(responseBody);
 
@@ -272,7 +272,7 @@ public class ChainControllerTests : BaseIntegrationTest
         var request = new UpdateChainDto(chain.Result.Id, StringRandom.GetRandomString(101), chain.Result.CreatedOn, chain.Result.ModifiedOn);
 
         // Act
-        var response = await _client.PutAsJsonAsync("/api/chain/updateChain", request);
+        var response = await _client.PutAsJsonAsync("/api/chains/putChain", request);
         var responseBody = await response.Content.ReadAsStringAsync();
         _output.WriteLine(responseBody);
 
@@ -287,7 +287,7 @@ public class ChainControllerTests : BaseIntegrationTest
         var request = new UpdateChainDto(Guid.NewGuid(), "Updated Chain", DateTime.UtcNow, DateTime.UtcNow.AddDays(1));
 
         // Act
-        var response = await _client.PutAsJsonAsync("/api/chain/updateChain", request);
+        var response = await _client.PutAsJsonAsync("/api/chains/putChain", request);
         var responseBody = await response.Content.ReadAsStringAsync();
         _output.WriteLine(responseBody);
 
@@ -312,7 +312,7 @@ public class ChainControllerTests : BaseIntegrationTest
         var httpRequestMessage = new HttpRequestMessage
         {
             Method = HttpMethod.Delete,
-            RequestUri = new Uri(_client.BaseAddress + "api/chain/deleteChain"),
+            RequestUri = new Uri(_client.BaseAddress + "api/chains/deleteChain"),
             Content = JsonContent.Create(request)
         };
         var response = await _client.SendAsync(httpRequestMessage);
@@ -334,7 +334,7 @@ public class ChainControllerTests : BaseIntegrationTest
         var httpRequestMessage = new HttpRequestMessage
         {
             Method = HttpMethod.Delete,
-            RequestUri = new Uri(_client.BaseAddress + "api/chain/deleteChain"),
+            RequestUri = new Uri(_client.BaseAddress + "api/chains/deleteChain"),
             Content = JsonContent.Create(request)
         };
         var response = await _client.SendAsync(httpRequestMessage);
@@ -355,7 +355,7 @@ public class ChainControllerTests : BaseIntegrationTest
         var httpRequestMessage = new HttpRequestMessage
         {
             Method = HttpMethod.Delete,
-            RequestUri = new Uri(_client.BaseAddress + "api/chain/deleteChain"),
+            RequestUri = new Uri(_client.BaseAddress + "api/chains/deleteChain"),
             Content = JsonContent.Create(request)
         };
         var response = await _client.SendAsync(httpRequestMessage);
@@ -373,11 +373,11 @@ public class ChainControllerTests : BaseIntegrationTest
         var chain = await ApiHelper.CreateChain(_client, StringRandom.GetRandomString(10));
         _output.WriteLine($"Created Chain ID: {chain.Result.Id}");
         var createStore1Dto = new CreateStoreDto(chain.Result.Id, 1, "Test Store 1", "123 Main St", "12345", "Test City", "1", "5551234567", "test1@store.com", "John", "Doe");
-        var store1Response = await _client.PostAsJsonAsync("/api/store/createStore", createStore1Dto);
+        var store1Response = await _client.PostAsJsonAsync("/api/stores/postStore", createStore1Dto);
         store1Response.EnsureSuccessStatusCode();
 
         var createStore2Dto = new CreateStoreDto(chain.Result.Id, 2, "Test Store 2", "456 Main St", "67890", "Test City", "1", "5559876543", "test2@store.com", "Jane", "Doe");
-        var store2Response = await _client.PostAsJsonAsync("/api/store/createStore", createStore2Dto);
+        var store2Response = await _client.PostAsJsonAsync("/api/stores/postStore", createStore2Dto);
         store2Response.EnsureSuccessStatusCode();
 
         var request = new DeleteChainDto(chain.Result.Id, chain.Result.CreatedOn, chain.Result.ModifiedOn);
@@ -386,7 +386,7 @@ public class ChainControllerTests : BaseIntegrationTest
         var httpRequestMessage = new HttpRequestMessage
         {
             Method = HttpMethod.Delete,
-            RequestUri = new Uri(_client.BaseAddress + "api/chain/deleteChain"),
+            RequestUri = new Uri(_client.BaseAddress + "api/chains/deleteChain"),
             Content = JsonContent.Create(request)
         };
         var response = await _client.SendAsync(httpRequestMessage);

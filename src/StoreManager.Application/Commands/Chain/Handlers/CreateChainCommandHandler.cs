@@ -27,7 +27,7 @@ public class CreateChainCommandHandler : ICommandHandler<CreateChainCommand, Cha
             {
                 Result<ChainEntity> chainResult = ChainEntity.Create(command.Name);
                 if (chainResult.Failure) 
-                    errors.Add(Errors.General.CreateEntityFailed(chainResult.Error));
+                    errors.Add(Errors.General.CreateEntityFailed(nameof(chainResult)));
 
 
                 List<StoreEntity> stores = new List<StoreEntity>();
@@ -42,7 +42,7 @@ public class CreateChainCommandHandler : ICommandHandler<CreateChainCommand, Cha
                         store.Email,
                         store.StoreOwner);
                     if (storeResult.Failure)
-                        errors.Add(Errors.General.CreateEntityFailed(storeResult.Error));
+                        errors.Add(Errors.General.CreateEntityFailed(nameof(storeResult)));
                     else
                         stores.Add(storeResult.Value);
                 }
@@ -82,7 +82,7 @@ public class CreateChainCommandHandler : ICommandHandler<CreateChainCommand, Cha
             else
             {
                 Result<ChainEntity> chainResult = ChainEntity.Create(command.Name);
-                if (chainResult.Failure) return Result.Fail<ChainResponseDto>(Errors.General.CreateEntityFailed(chainResult.Error));
+                if (chainResult.Failure) return Result.Fail<ChainResponseDto>(Errors.General.CreateEntityFailed(nameof(chainResult)));
 
                 await _chainRepository.AddAsync(chainResult.Value, cancellationToken);
 

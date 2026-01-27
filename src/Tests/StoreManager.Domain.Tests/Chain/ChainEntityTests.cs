@@ -48,23 +48,19 @@ public class ChainEntityTests
     [Theory]
     [InlineData("")]
     [InlineData(" ")]
+    [InlineData(null)]
     public void Create_WithEmptyName_ThrowsArgumentException(string name)
     {
         // Arrange
         string chainName = name;
 
-        // Act & Assert
-        Assert.Throws<ArgumentException>(() => ChainEntity.Create(chainName));
-    }
+        // Act
+        var result = ChainEntity.Create(chainName);
 
-    [Fact]
-    public void Create_WithNullName_ThrowsArgumentNullException()
-    {
-        // Arrange
-        string? chainName = null;
-
-        // Act & Assert
-        Assert.Throws<ArgumentNullException>(() => ChainEntity.Create(chainName));
+        // Assert
+        Assert.True(result.Failure);
+        Assert.Equal("MultipleErrors", result.Error.Code);
+        Assert.Contains("Value 'name' is required.", result.Error.Message);
     }
 
     #endregion
@@ -115,7 +111,7 @@ public class ChainEntityTests
         var chain = ChainEntity.Create("Test Chain").Value;
 
         // Act & Assert
-        Assert.Throws<ArgumentNullException>(() => chain.AddRangeStoresToChain(null));
+        Assert.Throws<ArgumentException>(() => chain.AddRangeStoresToChain(null));
     }
 
     #endregion
@@ -174,7 +170,7 @@ public class ChainEntityTests
         var chain = ChainEntity.Create("Test Chain").Value;
 
         // Act & Assert
-        Assert.Throws<ArgumentNullException>(() => chain.UpdateChainDetails(null));
+        Assert.Throws<ArgumentException>(() => chain.UpdateChainDetails(null));
     }
 
     #endregion

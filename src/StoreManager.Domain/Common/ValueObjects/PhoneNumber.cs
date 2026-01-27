@@ -1,4 +1,6 @@
-﻿namespace StoreManager.Domain.Common.ValueObjects;
+﻿using System.Linq;
+
+namespace StoreManager.Domain.Common.ValueObjects;
 
 public class PhoneNumber : ValueObject
 {
@@ -20,21 +22,32 @@ public class PhoneNumber : ValueObject
         // Basic validation for phone number format
         if (string.IsNullOrWhiteSpace(countryCode))
         {
-            errors.Add(Errors.General.ValueIsRequired(countryCode));
+            errors.Add(Errors.General.ValueIsRequired(nameof(countryCode)));
         }
         if (string.IsNullOrWhiteSpace(number))
         {
-            errors.Add(Errors.General.ValueIsRequired(number));
+            errors.Add(Errors.General.ValueIsRequired(nameof(number)));
         }
+
+        if (errors.Any())
+            return Result.Fail<PhoneNumber>(errors);
 
         var cleanedCountryCode = countryCode.Trim().Replace("+", "").Replace("(", "").Replace(")", "");
         if (!Int64.TryParse(cleanedCountryCode, out _))
         {
             errors.Add(Errors.General.UnexpectedValue(nameof(countryCode)));
         }
+        if (cleanedCountryCode.Length > 4)
+        {
+            errors.Add(Errors.General.ValueTooLarge(nameof(countryCode), 4));
+        }
         if (!Int64.TryParse(number.Trim(), out _))
         {
             errors.Add(Errors.General.UnexpectedValue(nameof(number)));
+        }
+        if (number.Trim().Length > 15)
+        {
+            errors.Add(Errors.General.ValueTooLarge(nameof(number), 15));
         }
 
         if (errors.Any())

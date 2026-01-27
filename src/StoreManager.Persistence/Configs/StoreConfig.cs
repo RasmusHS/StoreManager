@@ -29,8 +29,8 @@ public class StoreConfig : IEntityTypeConfiguration<StoreEntity>
 
         builder.OwnsOne(s => s.PhoneNumber, propertyBuilder =>
         {
-            propertyBuilder.Property(p => p.CountryCode).HasMaxLength(8);
-            propertyBuilder.Property(p => p.Number).HasMaxLength(12);
+            propertyBuilder.Property(p => p.CountryCode).HasMaxLength(5);
+            propertyBuilder.Property(p => p.Number).HasMaxLength(15);
         });
 
         builder.Property(s => s.Email).HasConversion(

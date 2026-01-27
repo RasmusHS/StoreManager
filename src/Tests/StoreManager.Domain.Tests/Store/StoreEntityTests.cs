@@ -1,5 +1,6 @@
 ﻿using Helpers;
 using StoreManager.Domain.Chain.ValueObjects;
+using StoreManager.Domain.Common;
 using StoreManager.Domain.Common.ValueObjects;
 using StoreManager.Domain.Store;
 using System.IO;
@@ -101,7 +102,7 @@ public class StoreEntityTests
     [Theory]
     [InlineData("")]
     [InlineData(" ")]
-    public void Create_WithInvalidParameters_ThrowsArgumentException(string testName)
+    public void Create_WithInvalidParameters_ReturnsFailureResult(string testName)
     {
         // Arrange
         var chainId = ChainId.Create().Value;
@@ -112,12 +113,17 @@ public class StoreEntityTests
         var email = Email.Create("test@example.com").Value;
         var storeOwner = FullName.Create("John", "Doe").Value;
 
-        // Act & Assert
-        Assert.Throws<ArgumentException>(() => StoreEntity.Create(chainId, number, name, address, phoneNumber, email, storeOwner));
+        // Act
+        var result = StoreEntity.Create(chainId, number, name, address, phoneNumber, email, storeOwner);
+
+        // Assert
+        Assert.True(result.Failure);
+        Assert.Equal("MultipleErrors", result.Error.Code);
+        Assert.Contains("Value 'name' is required.", result.Error.Message);
     }
 
     [Fact]
-    public void Create_WithInvalidParameters_ThrowsArgumentNullException()
+    public void Create_WithNullParameters_ReturnsFailureResult()
     {
         // Arrange
         var chainId = ChainId.Create().Value;
@@ -128,8 +134,13 @@ public class StoreEntityTests
         var email = Email.Create("test@example.com").Value;
         var storeOwner = FullName.Create("John", "Doe").Value;
 
-        // Act & Assert
-        Assert.Throws<ArgumentNullException>(() => StoreEntity.Create(chainId, number, name, address, phoneNumber, email, storeOwner));
+        // Act
+        var result = StoreEntity.Create(chainId, number, name, address, phoneNumber, email, storeOwner);
+
+        // Assert
+        Assert.True(result.Failure);
+        Assert.Equal("MultipleErrors", result.Error.Code);
+        Assert.Contains("Value 'name' is required.", result.Error.Message);
     }
 
     #endregion

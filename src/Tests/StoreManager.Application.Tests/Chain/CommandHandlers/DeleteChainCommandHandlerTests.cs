@@ -69,6 +69,7 @@ public class DeleteChainCommandHandlerTests
         // Assert
         Assert.False(result.Success);
         Assert.NotNull(result.Error);
+        Assert.Equal($"Could not find entity with ID {chainId}.", result.Error.Message); 
         _mockChainRepository.Verify(r => r.GetByIdAsync(chainId), Times.Once);
         _mockChainRepository.Verify(r => r.GetCountofStoresByChainAsync(It.IsAny<ChainId>()), Times.Never);
         _mockChainRepository.Verify(r => r.DeleteAsync(It.IsAny<ChainId>(), It.IsAny<CancellationToken>()), Times.Never);
@@ -96,6 +97,7 @@ public class DeleteChainCommandHandlerTests
         // Assert
         Assert.False(result.Success);
         Assert.NotNull(result.Error);
+        Assert.Equal("The chain could not be deleted due to still having stores. Delete all stores first.", result.Error.Message);
         _mockChainRepository.Verify(r => r.GetByIdAsync(chainId), Times.Once);
         _mockChainRepository.Verify(r => r.GetCountofStoresByChainAsync(chainId), Times.Once);
         _mockChainRepository.Verify(r => r.DeleteAsync(It.IsAny<ChainId>(), It.IsAny<CancellationToken>()), Times.Never);
@@ -123,6 +125,7 @@ public class DeleteChainCommandHandlerTests
         // Assert
         Assert.False(result.Success);
         Assert.NotNull(result.Error);
+        Assert.Equal("The chain could not be deleted due to still having stores. Delete all stores first.", result.Error.Message);
         _mockChainRepository.Verify(r => r.GetByIdAsync(chainId), Times.Once);
         _mockChainRepository.Verify(r => r.GetCountofStoresByChainAsync(chainId), Times.Once);
         _mockChainRepository.Verify(r => r.DeleteAsync(It.IsAny<ChainId>(), It.IsAny<CancellationToken>()), Times.Never);

@@ -25,7 +25,7 @@ public class StoreControllerTests : BaseIntegrationTest
         var request = new CreateStoreDto(null, 101, "Test Store", "123 Main St", "12345", "Test City", "1", "5551234567", "test@store.com", "John", "Doe");
         
         // Act
-        var response = await _client.PostAsJsonAsync("/api/store/createStore", request);
+        var response = await _client.PostAsJsonAsync("/api/stores/postStore", request);
         var responseBody = await response.Content.ReadAsStringAsync(); // log full server error for debugging
         _output.WriteLine(responseBody);
 
@@ -42,7 +42,7 @@ public class StoreControllerTests : BaseIntegrationTest
         var request = new CreateStoreDto(null, number, name, street, postalCode, city, countryCode, phoneNumber, email, firstName, lastName);
 
         // Act
-        var response = await _client.PostAsJsonAsync("/api/store/createStore", request);
+        var response = await _client.PostAsJsonAsync("/api/stores/postStore", request);
         var responseBody = await response.Content.ReadAsStringAsync(); // log full server error for debugging
         _output.WriteLine(responseBody);
 
@@ -62,7 +62,7 @@ public class StoreControllerTests : BaseIntegrationTest
         };
 
         // Act
-        var response = await _client.PostAsJsonAsync("/api/store/createStore", request);
+        var response = await _client.PostAsJsonAsync("/api/stores/postStore", request);
         var responseBody = await response.Content.ReadAsStringAsync(); // log full server error for debugging
         _output.WriteLine(responseBody);
 
@@ -78,7 +78,7 @@ public class StoreControllerTests : BaseIntegrationTest
         var storeId = await ApiHelper.CreateStoreAndGetId(_client, storeDto);
 
         // Act
-        var response = await _client.GetAsync($"/api/store/getStore/{storeId}");
+        var response = await _client.GetAsync($"/api/stores/getStore/{storeId}");
         var responseBody = await response.Content.ReadAsStringAsync(); // log full server error for debugging
         _output.WriteLine(responseBody);
 
@@ -94,7 +94,7 @@ public class StoreControllerTests : BaseIntegrationTest
         var nonExistingId = Guid.NewGuid();
 
         // Act
-        var response = await _client.GetAsync($"/api/store/getStore/{nonExistingId}");
+        var response = await _client.GetAsync($"/api/stores/getStore/{nonExistingId}");
         var responseBody = await response.Content.ReadAsStringAsync(); // log full server error for debugging
         _output.WriteLine(responseBody);
 
@@ -111,15 +111,15 @@ public class StoreControllerTests : BaseIntegrationTest
 
         // Create two stores for the chain
         var createStore1Dto = new CreateStoreDto(chainId, 1, "Test Store 1", "123 Main St", "12345", "Test City", "1", "5551234567", "test1@store.com", "John", "Doe");
-        var store1Response = await _client.PostAsJsonAsync("/api/store/createStore", createStore1Dto);
+        var store1Response = await _client.PostAsJsonAsync("/api/stores/postStore", createStore1Dto);
         store1Response.EnsureSuccessStatusCode();
 
         var createStore2Dto = new CreateStoreDto(chainId, 2, "Test Store 2", "456 Main St", "67890", "Test City", "1", "5559876543", "test2@store.com", "Jane", "Doe");
-        var store2Response = await _client.PostAsJsonAsync("/api/store/createStore", createStore2Dto);
+        var store2Response = await _client.PostAsJsonAsync("/api/stores/postStore", createStore2Dto);
         store2Response.EnsureSuccessStatusCode();
 
         // Act
-        var response = await _client.GetAsync($"/api/store/getStoresByChain/{chainId}");
+        var response = await _client.GetAsync($"/api/stores/getStoresByChain/{chainId}");
         var responseBody = await response.Content.ReadAsStringAsync(); // log full server error for debugging
         _output.WriteLine(responseBody);
 
@@ -137,11 +137,11 @@ public class StoreControllerTests : BaseIntegrationTest
 
         // Create 1 stores for the chain
         var createStore1Dto = new CreateStoreDto(chainId, 1, "Test Store 1", "123 Main St", "12345", "Test City", "1", "5551234567", "test1@store.com", "John", "Doe");
-        var store1Response = await _client.PostAsJsonAsync("/api/store/createStore", createStore1Dto);
+        var store1Response = await _client.PostAsJsonAsync("/api/stores/postStore", createStore1Dto);
         store1Response.EnsureSuccessStatusCode();
 
         // Act
-        var response = await _client.GetAsync($"/api/store/getStoresByChain/{chainId}");
+        var response = await _client.GetAsync($"/api/stores/getStoresByChain/{chainId}");
         var responseBody = await response.Content.ReadAsStringAsync(); // log full server error for debugging
         _output.WriteLine(responseBody);
 
@@ -158,7 +158,7 @@ public class StoreControllerTests : BaseIntegrationTest
         _output.WriteLine($"Created Chain ID: {chainId}");
 
         // Act
-        var response = await _client.GetAsync($"/api/store/getStoresByChain/{chainId}");
+        var response = await _client.GetAsync($"/api/stores/getStoresByChain/{chainId}");
         var responseBody = await response.Content.ReadAsStringAsync(); // log full server error for debugging
         _output.WriteLine(responseBody);
 
@@ -173,7 +173,7 @@ public class StoreControllerTests : BaseIntegrationTest
         var nonExistingId = Guid.NewGuid();
 
         // Act
-        var response = await _client.GetAsync($"/api/store/getStoresByChain/{nonExistingId}");
+        var response = await _client.GetAsync($"/api/stores/getStoresByChain/{nonExistingId}");
         var responseBody = await response.Content.ReadAsStringAsync(); // log full server error for debugging
         _output.WriteLine(responseBody);
 
@@ -191,7 +191,7 @@ public class StoreControllerTests : BaseIntegrationTest
         var request = new UpdateStoreDto(storeId, null, 201, "Updated Store", "456 Updated St", "54321", "Updated City", "1", "5559876543", "updated@store.com", "Jane", "Smith", DateTime.UtcNow, DateTime.UtcNow.AddDays(1));
 
         // Act
-        var response = await _client.PutAsJsonAsync("/api/store/updateStore", request);
+        var response = await _client.PutAsJsonAsync("/api/stores/putStore", request);
         var responseBody = await response.Content.ReadAsStringAsync(); // log full server error for debugging
         _output.WriteLine(responseBody);
 
@@ -209,7 +209,7 @@ public class StoreControllerTests : BaseIntegrationTest
         var request = new UpdateStoreDto(Guid.NewGuid(), null, 202, "Non-existing Store", "456 Updated St", "54321", "Updated City", "1", "5559876543", "updated@store.com", "Jane", "Smith", DateTime.UtcNow, DateTime.UtcNow.AddDays(1));
 
         // Act
-        var response = await _client.PutAsJsonAsync("/api/store/updateStore", request);
+        var response = await _client.PutAsJsonAsync("/api/stores/putStore", request);
         var responseBody = await response.Content.ReadAsStringAsync(); // log full server error for debugging
         _output.WriteLine(responseBody);
 
@@ -227,7 +227,7 @@ public class StoreControllerTests : BaseIntegrationTest
         var request = new UpdateStoreDto(storeId, null, 203, "Updated Store", "456 Updated St", "54321", "Updated City", "1", "5559876543", "invalid-email", "Jane", "Smith", DateTime.UtcNow, DateTime.UtcNow.AddDays(1));
 
         // Act
-        var response = await _client.PutAsJsonAsync("/api/store/updateStore", request);
+        var response = await _client.PutAsJsonAsync("/api/stores/putStore", request);
         var responseBody = await response.Content.ReadAsStringAsync(); // log full server error for debugging
         _output.WriteLine(responseBody);
 
@@ -248,7 +248,7 @@ public class StoreControllerTests : BaseIntegrationTest
         };
 
         // Act
-        var response = await _client.PutAsJsonAsync("/api/store/updateStore", request);
+        var response = await _client.PutAsJsonAsync("/api/stores/putStore", request);
         var responseBody = await response.Content.ReadAsStringAsync(); // log full server error for debugging
         _output.WriteLine(responseBody);
 
@@ -269,7 +269,7 @@ public class StoreControllerTests : BaseIntegrationTest
         var httpRequestMessage = new HttpRequestMessage
         {
             Method = HttpMethod.Delete,
-            RequestUri = new Uri(_client.BaseAddress + "api/store/deleteStore"),
+            RequestUri = new Uri(_client.BaseAddress + "api/stores/deleteStore"),
             Content = JsonContent.Create(request)
         };
         var response = await _client.SendAsync(httpRequestMessage);
@@ -288,7 +288,7 @@ public class StoreControllerTests : BaseIntegrationTest
         var request = new DeleteStoreDto(Guid.NewGuid(), DateTime.UtcNow, DateTime.UtcNow);
 
         // Act
-        var response = await _client.SendAsync(new HttpRequestMessage(HttpMethod.Delete, "/api/store/deleteStore")
+        var response = await _client.SendAsync(new HttpRequestMessage(HttpMethod.Delete, "/api/stores/deleteStore")
         {
             Content = JsonContent.Create(request)
         });
@@ -306,7 +306,7 @@ public class StoreControllerTests : BaseIntegrationTest
         var request = new DeleteStoreDto(Guid.Empty, DateTime.UtcNow, DateTime.UtcNow);
 
         // Act
-        var response = await _client.SendAsync(new HttpRequestMessage(HttpMethod.Delete, "/api/store/deleteStore")
+        var response = await _client.SendAsync(new HttpRequestMessage(HttpMethod.Delete, "/api/stores/deleteStore")
         {
             Content = JsonContent.Create(request)
         });
@@ -324,17 +324,17 @@ public class StoreControllerTests : BaseIntegrationTest
         var chainId = await ApiHelper.CreateChainAndGetId(_client, StringRandom.GetRandomString(10));
         _output.WriteLine($"Created Chain ID: {chainId}");
         var createStore1Dto = new CreateStoreDto(chainId, 1, "Test Store 1", "123 Main St", "12345", "Test City", "1", "5551234567", "test1@store.com", "John", "Doe");
-        var store1Response = await _client.PostAsJsonAsync("/api/store/createStore", createStore1Dto);
+        var store1Response = await _client.PostAsJsonAsync("/api/stores/postStore", createStore1Dto);
         store1Response.EnsureSuccessStatusCode();
 
         var createStore2Dto = new CreateStoreDto(chainId, 2, "Test Store 2", "456 Main St", "67890", "Test City", "1", "5559876543", "test2@store.com", "Jane", "Doe");
-        var store2Response = await _client.PostAsJsonAsync("/api/store/createStore", createStore2Dto);
+        var store2Response = await _client.PostAsJsonAsync("/api/stores/postStore", createStore2Dto);
         store2Response.EnsureSuccessStatusCode();
 
         var request = new DeleteAllStoresDto(chainId, DateTime.UtcNow, DateTime.UtcNow);
 
         // Act
-        var response = await _client.SendAsync(new HttpRequestMessage(HttpMethod.Delete, "/api/store/deleteAllStores")
+        var response = await _client.SendAsync(new HttpRequestMessage(HttpMethod.Delete, "/api/stores/deleteAllStores")
         {
             Content = JsonContent.Create(request)
         });
@@ -352,7 +352,7 @@ public class StoreControllerTests : BaseIntegrationTest
         var request = new DeleteAllStoresDto(Guid.NewGuid(), DateTime.UtcNow, DateTime.UtcNow);
 
         // Act
-        var response = await _client.SendAsync(new HttpRequestMessage(HttpMethod.Delete, "/api/store/deleteAllStores")
+        var response = await _client.SendAsync(new HttpRequestMessage(HttpMethod.Delete, "/api/stores/deleteAllStores")
         {
             Content = JsonContent.Create(request)
         });
@@ -373,7 +373,7 @@ public class StoreControllerTests : BaseIntegrationTest
         var request = new DeleteAllStoresDto(chainId, DateTime.UtcNow, DateTime.UtcNow);
 
         // Act
-        var response = await _client.SendAsync(new HttpRequestMessage(HttpMethod.Delete, "/api/store/deleteAllStores")
+        var response = await _client.SendAsync(new HttpRequestMessage(HttpMethod.Delete, "/api/stores/deleteAllStores")
         {
             Content = JsonContent.Create(request)
         });
@@ -395,8 +395,8 @@ public class StoreControllerTests : BaseIntegrationTest
         var request2 = new CreateStoreDto(chainId, 102, "Test Store", "123 Main St", "12345", "Test City", "1", "5551234567", "test@store.com", "John", "Doe");
 
         // Act
-        var task1 = _client.PostAsJsonAsync("/api/store/createStore", request1);
-        var task2 = _client.PostAsJsonAsync("/api/store/createStore", request2);
+        var task1 = _client.PostAsJsonAsync("/api/stores/postStore", request1);
+        var task2 = _client.PostAsJsonAsync("/api/stores/postStore", request2);
         var responses = await Task.WhenAll(task1, task2);
         foreach (var response in responses)// log full server error for debugging
         {
@@ -417,7 +417,7 @@ public class StoreControllerTests : BaseIntegrationTest
 
         // Delete the store
         var deleteRequest = new DeleteStoreDto(storeId, DateTime.UtcNow, DateTime.UtcNow);
-        await _client.SendAsync(new HttpRequestMessage(HttpMethod.Delete, "/api/store/deleteStore")
+        await _client.SendAsync(new HttpRequestMessage(HttpMethod.Delete, "/api/stores/deleteStore")
         {
             Content = JsonContent.Create(deleteRequest)
         });
@@ -426,7 +426,7 @@ public class StoreControllerTests : BaseIntegrationTest
         var updateRequest = new UpdateStoreDto(storeId, null, 401, "Updated Store", "456 Updated St", "54321", "Updated City", "1", "5559876543", "updated@store.com", "Jane", "Smith", DateTime.UtcNow, DateTime.UtcNow.AddDays(1));
 
         // Act
-        var response = await _client.PutAsJsonAsync("/api/store/updateStore", updateRequest);
+        var response = await _client.PutAsJsonAsync("/api/stores/putStore", updateRequest);
         var responseBody = await response.Content.ReadAsStringAsync(); // log full server error for debugging
         _output.WriteLine(responseBody);
 
@@ -460,7 +460,7 @@ public class StoreControllerTests : BaseIntegrationTest
             store.Result.ModifiedOn);
 
         // Act
-        var updateResponse = await _client.PutAsJsonAsync("/api/store/updateStore", updateRequest);
+        var updateResponse = await _client.PutAsJsonAsync("/api/stores/putStore", updateRequest);
         // Check that update succeeded
         if (!updateResponse.IsSuccessStatusCode)
         {
@@ -469,7 +469,7 @@ public class StoreControllerTests : BaseIntegrationTest
         }
         Assert.Equal(HttpStatusCode.OK, updateResponse.StatusCode);
 
-        var response = await _client.GetAsync($"/api/store/getStore/{store.Result.Id}");
+        var response = await _client.GetAsync($"/api/stores/getStore/{store.Result.Id}");
         var responseBody = await response.Content.ReadAsStringAsync(); // log full server error for debugging
         _output.WriteLine(responseBody);
 

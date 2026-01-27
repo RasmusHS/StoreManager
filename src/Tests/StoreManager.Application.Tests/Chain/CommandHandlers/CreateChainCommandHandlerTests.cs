@@ -219,7 +219,7 @@ public class CreateChainCommandHandlerTests
 
         // Assert
         Assert.True(result.Success);
-        var storeDto = result.Value.Stores[0];
+        var storeDto = result.Value.Stores![0];
         Assert.Equal(42, storeDto.Number);
         Assert.Equal("Test Store", storeDto.Name);
         Assert.Equal("789 Pine Rd", storeDto.Street);
@@ -256,7 +256,7 @@ public class CreateChainCommandHandlerTests
         // Assert
         var afterCreation = DateTime.UtcNow;
         Assert.True(result.Success);
-        var storeDto = result.Value.Stores[0];
+        var storeDto = result.Value.Stores![0];
         Assert.True(storeDto.CreatedOn >= beforeCreation && storeDto.CreatedOn <= afterCreation);
         Assert.True(storeDto.ModifiedOn >= beforeCreation && storeDto.ModifiedOn <= afterCreation);
     }
@@ -268,6 +268,7 @@ public class CreateChainCommandHandlerTests
     [Theory]
     [InlineData("")]
     [InlineData(" ")]
+    [InlineData(null)]
     public async Task Handle_WithInvalidChainName_ReturnsFailureResult(string invalidName)
     {
         // Arrange
@@ -280,24 +281,7 @@ public class CreateChainCommandHandlerTests
         Assert.False(result.Success);
         Assert.True(result.Failure);
         Assert.NotNull(result.Error);
-        Assert.Equal("exception.thrown", result.Error.Code);
-        _mockChainRepository.Verify(r => r.AddAsync(It.IsAny<ChainEntity>(), It.IsAny<CancellationToken>()), Times.Never);
-    }
-
-    [Fact]
-    public async Task Handle_WithNullChainName_ReturnsFailureResult()
-    {
-        // Arrange
-        var command = new CreateChainCommand(null, null);
-
-        // Act
-        var result = await _handler.Handle(command);
-
-        // Assert
-        Assert.False(result.Success);
-        Assert.True(result.Failure);
-        Assert.NotNull(result.Error);
-        Assert.Equal("exception.thrown", result.Error.Code);
+        Assert.Equal("Failed to create entity chainResult due to an unexpected error.", result.Error.Message);
         _mockChainRepository.Verify(r => r.AddAsync(It.IsAny<ChainEntity>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 

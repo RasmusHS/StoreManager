@@ -73,6 +73,7 @@ public class DeleteStoreCommandHandlerTests
         // Assert
         Assert.False(result.Success);
         Assert.NotNull(result.Error);
+        Assert.Equal($"Could not find entity with ID {storeId}.", result.Error.Message);
         _mockStoreRepository.Verify(r => r.GetByIdAsync(storeId), Times.Once);
         _mockStoreRepository.Verify(r => r.DeleteAsync(It.IsAny<StoreId>(), It.IsAny<CancellationToken>()), Times.Never);
     }

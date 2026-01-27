@@ -1,6 +1,7 @@
 ﻿using Assert = Xunit.Assert;
 using Helpers;
 using StoreManager.Domain.Common.ValueObjects;
+using StoreManager.Domain.Common;
 
 namespace StoreManager.Domain.Tests.Common.ValueObjects;
 
@@ -26,29 +27,45 @@ public class FullNameTests
     [Theory]
     [InlineData("", "Doe")]
     [InlineData(" ", "Doe")]
+    [InlineData(null, "Doe")]
     public void Create_WithInvalidFirstName_ThrowsArgumentException(string firstName, string lastName)
     {
-        // Act & Assert
-        Assert.Throws<ArgumentException>(() => FullName.Create(firstName, lastName));
+        // Act
+        var result = FullName.Create(firstName, lastName);
+
+        // Assert
+        Assert.True(result.Failure);
+        Assert.Equal("MultipleErrors", result.Error.Code);
+        Assert.Contains("Value 'firstName' is required.", result.Error.Message);
     }
 
     [Theory]
     [InlineData("John", "")]
     [InlineData("John", " ")]
+    [InlineData("John", null)]
     public void Create_WithInvalidLastName_ThrowsArgumentException(string firstName, string lastName)
     {
-        // Act & Assert
-        Assert.Throws<ArgumentException>(() => FullName.Create(firstName, lastName));
+        // Act
+        var result = FullName.Create(firstName, lastName);
+
+        // Assert
+        Assert.True(result.Failure);
+        Assert.Equal("MultipleErrors", result.Error.Code);
+        Assert.Contains("Value 'lastName' is required.", result.Error.Message);
     }
 
     [Theory]
-    [InlineData(null, "Doe")]
-    [InlineData("John", null)]
     [InlineData(null, null)]
     public void Create_WithNullNames_ThrowsArgumentNullException(string firstName, string lastName)
     {
-        // Act & Assert
-        Assert.Throws<ArgumentNullException>(() => FullName.Create(firstName, lastName));
+        // Act
+        var result = FullName.Create(firstName, lastName);
+
+        // Assert
+        Assert.True(result.Failure);
+        Assert.Equal("MultipleErrors", result.Error.Code);
+        Assert.Contains("Value 'firstName' is required.", result.Error.Message);
+        Assert.Contains("Value 'lastName' is required.", result.Error.Message);
     }
 
     [Fact]

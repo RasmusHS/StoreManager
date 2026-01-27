@@ -47,7 +47,8 @@ public class EmailTests
 
         // Assert
         Assert.True(result.Failure);
-        Assert.Contains<Error>(Errors.General.ValueIsRequired(nameof(email)), (IEnumerable<Error>)result.Error);
+        Assert.Equal("MultipleErrors", result.Error.Code);
+        Assert.Contains("Value 'email' is not valid in this context.", result.Error.Message);
     }
 
     [Fact]
@@ -61,7 +62,8 @@ public class EmailTests
 
         // Assert
         Assert.True(result.Failure);
-        Assert.Contains<Error>(Errors.General.ValueIsRequired(nameof(email)), (IEnumerable<Error>)result.Error);
+        Assert.Equal("MultipleErrors", result.Error.Code);
+        Assert.Contains("Value 'email' is required.", result.Error.Message);
     }
 
     [Fact]
@@ -75,7 +77,8 @@ public class EmailTests
 
         // Assert
         Assert.True(result.Failure);
-        Assert.Contains<Error>(Errors.General.ValueIsRequired(nameof(email)), (IEnumerable<Error>)result.Error);
+        Assert.Equal("MultipleErrors", result.Error.Code);
+        Assert.Contains("Value 'email' is required.", result.Error.Message);
     }
 
     [Fact]
@@ -89,7 +92,8 @@ public class EmailTests
 
         // Assert
         Assert.True(result.Failure);
-        Assert.Contains<Error>(Errors.General.ValueTooLarge(nameof(email), 100), (IEnumerable<Error>)result.Error);
+        Assert.Equal("MultipleErrors", result.Error.Code);
+        Assert.Contains("Value 'email' should not exceed 100.", result.Error.Message); 
     }
 
     [Fact]
@@ -103,7 +107,8 @@ public class EmailTests
 
         // Assert
         Assert.True(result.Failure);
-        Assert.Contains<Error>(Errors.General.UnexpectedValue(nameof(email)), (IEnumerable<Error>)result.Error);
+        Assert.Equal("MultipleErrors", result.Error.Code);
+        Assert.Contains("Value 'email' is not valid in this context.", result.Error.Message);
     }
 
     [Fact]
@@ -117,7 +122,8 @@ public class EmailTests
 
         // Assert
         Assert.True(result.Failure);
-        Assert.Contains<Error>(Errors.General.UnexpectedValue(nameof(email)), (IEnumerable<Error>)result.Error);
+        Assert.Equal("MultipleErrors", result.Error.Code);
+        Assert.Contains("Value 'email' is not valid in this context.", result.Error.Message);
     }
 
     [Fact]

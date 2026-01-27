@@ -170,14 +170,16 @@ public class CreateStoreCommandHandlerTests
 
     #region Failure Tests
 
-    [Fact]
-    public async Task Handle_WithEmptyStoreName_ReturnsFailureResult()
+    [Theory]
+    [InlineData("")]
+    [InlineData("   ")]
+    public async Task Handle_WithEmptyStoreName_ReturnsFailureResult(string name)
     {
         // Arrange
         var command = new CreateStoreCommand(
             null,
             1,
-            "",
+            name,
             Address.Create("123 Main St", "12345", "TestCity").Value,
             PhoneNumber.Create("+1", "1234567890").Value,
             Email.Create("store@example.com").Value,
@@ -189,28 +191,7 @@ public class CreateStoreCommandHandlerTests
         // Assert
         Assert.True(result.Failure);
         Assert.NotNull(result.Error);
-        _mockStoreRepository.Verify(r => r.AddAsync(It.IsAny<StoreEntity>(), It.IsAny<CancellationToken>()), Times.Never);
-    }
-
-    [Fact]
-    public async Task Handle_WithWhiteSpaceStoreName_ReturnsFailureResult()
-    {
-        // Arrange
-        var command = new CreateStoreCommand(
-            null,
-            1,
-            "   ",
-            Address.Create("123 Main St", "12345", "TestCity").Value,
-            PhoneNumber.Create("+1", "1234567890").Value,
-            Email.Create("store@example.com").Value,
-            FullName.Create("John", "Doe").Value);
-
-        // Act
-        var result = await _handler.Handle(command);
-
-        // Assert
-        Assert.True(result.Failure);
-        Assert.NotNull(result.Error);
+        Assert.Equal("Value 'name' is required.", result.Error.Message);
         _mockStoreRepository.Verify(r => r.AddAsync(It.IsAny<StoreEntity>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
@@ -250,8 +231,6 @@ public class CreateStoreCommandHandlerTests
         Assert.Equal("complete@example.com", dto.Email);
         Assert.Equal("Robert", dto.FirstName);
         Assert.Equal("Johnson", dto.LastName);
-        Assert.NotNull(dto.CreatedOn);
-        Assert.NotNull(dto.ModifiedOn);
     }
 
     [Fact]

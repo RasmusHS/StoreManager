@@ -144,6 +144,7 @@ public class UpdateChainCommandHandlerTests
         // Assert
         Assert.True(result.Failure);
         Assert.NotNull(result.Error);
+        Assert.Equal($"Could not find entity with ID {chainId}.", result.Error.Message); 
         _mockChainRepository.Verify(r => r.GetByIdAsync(chainId), Times.Once);
         _mockChainRepository.Verify(r => r.UpdateAsync(It.IsAny<ChainEntity>(), It.IsAny<CancellationToken>()), Times.Never);
     }
@@ -163,7 +164,9 @@ public class UpdateChainCommandHandlerTests
         var result = await _handler.Handle(command);
 
         // Assert
-        Assert.False(result.Success);
+        Assert.True(result.Failure);
+        Assert.NotNull(result.Error);
+        Assert.Equal($"Could not find entity with ID {chainId}.", result.Error.Message);
         _mockChainRepository.Verify(r => r.UpdateAsync(It.IsAny<ChainEntity>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 

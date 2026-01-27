@@ -32,20 +32,6 @@ public sealed class ChainEntity : AggregateRoot<ChainId>
             return Result.Ok<ChainEntity>(new ChainEntity(ChainId.Create().Value, name));
     }
 
-    // Marked for removal due to only being used in tests
-    //public void AddStoreToChain(StoreEntity store)
-    //{
-    //    List<Error> errors = new List<Error>();
-    //    //Ensure.That(store, nameof(store)).IsNotNull();
-    //    if (store == null)
-    //        errors.Add(Errors.General.ValueIsRequired(nameof(store)));
-
-    //    if (errors.Count > 0)
-    //       throw new ArgumentException(string.Join(", ", errors.Select(e => e.Message)));
-
-    //    _stores.Add(store);
-    //}
-
     public void AddRangeStoresToChain(List<StoreEntity> stores)
     {
         List<Error> errors = new List<Error>();
