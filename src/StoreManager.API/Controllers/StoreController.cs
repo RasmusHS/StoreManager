@@ -30,8 +30,8 @@ public class StoreController : BaseController
 
         if (!result.IsValid)
         {
-            errors.AddRange(result.Errors.Select(e => e.ErrorMessage));
-            return Error(string.Join(" | ", errors));
+            errors.AddRange(result.Errors.Select(e => "FluentValidation errors: \n" + " - Error code: " + e.ErrorCode + "\n - Error message: " + e.ErrorMessage + "\n"));
+            return Error(errors);
         }
 
         // Validate value objects
@@ -65,7 +65,7 @@ public class StoreController : BaseController
                 return Ok(commandResult.Value);
             }
             errors.Add(string.Join("; ", commandResult.Error.Code, commandResult.Error.Message, commandResult.Error.StatusCode));
-            return Error(string.Join(" | ", errors));
+            return Error(errors);
         }
         else
         {
@@ -83,7 +83,7 @@ public class StoreController : BaseController
                 return Ok(commandResult.Value);
             }
             errors.Add(string.Join("; ", commandResult.Error.Code, commandResult.Error.Message, commandResult.Error.StatusCode));
-            return Error(string.Join(" | ", errors));
+            return Error(errors);
         }
     }
 
@@ -111,7 +111,7 @@ public class StoreController : BaseController
             var result = await validators[i].ValidateAsync(requests[i]);
             if (!result.IsValid)
             {
-                errors.AddRange(result.Errors.Select(e => e.ErrorMessage));
+                errors.AddRange(result.Errors.Select(e => "FluentValidation errors: \n" + " - Error code: " + e.ErrorCode + "\n - Error message: " + e.ErrorMessage + "\n"));
                 continue;
             }
 
@@ -156,7 +156,7 @@ public class StoreController : BaseController
 
         if (errors.Any())
         {
-            return Error(string.Join(" | ", errors));
+            return Error(errors);
         }
 
         var bulkCommand = new BulkCreateStoresCommand(commands);
@@ -166,7 +166,7 @@ public class StoreController : BaseController
             return Ok(commandResults.Value);
         }
         errors.Add(string.Join("; ", commandResults.Error.Code, commandResults.Error.Message, commandResults.Error.StatusCode));
-        return Error(string.Join(" | ", errors));
+        return Error(errors);
     }
 
     [HttpGet]
@@ -179,7 +179,7 @@ public class StoreController : BaseController
         if (!storeIdResult.Success)
         {
             errors.Add(string.Join("; ", storeIdResult.Error.Code, storeIdResult.Error.Message, storeIdResult.Error.StatusCode));
-            return Error(string.Join(" | ", errors));
+            return Error(errors);
         }
 
         var result = await _dispatcher.Dispatch(new GetStoreQuery(storeIdResult.Value));
@@ -188,7 +188,7 @@ public class StoreController : BaseController
             return Ok(result.Value);
         }
         errors.Add(string.Join("; ", result.Error.Code, result.Error.Message, result.Error.StatusCode));
-        return Error(string.Join(" | ", errors));
+        return Error(errors);
     }
 
     [HttpGet]
@@ -201,7 +201,7 @@ public class StoreController : BaseController
         if (!chainIdResult.Success)
         {
             errors.Add(string.Join("; ", chainIdResult.Error.Code, chainIdResult.Error.Message, chainIdResult.Error.StatusCode));
-            return Error(string.Join(" | ", errors));
+            return Error(errors);
         }
 
         var result = await _dispatcher.Dispatch(new GetAllStoresByChainQuery(chainIdResult.Value));
@@ -210,7 +210,7 @@ public class StoreController : BaseController
             return Ok(result.Value);
         }
         errors.Add(string.Join("; ", result.Error.Code, result.Error.Message, result.Error.StatusCode));
-        return Error(string.Join(" | ", errors));
+        return Error(errors);
     }
 
     [HttpPut]
@@ -223,8 +223,8 @@ public class StoreController : BaseController
 
         if (!result.IsValid)
         {
-            errors.AddRange(result.Errors.Select(e => e.ErrorMessage));
-            return Error(string.Join(" | ", errors));
+            errors.AddRange(result.Errors.Select(e => "FluentValidation errors: \n" + " - Error code: " + e.ErrorCode + "\n - Error message: " + e.ErrorMessage + "\n"));
+            return Error(errors);
         }
 
         // Validate value objects
@@ -272,7 +272,7 @@ public class StoreController : BaseController
                 return Ok(commandResult.Value);
             }
             errors.Add(string.Join("; ", commandResult.Error.Code, commandResult.Error.Message, commandResult.Error.StatusCode));
-            return Error(string.Join(" | ", errors));
+            return Error(errors);
         }
         else
         {
@@ -294,7 +294,7 @@ public class StoreController : BaseController
                 return Ok(commandResult.Value);
             }
             errors.Add(string.Join("; ", commandResult.Error.Code, commandResult.Error.Message, commandResult.Error.StatusCode));
-            return Error(string.Join(" | ", errors));
+            return Error(errors);
         }
     }
 
@@ -308,7 +308,7 @@ public class StoreController : BaseController
         if (!result.Success)
         {
             errors.Add(string.Join("; ", result.Error.Code, result.Error.Message, result.Error.StatusCode));
-            return Error(string.Join(" | ", errors));
+            return Error(errors);
         }
 
         DeleteStoreCommand command = new DeleteStoreCommand(result);
@@ -318,7 +318,7 @@ public class StoreController : BaseController
             return Ok(commandResult);
         }
         errors.Add(string.Join("; ", commandResult.Error.Code, commandResult.Error.Message, commandResult.Error.StatusCode));
-        return Error(string.Join(" | ", errors));
+        return Error(errors);
     }
 
     [HttpDelete]
@@ -331,7 +331,7 @@ public class StoreController : BaseController
         if (!result.Success) 
         {
             errors.Add(string.Join("; ", result.Error.Code, result.Error.Message, result.Error.StatusCode));
-            return Error(string.Join(" | ", errors));
+            return Error(errors);
         }
 
         DeleteAllStoresCommand command = new DeleteAllStoresCommand(result);
@@ -341,6 +341,6 @@ public class StoreController : BaseController
             return Ok(commandResult);
         }
         errors.Add(string.Join("; ", commandResult.Error.Code, commandResult.Error.Message, commandResult.Error.StatusCode));
-        return Error(string.Join(" | ", errors));
+        return Error(errors);
     }
 }

@@ -1,9 +1,14 @@
 ﻿using Helpers;
 using Microsoft.EntityFrameworkCore;
+using StoreManager.API.Utilities;
+using StoreManager.Application.Data;
 using StoreManager.Application.DTO.Store.Command;
+using StoreManager.Application.DTO.Store.Query;
+using StoreManager.Domain.Chain.ValueObjects;
 using System.Net;
 using System.Net.Http.Json;
 using Xunit.Abstractions;
+using StoreResponseDto = StoreManager.Application.DTO.Store.Command.StoreResponseDto;
 
 namespace StoreManager.API.IntegrationTests;
 
@@ -31,6 +36,22 @@ public class StoreControllerTests : BaseIntegrationTest
 
         // Assert
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+        var storeResponse = await response.Content.ReadFromJsonAsync<Helpers.Envelope<StoreResponseDto>>();
+        Assert.NotNull(storeResponse);
+        Assert.NotNull(storeResponse.Result);
+        Assert.NotEqual(Guid.Empty, storeResponse.Result.Id);
+        Assert.Equal(request.Number, storeResponse.Result.Number);
+        Assert.Equal(request.Name, storeResponse.Result.Name);
+        Assert.Equal(request.Street, storeResponse.Result.Street);
+        Assert.Equal(request.PostalCode, storeResponse.Result.PostalCode);
+        Assert.Equal(request.City, storeResponse.Result.City);
+        Assert.Equal(request.CountryCode, storeResponse.Result.CountryCode);
+        Assert.Equal(request.PhoneNumber, storeResponse.Result.PhoneNumber);
+        Assert.Equal(request.Email, storeResponse.Result.Email);
+        Assert.Equal(request.FirstName, storeResponse.Result.FirstName);
+        Assert.Equal(request.LastName, storeResponse.Result.LastName);
+        Assert.Null(storeResponse.Result.ChainId);
     }
 
     [Theory]
@@ -48,6 +69,13 @@ public class StoreControllerTests : BaseIntegrationTest
 
         // Assert
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+
+        var errorResponse = await response.Content.ReadFromJsonAsync<Helpers.Envelope<StoreResponseDto>>();
+        Assert.NotNull(errorResponse);
+        Assert.Null(errorResponse.Result);
+        Assert.NotNull(errorResponse.ErrorMessage);
+        Assert.NotEmpty(errorResponse.ErrorMessage);
+        _output.WriteLine($"Error: {errorResponse.ErrorMessage}");
     }
 
     [Fact]
@@ -68,6 +96,13 @@ public class StoreControllerTests : BaseIntegrationTest
 
         // Assert
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+
+        var errorResponse = await response.Content.ReadFromJsonAsync<Helpers.Envelope<StoreResponseDto>>();
+        Assert.NotNull(errorResponse);
+        Assert.Null(errorResponse.Result);
+        Assert.NotNull(errorResponse.ErrorMessage);
+        Assert.NotEmpty(errorResponse.ErrorMessage);
+        _output.WriteLine($"Error: {errorResponse.ErrorMessage}");
     }
 
     [Fact]
@@ -85,6 +120,22 @@ public class StoreControllerTests : BaseIntegrationTest
         // Assert
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         Assert.NotEmpty(responseBody);
+
+        var queryStoreDto = await response.Content.ReadFromJsonAsync<Helpers.Envelope<QueryStoreDto>>();
+        Assert.NotNull(queryStoreDto);
+        Assert.NotNull(queryStoreDto.Result);
+        Assert.NotEqual(Guid.Empty, queryStoreDto.Result.Id);
+        Assert.Equal(storeDto.Number, queryStoreDto.Result.Number);
+        Assert.Equal(storeDto.Name, queryStoreDto.Result.Name);
+        Assert.Equal(storeDto.Street, queryStoreDto.Result.Street);
+        Assert.Equal(storeDto.PostalCode, queryStoreDto.Result.PostalCode);
+        Assert.Equal(storeDto.City, queryStoreDto.Result.City);
+        Assert.Equal(storeDto.CountryCode, queryStoreDto.Result.CountryCode);
+        Assert.Equal(storeDto.PhoneNumber, queryStoreDto.Result.PhoneNumber);
+        Assert.Equal(storeDto.Email, queryStoreDto.Result.Email);
+        Assert.Equal(storeDto.FirstName, queryStoreDto.Result.FirstName);
+        Assert.Equal(storeDto.LastName, queryStoreDto.Result.LastName);
+        Assert.Null(queryStoreDto.Result.ChainId);
     }
 
     [Fact]
@@ -100,6 +151,13 @@ public class StoreControllerTests : BaseIntegrationTest
 
         // Assert
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+
+        var errorResponse = await response.Content.ReadFromJsonAsync<Helpers.Envelope<QueryStoreDto>>();
+        Assert.NotNull(errorResponse);
+        Assert.Null(errorResponse.Result);
+        Assert.NotNull(errorResponse.ErrorMessage);
+        Assert.NotEmpty(errorResponse.ErrorMessage);
+        _output.WriteLine($"Error: {errorResponse.ErrorMessage}");
     }
 
     [Fact]
@@ -126,6 +184,17 @@ public class StoreControllerTests : BaseIntegrationTest
         // Assert
         Assert.NotNull(response);
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+        var queryStoreDto = await response.Content.ReadFromJsonAsync<Helpers.Envelope<CollectionResponseBase<QueryStoreDto>>>();
+        Assert.NotNull(queryStoreDto);
+        Assert.Equal(2, queryStoreDto.Result.Data.Count());
+        Assert.All(queryStoreDto.Result.Data, store =>
+        {
+            Assert.NotNull(store);
+            Assert.Equal(chainId, store.ChainId);
+        });
+        Assert.Contains(queryStoreDto.Result.Data, s => s.Name == "Test Store 1");
+        Assert.Contains(queryStoreDto.Result.Data, s => s.Name == "Test Store 2");
     }
 
     [Fact]
@@ -148,6 +217,16 @@ public class StoreControllerTests : BaseIntegrationTest
         // Assert
         Assert.NotNull(response);
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+        var queryStoreDto = await response.Content.ReadFromJsonAsync<Helpers.Envelope<CollectionResponseBase<QueryStoreDto>>>();
+        Assert.NotNull(queryStoreDto);
+        Assert.NotNull(queryStoreDto.Result);
+        Assert.Single(queryStoreDto.Result.Data);
+        var store = queryStoreDto.Result.Data.First();
+        Assert.NotNull(store);
+        Assert.Equal(chainId, store.ChainId);
+        Assert.Equal("Test Store 1", store.Name);
+        Assert.Equal(1, store.Number);
     }
 
     [Fact]
@@ -164,6 +243,13 @@ public class StoreControllerTests : BaseIntegrationTest
 
         // Assert
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+
+        var errorResponse = await response.Content.ReadFromJsonAsync<Helpers.Envelope<QueryStoreDto>>();
+        Assert.NotNull(errorResponse);
+        Assert.Null(errorResponse.Result);
+        Assert.NotNull(errorResponse.ErrorMessage);
+        Assert.NotEmpty(errorResponse.ErrorMessage);
+        _output.WriteLine($"Error: {errorResponse.ErrorMessage}");
     }
 
     [Fact]
@@ -179,6 +265,13 @@ public class StoreControllerTests : BaseIntegrationTest
 
         // Assert
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+
+        var errorResponse = await response.Content.ReadFromJsonAsync<Helpers.Envelope<QueryStoreDto>>();
+        Assert.NotNull(errorResponse);
+        Assert.Null(errorResponse.Result);
+        Assert.NotNull(errorResponse.ErrorMessage);
+        Assert.NotEmpty(errorResponse.ErrorMessage);
+        _output.WriteLine($"Error: {errorResponse.ErrorMessage}");
     }
 
     [Fact]
@@ -197,6 +290,22 @@ public class StoreControllerTests : BaseIntegrationTest
 
         // Assert
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+        var storeResponse = await response.Content.ReadFromJsonAsync<Helpers.Envelope<StoreResponseDto>>();
+        Assert.NotNull(storeResponse);
+        Assert.NotNull(storeResponse.Result);
+        Assert.Equal(storeId, storeResponse.Result.Id);
+        Assert.Equal(request.Number, storeResponse.Result.Number);
+        Assert.Equal(request.Name, storeResponse.Result.Name);
+        Assert.Equal(request.Street, storeResponse.Result.Street);
+        Assert.Equal(request.PostalCode, storeResponse.Result.PostalCode);
+        Assert.Equal(request.City, storeResponse.Result.City);
+        Assert.Equal(request.CountryCode, storeResponse.Result.CountryCode);
+        Assert.Equal(request.PhoneNumber, storeResponse.Result.PhoneNumber);
+        Assert.Equal(request.Email, storeResponse.Result.Email);
+        Assert.Equal(request.FirstName, storeResponse.Result.FirstName);
+        Assert.Equal(request.LastName, storeResponse.Result.LastName);
+        Assert.Null(storeResponse.Result.ChainId);
     }
 
     [Fact]
@@ -215,6 +324,13 @@ public class StoreControllerTests : BaseIntegrationTest
 
         // Assert
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+
+        var errorResponse = await response.Content.ReadFromJsonAsync<Helpers.Envelope<StoreResponseDto>>();
+        Assert.NotNull(errorResponse);
+        Assert.Null(errorResponse.Result);
+        Assert.NotNull(errorResponse.ErrorMessage);
+        Assert.NotEmpty(errorResponse.ErrorMessage);
+        _output.WriteLine($"Error: {errorResponse.ErrorMessage}");
     }
 
     [Fact]
@@ -233,6 +349,13 @@ public class StoreControllerTests : BaseIntegrationTest
 
         // Assert
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+
+        var errorResponse = await response.Content.ReadFromJsonAsync<Helpers.Envelope<StoreResponseDto>>();
+        Assert.NotNull(errorResponse);
+        Assert.Null(errorResponse.Result);
+        Assert.NotNull(errorResponse.ErrorMessage);
+        Assert.NotEmpty(errorResponse.ErrorMessage);
+        _output.WriteLine($"Error: {errorResponse.ErrorMessage}");
     }
 
     [Fact]
@@ -254,6 +377,13 @@ public class StoreControllerTests : BaseIntegrationTest
 
         // Assert
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+
+        var errorResponse = await response.Content.ReadFromJsonAsync<Helpers.Envelope<StoreResponseDto>>();
+        Assert.NotNull(errorResponse);
+        Assert.Null(errorResponse.Result);
+        Assert.NotNull(errorResponse.ErrorMessage);
+        Assert.NotEmpty(errorResponse.ErrorMessage);
+        _output.WriteLine($"Error: {errorResponse.ErrorMessage}");
     }
 
     [Fact]
@@ -263,58 +393,65 @@ public class StoreControllerTests : BaseIntegrationTest
         var storeDto = new CreateStoreDto(null, 101, "Test Store", "123 Main St", "12345", "Test City", "1", "5551234567", "test@store.com", "John", "Doe");
         var storeId = await ApiHelper.CreateStoreAndGetId(_client, storeDto);
 
-        var request = new DeleteStoreDto(storeId, DateTime.UtcNow, DateTime.UtcNow);
-
-        // Act
-        var httpRequestMessage = new HttpRequestMessage
-        {
-            Method = HttpMethod.Delete,
-            RequestUri = new Uri(_client.BaseAddress + "api/stores/deleteStore"),
-            Content = JsonContent.Create(request)
-        };
-        var response = await _client.SendAsync(httpRequestMessage);
+        var response = await _client.DeleteAsync($"/api/stores/deleteStore/{storeId}");
         var responseBody = await response.Content.ReadAsStringAsync(); // log full server error for debugging
         _output.WriteLine(responseBody);
 
         // Assert
         Assert.NotNull(response);
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+        var storeGetResponse = await _client.GetAsync($"/api/stores/getStore/{storeId}");
+        var storeResponse = await storeGetResponse.Content.ReadFromJsonAsync<Helpers.Envelope<QueryStoreDto>>();
+        Assert.NotNull(storeResponse);
+        Assert.Null(storeResponse.Result);
+        Assert.NotNull(storeResponse.ErrorMessage);
+        Assert.NotEmpty(storeResponse.ErrorMessage);
+        _output.WriteLine($"Error: {storeResponse.ErrorMessage}");
     }
 
     [Fact]
     public async Task DeleteStore_WithNonExistingStoreId_ReturnsBadRequest()
     {
         // Arrange
-        var request = new DeleteStoreDto(Guid.NewGuid(), DateTime.UtcNow, DateTime.UtcNow);
+        var nonExistingStoreId = Guid.NewGuid();
 
         // Act
-        var response = await _client.SendAsync(new HttpRequestMessage(HttpMethod.Delete, "/api/stores/deleteStore")
-        {
-            Content = JsonContent.Create(request)
-        });
+        var response = await _client.DeleteAsync($"/api/stores/deleteStore/{nonExistingStoreId}");
         var responseBody = await response.Content.ReadAsStringAsync(); // log full server error for debugging
         _output.WriteLine(responseBody);
 
         // Assert
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+
+        var errorResponse = await response.Content.ReadFromJsonAsync<Helpers.Envelope<StoreResponseDto>>();
+        Assert.NotNull(errorResponse);
+        Assert.Null(errorResponse.Result);
+        Assert.NotNull(errorResponse.ErrorMessage);
+        Assert.NotEmpty(errorResponse.ErrorMessage);
+        _output.WriteLine($"Error: {errorResponse.ErrorMessage}");
     }
 
     [Fact]
-    public async Task DeleteStore_WithInvalidDto_ReturnsBadRequestWithValidationErrors()
+    public async Task DeleteStore_WithInvalidStoreId_ReturnsBadRequestWithValidationErrors()
     {
         // Arrange
-        var request = new DeleteStoreDto(Guid.Empty, DateTime.UtcNow, DateTime.UtcNow);
+        var invalidStoreId = Guid.Empty;
 
         // Act
-        var response = await _client.SendAsync(new HttpRequestMessage(HttpMethod.Delete, "/api/stores/deleteStore")
-        {
-            Content = JsonContent.Create(request)
-        });
+        var response = await _client.DeleteAsync($"/api/stores/deleteStore/{invalidStoreId}");
         var responseBody = await response.Content.ReadAsStringAsync(); // log full server error for debugging
         _output.WriteLine(responseBody);
 
         // Assert
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+
+        var errorResponse = await response.Content.ReadFromJsonAsync<Helpers.Envelope<StoreResponseDto>>();
+        Assert.NotNull(errorResponse);
+        Assert.Null(errorResponse.Result);
+        Assert.NotNull(errorResponse.ErrorMessage);
+        Assert.NotEmpty(errorResponse.ErrorMessage);
+        _output.WriteLine($"Error: {errorResponse.ErrorMessage}");
     }
 
     [Fact]
@@ -331,36 +468,43 @@ public class StoreControllerTests : BaseIntegrationTest
         var store2Response = await _client.PostAsJsonAsync("/api/stores/postStore", createStore2Dto);
         store2Response.EnsureSuccessStatusCode();
 
-        var request = new DeleteAllStoresDto(chainId, DateTime.UtcNow, DateTime.UtcNow);
-
         // Act
-        var response = await _client.SendAsync(new HttpRequestMessage(HttpMethod.Delete, "/api/stores/deleteAllStores")
-        {
-            Content = JsonContent.Create(request)
-        });
+        var response = await _client.DeleteAsync($"/api/stores/deleteAllStores/{chainId}");
         var responseBody = await response.Content.ReadAsStringAsync(); // log full server error for debugging
         _output.WriteLine(responseBody);
 
         // Assert
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+        var storeGetResponse = await _client.GetAsync($"/api/stores/getStoresByChain/{chainId}");
+        var storeResponse = await storeGetResponse.Content.ReadFromJsonAsync<Helpers.Envelope<QueryStoreDto>>();
+        Assert.NotNull(storeResponse);
+        Assert.Null(storeResponse.Result);
+        Assert.NotNull(storeResponse.ErrorMessage);
+        Assert.NotEmpty(storeResponse.ErrorMessage);
+        _output.WriteLine($"Error: {storeResponse.ErrorMessage}");
     }
 
     [Fact]
     public async Task DeleteAllStores_WithNonExistingChainId_ReturnsBadRequest()
     {
         // Arrange
-        var request = new DeleteAllStoresDto(Guid.NewGuid(), DateTime.UtcNow, DateTime.UtcNow);
+        var nonExistingChainId = Guid.NewGuid();
 
         // Act
-        var response = await _client.SendAsync(new HttpRequestMessage(HttpMethod.Delete, "/api/stores/deleteAllStores")
-        {
-            Content = JsonContent.Create(request)
-        });
+        var response = await _client.DeleteAsync($"/api/stores/deleteAllStores/{nonExistingChainId}");
         var responseBody = await response.Content.ReadAsStringAsync(); // log full server error for debugging
         _output.WriteLine(responseBody);
 
         // Assert
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+
+        var errorResponse = await response.Content.ReadFromJsonAsync<Helpers.Envelope<StoreResponseDto>>();
+        Assert.NotNull(errorResponse);
+        Assert.Null(errorResponse.Result);
+        Assert.NotNull(errorResponse.ErrorMessage);
+        Assert.NotEmpty(errorResponse.ErrorMessage);
+        _output.WriteLine($"Error: {errorResponse.ErrorMessage}");
     }
 
     [Fact]
@@ -370,13 +514,8 @@ public class StoreControllerTests : BaseIntegrationTest
         var chainId = await ApiHelper.CreateChainAndGetId(_client, StringRandom.GetRandomString(10));
         _output.WriteLine($"Created Chain ID: {chainId}");
 
-        var request = new DeleteAllStoresDto(chainId, DateTime.UtcNow, DateTime.UtcNow);
-
         // Act
-        var response = await _client.SendAsync(new HttpRequestMessage(HttpMethod.Delete, "/api/stores/deleteAllStores")
-        {
-            Content = JsonContent.Create(request)
-        });
+        var response = await _client.DeleteAsync($"/api/stores/deleteAllStores/{chainId}");
         var responseBody = await response.Content.ReadAsStringAsync(); // log full server error for debugging
         _output.WriteLine(responseBody);
 
@@ -406,6 +545,15 @@ public class StoreControllerTests : BaseIntegrationTest
 
         // Assert
         Assert.All(responses, r => Assert.Equal(HttpStatusCode.OK, r.StatusCode));
+
+        var store1Response = await responses[0].Content.ReadFromJsonAsync<Helpers.Envelope<StoreResponseDto>>();
+        var store2Response = await responses[1].Content.ReadFromJsonAsync<Helpers.Envelope<StoreResponseDto>>();
+        Assert.NotNull(store1Response?.Result);
+        Assert.NotNull(store2Response?.Result);
+        Assert.Equal(101, store1Response.Result.Number);
+        Assert.Equal(102, store2Response.Result.Number);
+        Assert.Equal(chainId, store1Response.Result.ChainId);
+        Assert.Equal(chainId, store2Response.Result.ChainId);
     }
 
     [Fact]
@@ -416,11 +564,7 @@ public class StoreControllerTests : BaseIntegrationTest
         var storeId = await ApiHelper.CreateStoreAndGetId(_client, storeDto);
 
         // Delete the store
-        var deleteRequest = new DeleteStoreDto(storeId, DateTime.UtcNow, DateTime.UtcNow);
-        await _client.SendAsync(new HttpRequestMessage(HttpMethod.Delete, "/api/stores/deleteStore")
-        {
-            Content = JsonContent.Create(deleteRequest)
-        });
+        await _client.DeleteAsync($"/api/stores/deleteStore/{storeId}");
 
         // Attempt to update
         var updateRequest = new UpdateStoreDto(storeId, null, 401, "Updated Store", "456 Updated St", "54321", "Updated City", "1", "5559876543", "updated@store.com", "Jane", "Smith", DateTime.UtcNow, DateTime.UtcNow.AddDays(1));
@@ -432,6 +576,13 @@ public class StoreControllerTests : BaseIntegrationTest
 
         // Assert
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+
+        var errorResponse = await response.Content.ReadFromJsonAsync<Helpers.Envelope<StoreResponseDto>>();
+        Assert.NotNull(errorResponse);
+        Assert.Null(errorResponse.Result);
+        Assert.NotNull(errorResponse.ErrorMessage);
+        Assert.NotEmpty(errorResponse.ErrorMessage);
+        _output.WriteLine($"Error: {errorResponse.ErrorMessage}");
     }
 
     [Fact]
@@ -443,19 +594,25 @@ public class StoreControllerTests : BaseIntegrationTest
         _output.WriteLine(store.Result.Id.ToString());
 
         var updatedName = "Newly Updated Store";
+        var updatedEmail = "new@store.com";
+        var updatedStreet = "456 Updated St";
+        var updatedPostalCode = "54321";
+        var updatedCity = "Updated City";
+        var updatedFirstName = "Jane";
+        var updatedLastName = "Smith";
         var updateRequest = new UpdateStoreDto(
             store.Result.Id, 
             null, 
             203, 
-            updatedName, 
-            "456 Updated St", 
-            "54321", 
-            "Updated City", 
+            updatedName,
+            updatedStreet,
+            updatedPostalCode,
+            updatedCity,
             "1", 
-            "5559876543", 
-            "new@store.com", 
-            "Jane", 
-            "Smith", 
+            "5559876543",
+            updatedEmail,
+            updatedFirstName,
+            updatedLastName,
             store.Result.CreatedOn, 
             store.Result.ModifiedOn);
 
@@ -475,6 +632,18 @@ public class StoreControllerTests : BaseIntegrationTest
 
         // Assert
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-        Assert.Contains(updatedName, responseBody);
+
+        var queryStoreDto = await response.Content.ReadFromJsonAsync<Helpers.Envelope<QueryStoreDto>>();
+        Assert.NotNull(queryStoreDto);
+        Assert.NotNull(queryStoreDto.Result);
+        Assert.Equal(store.Result.Id, queryStoreDto.Result.Id);
+        Assert.Equal(updatedName, queryStoreDto.Result.Name);
+        Assert.Equal(updatedEmail, queryStoreDto.Result.Email);
+        Assert.Equal(203, queryStoreDto.Result.Number);
+        Assert.Equal(updatedStreet, queryStoreDto.Result.Street);
+        Assert.Equal(updatedPostalCode, queryStoreDto.Result.PostalCode);
+        Assert.Equal(updatedCity, queryStoreDto.Result.City);
+        Assert.Equal(updatedFirstName, queryStoreDto.Result.FirstName);
+        Assert.Equal(updatedLastName, queryStoreDto.Result.LastName);
     }
 }

@@ -1,5 +1,4 @@
-﻿using Azure.Core;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using StoreManager.Application.Commands.Chain;
 using StoreManager.Application.Commands.Store;
 using StoreManager.Application.Data;
@@ -32,8 +31,8 @@ public class ChainController : BaseController
 
         if (!result.IsValid)
         {
-            errors.AddRange(result.Errors.Select(e => e.ErrorMessage));
-            return Error(string.Join(" | ", errors));
+            errors.AddRange(result.Errors.Select(e => "FluentValidation errors: \n" + " - Error code: " + e.ErrorCode + "\n - Error message: " + e.ErrorMessage + "\n"));
+            return Error(errors);
         }
 
         if (containsStores == true)
@@ -66,7 +65,7 @@ public class ChainController : BaseController
 
             if (errors.Any())
             {
-                return Error(string.Join(" | ", errors));
+                return Error(errors);
             }
 
             CreateChainCommand command = new CreateChainCommand(
@@ -86,7 +85,7 @@ public class ChainController : BaseController
                 return Ok(commandResult.Value);
             }
             errors.Add(string.Join("; ", commandResult.Error.Code, commandResult.Error.Message, commandResult.Error.StatusCode));
-            return Error(string.Join(" | ", errors));
+            return Error(errors);
         }
         else
         {
@@ -99,7 +98,7 @@ public class ChainController : BaseController
                 return Ok(commandResult.Value);
             }
             errors.Add(string.Join("; ", commandResult.Error.Code, commandResult.Error.Message, commandResult.Error.StatusCode));
-            return Error(string.Join(" | ", errors));
+            return Error(errors);
         }
     }
 
@@ -113,7 +112,7 @@ public class ChainController : BaseController
         if (!chainIdResult.Success)
         {
             errors.Add(string.Join("; ", chainIdResult.Error.Code, chainIdResult.Error.Message, chainIdResult.Error.StatusCode));
-            return Error(string.Join(" | ", errors));
+            return Error(errors);
         }
 
         var result = await _dispatcher.Dispatch(new GetChainQuery(chainIdResult.Value));
@@ -127,7 +126,7 @@ public class ChainController : BaseController
             return Ok(result.Value);
         }
         errors.Add(string.Join("; ", result.Error.Code, result.Error.Message, result.Error.StatusCode));
-        return Error(string.Join(" | ", errors));
+        return Error(errors);
     }
 
     [HttpGet]
@@ -140,7 +139,7 @@ public class ChainController : BaseController
         if (!chainIdResult.Success)
         {
             errors.Add(string.Join("; ", chainIdResult.Error.Code, chainIdResult.Error.Message, chainIdResult.Error.StatusCode));
-            return Error(string.Join(" | ", errors));
+            return Error(errors);
         }
 
         var result = await _dispatcher.Dispatch(new GetChainAndStoresQuery(chainIdResult.Value));
@@ -149,7 +148,7 @@ public class ChainController : BaseController
             return Ok(result.Value);
         }
         errors.Add(string.Join("; ", result.Error.Code, result.Error.Message, result.Error.StatusCode));
-        return Error(string.Join(" | ", errors));
+        return Error(errors);
     }
 
     [HttpGet]
@@ -164,7 +163,7 @@ public class ChainController : BaseController
             return Ok(result.Value);
         }
         errors.Add(string.Join("; ", result.Error.Code, result.Error.Message, result.Error.StatusCode));
-        return Error(string.Join(" | ", errors));
+        return Error(errors);
     }
 
     [HttpPut]
@@ -177,15 +176,15 @@ public class ChainController : BaseController
 
         if (!result.IsValid)
         {
-            errors.AddRange(result.Errors.Select(e => e.ErrorMessage));
-            return Error(string.Join(" | ", errors));
+            errors.AddRange(result.Errors.Select(e => "FluentValidation errors: \n" + " - Error code: " + e.ErrorCode + "\n - Error message: " + e.ErrorMessage + "\n"));
+            return Error(errors);
         }
 
         var chainIdResult = ChainId.GetExisting(request.Id);
         if (!chainIdResult.Success)
         {
             errors.Add(string.Join("; ", chainIdResult.Error.Code, chainIdResult.Error.Message, chainIdResult.Error.StatusCode));
-            return Error(string.Join(" | ", errors));
+            return Error(errors);
         }
 
         UpdateChainCommand command = new UpdateChainCommand(
@@ -199,11 +198,11 @@ public class ChainController : BaseController
             return Ok(commandResult.Value);
         }
         errors.Add(string.Join("; ", commandResult.Error.Code, commandResult.Error.Message, commandResult.Error.StatusCode));
-        return Error(string.Join(" | ", errors));
+        return Error(errors);
     }
 
     [HttpDelete]
-    [Route("deleteChain")]
+    [Route("deleteChain/{chainId}")]
     public async Task<IActionResult> DeleteChain(Guid chainId)
     {
         List<string> errors = new List<string>();
@@ -213,7 +212,7 @@ public class ChainController : BaseController
         if (!result.Success)
         {
             errors.Add(string.Join("; ", result.Error.Code, result.Error.Message, result.Error.StatusCode));
-            return Error(string.Join(" | ", errors));
+            return Error(errors);
         }
 
         DeleteChainCommand command = new DeleteChainCommand(result);
@@ -223,6 +222,6 @@ public class ChainController : BaseController
             return Ok(commandResult);
         }
         errors.Add(string.Join("; ", commandResult.Error.Code, commandResult.Error.Message, commandResult.Error.StatusCode));
-        return Error(string.Join(" | ", errors));
+        return Error(errors);
     }
 }
