@@ -22,7 +22,7 @@ public record DeleteStoreDto
     {
         public Validator()
         {
-            RuleFor(x => x.Id).NotEmpty().NotNull().WithMessage("Store ID must not be empty.");
+            RuleFor(x => x.Id).NotEmpty().WithMessage("Store ID must not be empty.");
         }
     }
 }

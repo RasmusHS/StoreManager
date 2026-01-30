@@ -2,6 +2,7 @@
 using StoreManager.Application.Data.Infrastructure;
 using StoreManager.Application.DTO.Store.Command;
 using StoreManager.Domain.Common;
+using StoreManager.Domain.Common.ValueObjects;
 using StoreManager.Domain.Store.ValueObjects;
 
 namespace StoreManager.Application.Commands.Store.Handlers;
@@ -20,7 +21,7 @@ public class UpdateStoreCommandHandler : ICommandHandler<UpdateStoreCommand, Sto
         try
         {
             var storeResult = await _storeRepository.GetByIdAsync(command.Id);
-            if (storeResult is null)
+            if (storeResult == null)
             {
                 return Result.Fail<StoreResponseDto>(Errors.General.NotFound<StoreId>(command.Id));
             }

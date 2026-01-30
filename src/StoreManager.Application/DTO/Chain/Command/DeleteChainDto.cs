@@ -22,7 +22,7 @@ public record DeleteChainDto
     {
         public Validator()
         {
-            RuleFor(x => x.Id).NotEmpty().NotNull().WithMessage("Chain ID must not be empty or null.");
+            RuleFor(x => x.Id).NotEmpty().WithMessage("Chain ID must not be empty or null.");
         }
     }
 }

@@ -28,4 +28,9 @@ public class Dispatcher : IDispatcher
     {
         return await Mediator.Send(query, cancellationToken);
     }
+
+    //public async Task<Result<TResult>> Dispatch<TResult>(IList<ICommand<TResult>> command, CancellationToken cancellationToken = default)
+    //{
+    //    return await Mediator.Send(command, cancellationToken);
+    //}
 }

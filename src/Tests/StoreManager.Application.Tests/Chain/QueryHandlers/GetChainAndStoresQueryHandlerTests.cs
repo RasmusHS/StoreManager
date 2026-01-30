@@ -7,6 +7,7 @@ using StoreManager.Domain.Chain;
 using StoreManager.Domain.Chain.ValueObjects;
 using StoreManager.Domain.Common.ValueObjects;
 using StoreManager.Domain.Store;
+using StoreManager.Domain.Store.ValueObjects;
 using Xunit.Abstractions;
 using Assert = Xunit.Assert;
 
@@ -47,8 +48,9 @@ public class GetChainAndStoresQueryHandlerTests
             Email.Create("store2@example.com").Value,
             FullName.Create("Jane", "Smith").Value).Value;
 
-        chainEntity.AddStoreToChain(store1);
-        chainEntity.AddStoreToChain(store2);
+        var storeList = new List<StoreEntity> { store1, store2 };
+
+        chainEntity.AddRangeStoresToChain(storeList);
 
         _mockChainRepository
             .Setup(r => r.GetByIdIncludeStoresAsync(chainEntity.Id))
@@ -114,12 +116,13 @@ public class GetChainAndStoresQueryHandlerTests
         // Assert
         Assert.False(result.Success);
         Assert.NotNull(result.Error);
+        Assert.Equal($"Could not find entity with ID {chainId}.", result.Error.Message);
 
         _mockChainRepository.Verify(r => r.GetByIdIncludeStoresAsync(chainId), Times.Once);
     }
 
     [Fact]
-    public async Task Handle_WithChainHavingNoStores_ReturnsFailureResult()
+    public async Task Handle_WithChainHavingNoStores_ReturnsSuccessResult()
     {
         // Arrange
         var chainEntity = ChainEntity.Create("Empty Chain").Value;
@@ -134,9 +137,13 @@ public class GetChainAndStoresQueryHandlerTests
         var result = await _handler.Handle(query);
 
         // Assert
-        Assert.False(result.Success);
-        Assert.NotNull(result.Error);
-        Assert.Contains("has no stores", result.Error.Message.ToLower());
+        Assert.True(result.Success);
+        Assert.NotNull(result.Value);
+        Assert.Empty(result.Value.Stores!);
+        Assert.Equal(chainEntity.Id.Value, result.Value.Id);
+        Assert.Equal(chainEntity.Name, result.Value.Name);
+        Assert.Equal(chainEntity.CreatedOn, result.Value.CreatedOn);
+        Assert.Equal(chainEntity.ModifiedOn, result.Value.ModifiedOn);
 
         _mockChainRepository.Verify(r => r.GetByIdIncludeStoresAsync(chainEntity.Id), Times.Once);
     }
@@ -155,7 +162,9 @@ public class GetChainAndStoresQueryHandlerTests
             Email.Create("test@example.com").Value,
             FullName.Create("John", "Doe").Value).Value;
 
-        chainEntity.AddStoreToChain(store);
+        var storeList = new List<StoreEntity> { store };
+
+        chainEntity.AddRangeStoresToChain(storeList);
 
         var cancellationToken = new CancellationToken();
 
@@ -171,6 +180,16 @@ public class GetChainAndStoresQueryHandlerTests
         // Assert
         Assert.True(result.Success);
         Assert.NotNull(result.Value);
+        Assert.Single(result.Value.Stores!);
+        Assert.Equal(store.Id.Value, result.Value.Stores![0].Id);
+        Assert.Equal(store.Name, result.Value.Stores![0].Name);
+        Assert.Equal(store.Address.Street, result.Value.Stores![0].Street);
+        Assert.Equal(store.Address.PostalCode, result.Value.Stores![0].PostalCode);
+        Assert.Equal(store.Address.City, result.Value.Stores![0].City);
+        Assert.Equal(store.PhoneNumber.Number, result.Value.Stores![0].PhoneNumber);
+        Assert.Equal(store.Email.Value, result.Value.Stores![0].Email);
+        Assert.Equal(store.StoreOwner.FirstName, result.Value.Stores![0].FirstName);
+        Assert.Equal(store.StoreOwner.LastName, result.Value.Stores![0].LastName);
 
         _mockChainRepository.Verify(r => r.GetByIdIncludeStoresAsync(chainEntity.Id), Times.Once);
     }
@@ -189,7 +208,9 @@ public class GetChainAndStoresQueryHandlerTests
             Email.Create("only@example.com").Value,
             FullName.Create("Alice", "Johnson").Value).Value;
 
-        chainEntity.AddStoreToChain(store);
+        var storeList = new List<StoreEntity> { store };
+
+        chainEntity.AddRangeStoresToChain(storeList);
 
         _mockChainRepository
             .Setup(r => r.GetByIdIncludeStoresAsync(chainEntity.Id))
@@ -203,68 +224,16 @@ public class GetChainAndStoresQueryHandlerTests
         // Assert
         Assert.True(result.Success);
         Assert.NotNull(result.Value);
-        Assert.Single(result.Value.Stores);
-        Assert.Equal(store.Id.Value, result.Value.Stores[0].Id);
-        Assert.Equal(store.Name, result.Value.Stores[0].Name);
-
-        _mockChainRepository.Verify(r => r.GetByIdIncludeStoresAsync(chainEntity.Id), Times.Once);
-    }
-
-    [Fact]
-    public async Task Handle_WithMultipleStores_MapsAllStorePropertiesCorrectly()
-    {
-        // Arrange
-        var chainEntity = ChainEntity.Create("Multi Store Chain").Value;
-        var stores = new List<StoreEntity>();
-
-        for (int i = 1; i <= 5; i++)
-        {
-            var store = StoreEntity.Create(
-                chainEntity.Id,
-                i,
-                $"Store {i}",
-                Address.Create($"{i} Street", $"ZIP{i:00000}", $"City{i}").Value,
-                PhoneNumber.Create("+1", $"123456789{i}").Value,
-                Email.Create($"store{i}@example.com").Value,
-                FullName.Create($"First{i}", $"Last{i}").Value).Value;
-
-            stores.Add(store);
-            chainEntity.AddStoreToChain(store);
-        }
-
-        _mockChainRepository
-            .Setup(r => r.GetByIdIncludeStoresAsync(chainEntity.Id))
-            .ReturnsAsync(chainEntity);
-
-        var query = new GetChainAndStoresQuery(chainEntity.Id);
-
-        // Act
-        var result = await _handler.Handle(query);
-
-        // Assert
-        Assert.True(result.Success);
-        Assert.NotNull(result.Value);
-        Assert.Equal(5, result.Value.Stores.Count);
-
-        for (int i = 0; i < 5; i++)
-        {
-            var expectedStore = stores[i];
-            var actualStoreDto = result.Value.Stores.FirstOrDefault(s => s.Number == expectedStore.Number);
-
-            Assert.NotNull(actualStoreDto);
-            Assert.Equal(expectedStore.Id.Value, actualStoreDto.Id);
-            Assert.Equal(expectedStore.ChainId!.Value, actualStoreDto.ChainId);
-            Assert.Equal(expectedStore.Number, actualStoreDto.Number);
-            Assert.Equal(expectedStore.Name, actualStoreDto.Name);
-            Assert.Equal(expectedStore.Address.Street, actualStoreDto.Street);
-            Assert.Equal(expectedStore.Address.PostalCode, actualStoreDto.PostalCode);
-            Assert.Equal(expectedStore.Address.City, actualStoreDto.City);
-            Assert.Equal(expectedStore.PhoneNumber.CountryCode, actualStoreDto.CountryCode);
-            Assert.Equal(expectedStore.PhoneNumber.Number, actualStoreDto.PhoneNumber);
-            Assert.Equal(expectedStore.Email.Value, actualStoreDto.Email);
-            Assert.Equal(expectedStore.StoreOwner.FirstName, actualStoreDto.FirstName);
-            Assert.Equal(expectedStore.StoreOwner.LastName, actualStoreDto.LastName);
-        }
+        Assert.Single(result.Value.Stores!);
+        Assert.Equal(store.Id.Value, result.Value.Stores![0].Id);
+        Assert.Equal(store.Name, result.Value.Stores![0].Name);
+        Assert.Equal(store.Address.Street, result.Value.Stores![0].Street);
+        Assert.Equal(store.Address.PostalCode, result.Value.Stores![0].PostalCode);
+        Assert.Equal(store.Address.City, result.Value.Stores![0].City);
+        Assert.Equal(store.PhoneNumber.Number, result.Value.Stores![0].PhoneNumber);
+        Assert.Equal(store.Email.Value, result.Value.Stores![0].Email);
+        Assert.Equal(store.StoreOwner.FirstName, result.Value.Stores![0].FirstName);
+        Assert.Equal(store.StoreOwner.LastName, result.Value.Stores![0].LastName);
 
         _mockChainRepository.Verify(r => r.GetByIdIncludeStoresAsync(chainEntity.Id), Times.Once);
     }

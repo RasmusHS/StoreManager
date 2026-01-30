@@ -2,6 +2,7 @@
 using StoreManager.Application.Data.Infrastructure;
 using StoreManager.Domain.Chain.ValueObjects;
 using StoreManager.Domain.Common;
+using StoreManager.Domain.Common.ValueObjects;
 
 namespace StoreManager.Application.Commands.Chain.Handlers;
 

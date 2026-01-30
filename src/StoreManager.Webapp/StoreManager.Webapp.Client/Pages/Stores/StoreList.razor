@@ -349,7 +349,7 @@
             // Check if this is a bulk delete (storeToDelete is null) or single delete
             if (storeToDelete == null && selectedFilter.StartsWith("chain_"))
             {
-                // Bulk delete all stores from the chain using DeleteAllStoresDto
+                // Bulk delete all stores from the chain using DeleteAllStoresAsync endpoint
                 var chainIdString = selectedFilter.Replace("chain_", "");
                 if (Guid.TryParse(chainIdString, out var chainId))
                 {
@@ -357,8 +357,7 @@
                     var chain = availableChains.FirstOrDefault(c => c.Id == chainId);
                     if (chain != null)
                     {
-                        var deleteAllRequest = new DeleteAllStoresDto(chainId, chain.CreatedOn, chain.ModifiedOn);
-                        await StoreService.DeleteAllStoresAsync(deleteAllRequest);
+                        await StoreService.DeleteAllStoresAsync(chainId);
                     }
 
                     showDeleteModal = false;
@@ -369,9 +368,8 @@
             }
             else if (storeToDelete != null)
             {
-                // Single store delete using DeleteStoreDto
-                var deleteRequest = new DeleteStoreDto(storeToDelete.Id, storeToDelete.CreatedOn, storeToDelete.ModifiedOn);
-                await StoreService.DeleteStoreAsync(deleteRequest);
+                // Single store delete using DeleteStoreAsync endpoint
+                await StoreService.DeleteStoreAsync(storeToDelete.Id);
 
                 showDeleteModal = false;
                 storeToDelete = null;

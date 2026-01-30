@@ -14,59 +14,55 @@ public class StoreService : IStoreService
         _httpClient = httpClient;
     }
 
-    public async Task<StoreResponseDto> CreateStoreAsync(CreateStoreDto request)
+    public async Task<StoreResponseDto> PostStoreAsync(CreateStoreDto request)
     {
-        var response = await _httpClient.PostAsJsonAsync("api/store/createStore", request);
+        var response = await _httpClient.PostAsJsonAsync("api/stores/postStore", request);
         response.EnsureSuccessStatusCode();
         var envelope = await response.Content.ReadFromJsonAsync<Envelope<StoreResponseDto>>();
         return envelope?.Result ?? throw new Exception("Failed to create store");
     }
 
+    public async Task<List<StoreResponseDto>> PostBulkStoresAsync(List<CreateStoreDto> requests)
+    {
+        var response = await _httpClient.PostAsJsonAsync("api/stores/postBulkStores", requests);
+        response.EnsureSuccessStatusCode();
+        var envelope = await response.Content.ReadFromJsonAsync<Envelope<List<StoreResponseDto>>>();
+        return envelope?.Result ?? throw new Exception("Failed to bulk create stores");
+    }
+
     public async Task<QueryStoreDto?> GetStoreByIdAsync(Guid storeId)
     {
-        var envelope = await _httpClient.GetFromJsonAsync<Envelope<QueryStoreDto>>($"api/store/getStore/{storeId}");
+        var envelope = await _httpClient.GetFromJsonAsync<Envelope<QueryStoreDto>>($"api/stores/getStore/{storeId}");
         return envelope?.Result;
     }
 
     public async Task<List<QueryStoreDto>> GetAllIndependentStoresAsync()
     {
-        var envelope = await _httpClient.GetFromJsonAsync<Envelope<CollectionResponseBase<QueryStoreDto>>>($"api/store/getStoresByChain/{Guid.Empty}");
+        var envelope = await _httpClient.GetFromJsonAsync<Envelope<CollectionResponseBase<QueryStoreDto>>>($"api/stores/getStoresByChain/{Guid.Empty}");
         return envelope?.Result?.Data?.ToList() ?? new List<QueryStoreDto>();
     }
 
     public async Task<List<QueryStoreDto>> GetStoresByChainAsync(Guid chainId)
     {
-        var envelope = await _httpClient.GetFromJsonAsync<Envelope<CollectionResponseBase<QueryStoreDto>>>($"api/store/getStoresByChain/{chainId}");
+        var envelope = await _httpClient.GetFromJsonAsync<Envelope<CollectionResponseBase<QueryStoreDto>>>($"api/stores/getStoresByChain/{chainId}");
         return envelope?.Result?.Data?.ToList() ?? new List<QueryStoreDto>();
     }
 
-    public async Task<StoreResponseDto> UpdateStoreAsync(UpdateStoreDto request)
+    public async Task<StoreResponseDto> PutStoreAsync(UpdateStoreDto request)
     {
-        var response = await _httpClient.PutAsJsonAsync("api/store/updateStore", request);
+        var response = await _httpClient.PutAsJsonAsync("api/stores/updateStore", request);
         response.EnsureSuccessStatusCode();
         var envelope = await response.Content.ReadFromJsonAsync<Envelope<StoreResponseDto>>();
         return envelope?.Result ?? throw new Exception("Failed to update store");
     }
 
-    public async Task DeleteStoreAsync(DeleteStoreDto request)
+    public async Task DeleteStoreAsync(Guid storeId)
     {
-        var response = await _httpClient.SendAsync(new HttpRequestMessage
-        {
-            Method = HttpMethod.Delete,
-            RequestUri = new Uri("api/store/deleteStore", UriKind.Relative),
-            Content = JsonContent.Create(request)
-        });
-        response.EnsureSuccessStatusCode();
+        await _httpClient.DeleteAsync($"api/stores/deleteStore/{storeId}");
     }
 
-    public async Task DeleteAllStoresAsync(DeleteAllStoresDto request)
+    public async Task DeleteAllStoresAsync(Guid chainId)
     {
-        var response = await _httpClient.SendAsync(new HttpRequestMessage
-        {
-            Method = HttpMethod.Delete,
-            RequestUri = new Uri("api/store/deleteAllStores", UriKind.Relative),
-            Content = JsonContent.Create(request)
-        });
-        response.EnsureSuccessStatusCode();
+        await _httpClient.DeleteAsync($"api/stores/deleteAllStores/{chainId}");
     }
 }

@@ -165,8 +165,7 @@
             errorMessage = null;
 
             // Get chain with stores
-            var chains = await ChainService.GetByIdIncludeStoresAsync(ChainId);
-            chain = chains.FirstOrDefault();
+            chain = await ChainService.GetChainAndStores(ChainId);
         }
         catch (Exception ex)
         {

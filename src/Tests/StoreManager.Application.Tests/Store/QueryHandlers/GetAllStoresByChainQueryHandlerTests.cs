@@ -16,14 +16,12 @@ namespace StoreManager.Application.Tests.Store.QueryHandlers;
 public class GetAllStoresByChainQueryHandlerTests
 {
     private readonly Mock<IStoreRepository> _mockStoreRepository;
-    private readonly Mock<IChainRepository> _mockChainRepository;
     private readonly GetAllStoresByChainQueryHandler _handler;
 
     public GetAllStoresByChainQueryHandlerTests()
     {
         _mockStoreRepository = new Mock<IStoreRepository>();
-        _mockChainRepository = new Mock<IChainRepository>();
-        _handler = new GetAllStoresByChainQueryHandler(_mockStoreRepository.Object, _mockChainRepository.Object);
+        _handler = new GetAllStoresByChainQueryHandler(_mockStoreRepository.Object);
     }
 
     [Fact]
@@ -114,8 +112,7 @@ public class GetAllStoresByChainQueryHandlerTests
         // Assert
         Assert.False(result.Success);
         Assert.NotNull(result.Error);
-        // The error message has changed - now it's "chain has no stores" instead of "not found"
-        Assert.Contains("has no stores", result.Error.Message.ToLower());
+        Assert.Contains($"The chain with ID {chainId} has no stores.", result.Error.Message);
 
         _mockStoreRepository.Verify(r => r.GetAllByChainIdAsync(chainId), Times.Once);
     }
@@ -139,7 +136,7 @@ public class GetAllStoresByChainQueryHandlerTests
         // Assert
         Assert.False(result.Success);
         Assert.NotNull(result.Error);
-        Assert.Contains("has no stores", result.Error.Message.ToLower());
+        Assert.Contains($"The chain with ID {chainEntity.Id} has no stores.", result.Error.Message);
 
         _mockStoreRepository.Verify(r => r.GetAllByChainIdAsync(chainEntity.Id), Times.Once);
     }

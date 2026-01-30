@@ -119,7 +119,7 @@ public class GetStoreQueryHandlerTests
         // Assert
         Assert.False(result.Success);
         Assert.NotNull(result.Error);
-
+        Assert.Equal($"Could not find entity with ID {storeId}.", result.Error.Message);
         _mockStoreRepository.Verify(r => r.GetByIdAsync(storeId), Times.Once);
     }
 

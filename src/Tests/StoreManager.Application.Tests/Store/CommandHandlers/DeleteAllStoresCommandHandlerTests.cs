@@ -5,6 +5,7 @@ using StoreManager.Application.Commands.Store.Handlers;
 using StoreManager.Application.Data.Infrastructure;
 using StoreManager.Domain.Chain;
 using StoreManager.Domain.Chain.ValueObjects;
+using StoreManager.Domain.Store.ValueObjects;
 using Xunit.Abstractions;
 using Assert = Xunit.Assert;
 
@@ -66,6 +67,7 @@ public class DeleteAllStoresCommandHandlerTests
         // Assert
         Assert.False(result.Success);
         Assert.NotNull(result.Error);
+        Assert.Equal($"Could not find entity with ID {chainId}.", result.Error.Message);
         _mockChainRepository.Verify(r => r.GetByIdAsync(chainId), Times.Once);
         _mockStoreRepository.Verify(r => r.DeleteByChainIdAsync(It.IsAny<ChainId>(), It.IsAny<CancellationToken>()), Times.Never);
     }

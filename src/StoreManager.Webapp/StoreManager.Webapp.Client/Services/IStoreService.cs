@@ -5,11 +5,12 @@ namespace StoreManager.Webapp.Client.Services;
 
 public interface IStoreService
 {
-    Task<StoreResponseDto> CreateStoreAsync(CreateStoreDto request);
+    Task<StoreResponseDto> PostStoreAsync(CreateStoreDto request);
+    Task<List<StoreResponseDto>> PostBulkStoresAsync(List<CreateStoreDto> requests);
     Task<QueryStoreDto?> GetStoreByIdAsync(Guid storeId);
     Task<List<QueryStoreDto>> GetAllIndependentStoresAsync();
     Task<List<QueryStoreDto>> GetStoresByChainAsync(Guid chainId);
-    Task<StoreResponseDto> UpdateStoreAsync(UpdateStoreDto request);
-    Task DeleteStoreAsync(DeleteStoreDto request);
-    Task DeleteAllStoresAsync(DeleteAllStoresDto request);
+    Task<StoreResponseDto> PutStoreAsync(UpdateStoreDto request);
+    Task DeleteStoreAsync(Guid storeId);
+    Task DeleteAllStoresAsync(Guid chainId);
 }

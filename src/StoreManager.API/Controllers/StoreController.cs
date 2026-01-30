@@ -9,7 +9,7 @@ using StoreManager.Domain.Store.ValueObjects;
 
 namespace StoreManager.API.Controllers;
 
-[Route("api/store")]
+[Route("api/stores")]
 [ApiController]
 public class StoreController : BaseController
 {
@@ -21,15 +21,17 @@ public class StoreController : BaseController
     }
 
     [HttpPost]
-    [Route("createStore")]
-    public async Task<IActionResult> CreateStore(CreateStoreDto request)
+    [Route("postStore")]
+    public async Task<IActionResult> PostStore(CreateStoreDto request)
     {
         CreateStoreDto.Validator validator = new CreateStoreDto.Validator();
         var result = await validator.ValidateAsync(request);
+        List<string> errors = new List<string>();
 
         if (!result.IsValid)
         {
-            return BadRequest(result.Errors);
+            errors.AddRange(result.Errors.Select(e => "FluentValidation errors: \n" + " - Error code: " + e.ErrorCode + "\n - Error message: " + e.ErrorMessage + "\n"));
+            return Error(errors);
         }
 
         // Validate value objects
@@ -39,13 +41,18 @@ public class StoreController : BaseController
         var nameResult = FullName.Create(request.FirstName, request.LastName);
 
         if (!addressResult.Success)
-            return BadRequest(addressResult.Error.Code);
+            errors.Add(string.Join("; ", addressResult.Error.Code, addressResult.Error.Message, addressResult.Error.StatusCode));
         if (!phoneResult.Success)
-            return BadRequest(phoneResult.Error.Code);
+            errors.Add(string.Join("; ", phoneResult.Error.Code, phoneResult.Error.Message, phoneResult.Error.StatusCode));
         if (!emailResult.Success)
-            return BadRequest(emailResult.Error.Code);
+            errors.Add(string.Join("; ", emailResult.Error.Code, emailResult.Error.Message, emailResult.Error.StatusCode));
         if (!nameResult.Success)
-            return BadRequest(nameResult.Error.Code);
+            errors.Add(string.Join("; ", nameResult.Error.Code, nameResult.Error.Message, nameResult.Error.StatusCode));
+
+        if (errors.Any())
+        {
+            return Error(errors);
+        }
 
         if (request.ChainId == null || request.ChainId == Guid.Empty)
         {
@@ -62,7 +69,8 @@ public class StoreController : BaseController
             {
                 return Ok(commandResult.Value);
             }
-            return BadRequest(commandResult.Error.Code);
+            errors.Add(string.Join("; ", commandResult.Error.Code, commandResult.Error.Message, commandResult.Error.StatusCode));
+            return Error(errors);
         }
         else
         {
@@ -79,66 +87,181 @@ public class StoreController : BaseController
             {
                 return Ok(commandResult.Value);
             }
-            return BadRequest(commandResult.Error.Code);
+            errors.Add(string.Join("; ", commandResult.Error.Code, commandResult.Error.Message, commandResult.Error.StatusCode));
+            return Error(errors);
         }
+    }
+
+    [HttpPost]
+    [Route("postBulkStores")]
+    public async Task<IActionResult> PostBulkStores(List<CreateStoreDto> requests)
+    {
+        List<CreateStoreDto.Validator> validators = requests.Select(_ => new CreateStoreDto.Validator()).ToList();
+        List<CreateStoreCommand> commands = new List<CreateStoreCommand>();
+        List<string> errors = new List<string>();
+        
+        // Check if all ChainIds are identical
+        bool hasIdenticalChainIds = requests.Select(r => r.ChainId).Distinct().Count() <= 1;
+
+        if (!hasIdenticalChainIds)
+        {
+            return Error("All stores in bulk creation must either share the same ChainId or none at all.");
+        }
+
+        // Get ChainId value
+        Guid? commonChainId = requests.First().ChainId;
+
+        for (int i = 0; i < requests.Count; i++)
+        {
+            var result = await validators[i].ValidateAsync(requests[i]);
+            if (!result.IsValid)
+            {
+                errors.AddRange(result.Errors.Select(e => "FluentValidation errors: \n" + " - Error code: " + e.ErrorCode + "\n - Error message: " + e.ErrorMessage + "\n"));
+                continue;
+            }
+
+            // Validate value objects
+            var addressResult = Address.Create(requests[i].Street, requests[i].PostalCode, requests[i].City);
+            var phoneResult = PhoneNumber.Create(requests[i].CountryCode, requests[i].PhoneNumber);
+            var emailResult = Email.Create(requests[i].Email);
+            var nameResult = FullName.Create(requests[i].FirstName, requests[i].LastName);
+
+            if (!addressResult.Success)
+                errors.Add(string.Join("; ", addressResult.Error.Code, addressResult.Error.Message, addressResult.Error.StatusCode));
+            if (!phoneResult.Success)
+                errors.Add(string.Join("; ", phoneResult.Error.Code, phoneResult.Error.Message, phoneResult.Error.StatusCode));
+            if (!emailResult.Success)
+                errors.Add(string.Join("; ", emailResult.Error.Code, emailResult.Error.Message, emailResult.Error.StatusCode));
+            if (!nameResult.Success)
+                errors.Add(string.Join("; ", nameResult.Error.Code, nameResult.Error.Message, nameResult.Error.StatusCode));
+
+            if (commonChainId == null || commonChainId == Guid.Empty)
+            {
+                commands.Add(new CreateStoreCommand(
+                    null,
+                    requests[i].Number,
+                    requests[i].Name,
+                    addressResult.Value,
+                    phoneResult.Value,
+                    emailResult.Value,
+                    nameResult.Value));
+            }
+            else
+            {
+                commands.Add(new CreateStoreCommand(
+                    ChainId.GetExisting(commonChainId!.Value).Value,
+                    requests[i].Number,
+                    requests[i].Name,
+                    addressResult.Value,
+                    phoneResult.Value,
+                    emailResult.Value,
+                    nameResult.Value));
+            }
+        }
+
+        if (errors.Any())
+        {
+            return Error(errors);
+        }
+
+        var bulkCommand = new BulkCreateStoresCommand(commands);
+        var commandResults = await _dispatcher.Dispatch(bulkCommand);
+        if (commandResults.Success)
+        {
+            return Ok(commandResults.Value);
+        }
+        errors.Add(string.Join("; ", commandResults.Error.Code, commandResults.Error.Message, commandResults.Error.StatusCode));
+        return Error(errors);
     }
 
     [HttpGet]
     [Route("getStore/{storeId}")]
     public async Task<IActionResult> GetStore(Guid storeId)
     {
-        var result = await _dispatcher.Dispatch(new GetStoreQuery(StoreId.GetExisting(storeId).Value)) ?? throw new KeyNotFoundException($"Store with ID {storeId} not found.");
+        List<string> errors = new List<string>();
+
+        var storeIdResult = StoreId.GetExisting(storeId);
+        if (!storeIdResult.Success)
+        {
+            errors.Add(string.Join("; ", storeIdResult.Error.Code, storeIdResult.Error.Message, storeIdResult.Error.StatusCode));
+            return Error(errors);
+        }
+
+        var result = await _dispatcher.Dispatch(new GetStoreQuery(storeIdResult.Value));
         if (result.Success)
         {
             return Ok(result.Value);
         }
-        return BadRequest(result.Error.Code);
+        errors.Add(string.Join("; ", result.Error.Code, result.Error.Message, result.Error.StatusCode));
+        return Error(errors);
     }
 
     [HttpGet]
     [Route("getStoresByChain/{chainId}")]
     public async Task<IActionResult> GetStoresByChainId(Guid chainId)
     {
-        var result = await _dispatcher.Dispatch(new GetAllStoresByChainQuery(ChainId.GetExisting(chainId).Value)) ?? throw new KeyNotFoundException($"Stores belonging to chain with ID {chainId} not found.");
+        List<string> errors = new List<string>();
+
+        var chainIdResult = ChainId.GetExisting(chainId);
+        if (!chainIdResult.Success)
+        {
+            errors.Add(string.Join("; ", chainIdResult.Error.Code, chainIdResult.Error.Message, chainIdResult.Error.StatusCode));
+            return Error(errors);
+        }
+
+        var result = await _dispatcher.Dispatch(new GetAllStoresByChainQuery(chainIdResult.Value));
         if (result.Success)
         {
             return Ok(result.Value);
         }
-        return BadRequest(result.Error.Code);
+        errors.Add(string.Join("; ", result.Error.Code, result.Error.Message, result.Error.StatusCode));
+        return Error(errors);
     }
 
     [HttpPut]
-    [Route("updateStore")]
-    public async Task<IActionResult> UpdateStore(UpdateStoreDto request)
+    [Route("putStore")]
+    public async Task<IActionResult> PutStore(UpdateStoreDto request)
     {
         UpdateStoreDto.Validator validator = new UpdateStoreDto.Validator();
         var result = await validator.ValidateAsync(request);
+        List<string> errors = new List<string>();
 
         if (!result.IsValid)
         {
-            return BadRequest(result.Errors);
+            errors.AddRange(result.Errors.Select(e => "FluentValidation errors: \n" + " - Error code: " + e.ErrorCode + "\n - Error message: " + e.ErrorMessage + "\n"));
+            return Error(errors);
         }
 
         // Validate value objects
+        var storeIdResult = StoreId.GetExisting(request.Id);
         var addressResult = Address.Create(request.Street, request.PostalCode, request.City);
         var phoneResult = PhoneNumber.Create(request.CountryCode, request.PhoneNumber);
         var emailResult = Email.Create(request.Email);
         var nameResult = FullName.Create(request.FirstName, request.LastName);
 
+        if (!storeIdResult.Success)
+            errors.Add(string.Join("; ", storeIdResult.Error.Code, storeIdResult.Error.Message, storeIdResult.Error.StatusCode));
         if (!addressResult.Success)
-            return BadRequest(addressResult.Error.Code);
+            errors.Add(string.Join("; ", addressResult.Error.Code, addressResult.Error.Message, addressResult.Error.StatusCode));
         if (!phoneResult.Success)
-            return BadRequest(phoneResult.Error.Code);
+            errors.Add(string.Join("; ", phoneResult.Error.Code, phoneResult.Error.Message, phoneResult.Error.StatusCode));
         if (!emailResult.Success)
-            return BadRequest(emailResult.Error.Code);
+            errors.Add(string.Join("; ", emailResult.Error.Code, emailResult.Error.Message, emailResult.Error.StatusCode));
         if (!nameResult.Success)
-            return BadRequest(nameResult.Error.Code);
+            errors.Add(string.Join("; ", nameResult.Error.Code, nameResult.Error.Message, nameResult.Error.StatusCode));
+
+        if (request.ChainId != null && request.ChainId != Guid.Empty)
+        {
+            var chainIdResult = ChainId.GetExisting(request.ChainId!.Value);
+            if (!chainIdResult.Success)
+                errors.Add(string.Join("; ", chainIdResult.Error.Code, chainIdResult.Error.Message, chainIdResult.Error.StatusCode));
+        }
 
         // Validate ChainId is not null before accessing .Value
-        if (request.ChainId == null)
+        if (request.ChainId == null || request.ChainId == Guid.Empty)
         {
             UpdateStoreCommand command = new UpdateStoreCommand(
-                StoreId.GetExisting(request.Id).Value,
+                storeIdResult.Value,
                 null,
                 request.Number,
                 request.Name,
@@ -153,12 +276,13 @@ public class StoreController : BaseController
             {
                 return Ok(commandResult.Value);
             }
-            return BadRequest(commandResult.Error.Code);
+            errors.Add(string.Join("; ", commandResult.Error.Code, commandResult.Error.Message, commandResult.Error.StatusCode));
+            return Error(errors);
         }
         else
         {
             UpdateStoreCommand command = new UpdateStoreCommand(
-                StoreId.GetExisting(request.Id).Value,
+                storeIdResult.Value,
                 ChainId.GetExisting(request.ChainId.Value).Value,
                 request.Number,
                 request.Name,
@@ -174,45 +298,54 @@ public class StoreController : BaseController
             {
                 return Ok(commandResult.Value);
             }
-            return BadRequest(commandResult.Error.Code);
+            errors.Add(string.Join("; ", commandResult.Error.Code, commandResult.Error.Message, commandResult.Error.StatusCode));
+            return Error(errors);
         }
     }
 
     [HttpDelete]
-    [Route("deleteStore")]
-    public async Task<IActionResult> DeleteStore(DeleteStoreDto request)
+    [Route("deleteStore/{storeId}")]
+    public async Task<IActionResult> DeleteStore(Guid storeId)
     {
-        DeleteStoreDto.Validator validator = new DeleteStoreDto.Validator();
-        var result = await validator.ValidateAsync(request);
-        if (result.IsValid) 
+        List<string> errors = new List<string>();
+
+        var result = StoreId.GetExisting(storeId);
+        if (!result.Success)
         {
-            DeleteStoreCommand command = new DeleteStoreCommand(StoreId.GetExisting(request.Id).Value);
-            var commandResult = await _dispatcher.Dispatch(command);
-            if (commandResult.Success)
-            {
-                return Ok(commandResult);
-            }
-            return BadRequest(commandResult.Error.Code);
+            errors.Add(string.Join("; ", result.Error.Code, result.Error.Message, result.Error.StatusCode));
+            return Error(errors);
         }
-        return BadRequest(result.Errors);
+
+        DeleteStoreCommand command = new DeleteStoreCommand(result);
+        var commandResult = await _dispatcher.Dispatch(command);
+        if (commandResult.Success)
+        {
+            return Ok(commandResult);
+        }
+        errors.Add(string.Join("; ", commandResult.Error.Code, commandResult.Error.Message, commandResult.Error.StatusCode));
+        return Error(errors);
     }
 
     [HttpDelete]
-    [Route("deleteAllStores")]
-    public async Task<IActionResult> DeleteAllStores(DeleteAllStoresDto request)
+    [Route("deleteAllStores/{chainId}")]
+    public async Task<IActionResult> DeleteAllStores(Guid chainId)
     {
-        DeleteAllStoresDto.Validator validator = new DeleteAllStoresDto.Validator();
-        var result = await validator.ValidateAsync(request);
-        if (result.IsValid)
+        List<string> errors = new List<string>();
+
+        var result = ChainId.GetExisting(chainId);
+        if (!result.Success) 
         {
-            DeleteAllStoresCommand command = new DeleteAllStoresCommand(ChainId.GetExisting(request.ChainId).Value);
-            var commandResult = await _dispatcher.Dispatch(command);
-            if (commandResult.Success)
-            {
-                return Ok(commandResult);
-            }
-            return BadRequest(commandResult.Error.Code);
-        };
-        return BadRequest(result.Errors);
+            errors.Add(string.Join("; ", result.Error.Code, result.Error.Message, result.Error.StatusCode));
+            return Error(errors);
+        }
+
+        DeleteAllStoresCommand command = new DeleteAllStoresCommand(result);
+        var commandResult = await _dispatcher.Dispatch(command);
+        if (commandResult.Success)
+        {
+            return Ok(commandResult);
+        }
+        errors.Add(string.Join("; ", commandResult.Error.Code, commandResult.Error.Message, commandResult.Error.StatusCode));
+        return Error(errors);
     }
 }

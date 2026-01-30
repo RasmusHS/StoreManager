@@ -235,7 +235,7 @@
             // Set the stores list on the request (can be null/empty)
             createRequest.Stores = stores.Any() ? stores : null;
 
-            await ChainService.CreateChainAsync(createRequest);
+            await ChainService.PostChainAsync(createRequest);
             Navigation.NavigateTo("/chains");
         }
         catch (Exception ex)

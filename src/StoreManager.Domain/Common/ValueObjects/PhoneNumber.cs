@@ -1,4 +1,6 @@
-﻿namespace StoreManager.Domain.Common.ValueObjects;
+﻿using System.Linq;
+
+namespace StoreManager.Domain.Common.ValueObjects;
 
 public class PhoneNumber : ValueObject
 {
@@ -15,20 +17,45 @@ public class PhoneNumber : ValueObject
 
     public static Result<PhoneNumber> Create(string countryCode, string number)
     {
+        List<Error> errors = new List<Error>();
+
         // Basic validation for phone number format
+        if (string.IsNullOrWhiteSpace(countryCode))
+        {
+            errors.Add(Errors.General.ValueIsRequired(nameof(countryCode)));
+        }
         if (string.IsNullOrWhiteSpace(number))
         {
-            return Result.Fail<PhoneNumber>(Errors.General.ValueIsRequired(number));
+            errors.Add(Errors.General.ValueIsRequired(nameof(number)));
         }
 
-        if (!Int64.TryParse(number.Trim(), out _))
-        {
-            return Result.Fail<PhoneNumber>(Errors.General.UnexpectedValue($"Value {number} is not a number"));
-        }
+        if (errors.Any())
+            return Result.Fail<PhoneNumber>(errors);
 
         var cleanedCountryCode = countryCode.Trim().Replace("+", "").Replace("(", "").Replace(")", "");
+        if (!Int64.TryParse(cleanedCountryCode, out _))
+        {
+            errors.Add(Errors.General.UnexpectedValue(nameof(countryCode)));
+        }
+        if (cleanedCountryCode.Length > 4)
+        {
+            errors.Add(Errors.General.ValueTooLarge(nameof(countryCode), 4));
+        }
+        if (!Int64.TryParse(number.Trim(), out _))
+        {
+            errors.Add(Errors.General.UnexpectedValue(nameof(number)));
+        }
+        if (number.Trim().Length > 15)
+        {
+            errors.Add(Errors.General.ValueTooLarge(nameof(number), 15));
+        }
 
-        return Result.Ok(new PhoneNumber($"+{cleanedCountryCode}", number));
+        if (errors.Any())
+            return Result.Fail<PhoneNumber>(errors);
+        else
+        {
+            return Result.Ok(new PhoneNumber($"+{cleanedCountryCode}", number));
+        }
     }
 
     protected override IEnumerable<object> GetEqualityComponents()

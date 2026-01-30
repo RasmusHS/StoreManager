@@ -211,8 +211,7 @@
 
         try
         {
-            var deleteRequest = new DeleteChainDto(chain.Id, chain.CreatedOn, chain.ModifiedOn);
-            await ChainService.DeleteChainAsync(deleteRequest);
+            await ChainService.DeleteChainAsync(chain.Id);
 
             showDeleteModal = false;
             chain = null;

@@ -74,6 +74,7 @@ public class GetChainQueryHandlerTests
         // Assert
         Assert.False(result.Success);
         Assert.NotNull(result.Error);
+        Assert.Equal($"Could not find entity with ID {chainId}.", result.Error.Message);
 
         _mockChainRepository.Verify(r => r.GetByIdAsync(chainId), Times.Once);
         _mockChainRepository.Verify(r => r.GetCountofStoresByChainAsync(It.IsAny<ChainId>()), Times.Never);

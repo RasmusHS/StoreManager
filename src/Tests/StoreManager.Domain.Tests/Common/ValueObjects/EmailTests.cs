@@ -1,6 +1,7 @@
 ﻿using Assert = Xunit.Assert;
 using Helpers;
 using StoreManager.Domain.Common.ValueObjects;
+using StoreManager.Domain.Common;
 
 namespace StoreManager.Domain.Tests.Common.ValueObjects;
 
@@ -38,70 +39,91 @@ public class EmailTests
     [Fact]
     public void Create_WithNullAndNotRequired_ShouldFail()
     {
+        // Arrange
+        string email = null;
+
         // Act
-        var result = Email.Create(null, isRequired: false);
+        var result = Email.Create(email, isRequired: false);
 
         // Assert
         Assert.True(result.Failure);
+        Assert.Equal("MultipleErrors", result.Error.Code);
+        Assert.Contains("Value 'email' is not valid in this context.", result.Error.Message);
     }
 
     [Fact]
     public void Create_WithEmptyStringAndRequired_ShouldFail()
     {
+        // Arrange
+        var email = string.Empty;
+
         // Act
-        var result = Email.Create(string.Empty, isRequired: true);
+        var result = Email.Create(email, isRequired: true);
 
         // Assert
         Assert.True(result.Failure);
+        Assert.Equal("MultipleErrors", result.Error.Code);
+        Assert.Contains("Value 'email' is required.", result.Error.Message);
     }
 
     [Fact]
     public void Create_WithNullAndRequired_ShouldFail()
     {
+        // Arrange
+        string email = null;
+
         // Act
-        var result = Email.Create(null, isRequired: true);
+        var result = Email.Create(email, isRequired: true);
 
         // Assert
         Assert.True(result.Failure);
+        Assert.Equal("MultipleErrors", result.Error.Code);
+        Assert.Contains("Value 'email' is required.", result.Error.Message);
     }
 
     [Fact]
     public void Create_WithEmailTooLong_ShouldFail()
     {
         // Arrange
-        var longEmail = new string('a', 100) + "@test.com";
+        var email = new string('a', 100) + "@test.com";
 
         // Act
-        var result = Email.Create(longEmail);
+        var result = Email.Create(email);
 
         // Assert
         Assert.True(result.Failure);
+        Assert.Equal("MultipleErrors", result.Error.Code);
+        Assert.Contains("Value 'email' should not exceed 100.", result.Error.Message); 
     }
 
     [Fact]
     public void Create_WithInvalidEmailFormat_ShouldFail()
     {
         // Arrange
-        var invalidEmail = "notanemail";
+        var email = "notanemail";
 
         // Act
-        var result = Email.Create(invalidEmail);
+        var result = Email.Create(email);
 
         // Assert
         Assert.True(result.Failure);
+        Assert.Equal("MultipleErrors", result.Error.Code);
+        Assert.Contains("Value 'email' is not valid in this context.", result.Error.Message);
     }
 
     [Fact]
     public void Create_WithMissingAtSign_ShouldFail()
     {
         // Arrange
-        var invalidEmail = "testexample.com";
+        var email = "testexample.com";
 
         // Act
-        var result = Email.Create(invalidEmail);
+        var result = Email.Create(email);
 
         // Assert
         Assert.True(result.Failure);
+        Assert.Equal("MultipleErrors", result.Error.Code);
+        Assert.Contains("Value 'email' is not valid in this context.", result.Error.Message);
     }
 
     [Fact]
@@ -141,5 +163,6 @@ public class EmailTests
         // Assert
         Assert.Equal(email1, email2);
         Assert.NotEqual(email1, email3);
+        Assert.NotEqual(email2, email3);
     }
 }

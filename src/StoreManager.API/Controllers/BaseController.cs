@@ -20,7 +20,7 @@ public class BaseController : ControllerBase
 
     protected ActionResult Error(List<string> errorMessages)
     {
-        string errors = string.Join(";", errorMessages);
+        string errors = string.Join(" | ", errorMessages);
         return BadRequest(Envelope.Error(errors));
     }
 

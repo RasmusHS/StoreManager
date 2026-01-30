@@ -24,7 +24,7 @@ public class GetChainQueryHandler : IQueryHandler<GetChainQuery, QueryChainDto>
             {
                 return Result.Fail<QueryChainDto>(Errors.General.NotFound<ChainId>(query.Id));
             }
-            int storeCount = await _chainRepository.GetCountofStoresByChainAsync(query.Id);
+            int storeCount = await _chainRepository.GetCountofStoresByChainAsync(query.Id); // Potential optimization: Create a StoreCount property in Chain entity with a trigger in the database to maintain the count
 
             var chainDto = new QueryChainDto(
                 chainResult.Id.Value,
