@@ -49,6 +49,11 @@ public class StoreController : BaseController
         if (!nameResult.Success)
             errors.Add(string.Join("; ", nameResult.Error.Code, nameResult.Error.Message, nameResult.Error.StatusCode));
 
+        if (errors.Any())
+        {
+            return Error(errors);
+        }
+
         if (request.ChainId == null || request.ChainId == Guid.Empty)
         {
             CreateStoreCommand command = new CreateStoreCommand(

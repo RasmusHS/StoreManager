@@ -34,16 +34,11 @@ public class ChainService : IChainService
         return envelope?.Result?.Data?.ToList() ?? new List<QueryChainDto>();
     }
 
-    public async Task<List<QueryChainDto>> GetChainAndStores(Guid id)
+    public async Task<QueryChainDto> GetChainAndStores(Guid id)
     {
         // API returns a single chain with stores, not a collection
         var envelope = await _httpClient.GetFromJsonAsync<Envelope<QueryChainDto>>($"api/chains/getChainAndStores/{id}");
-
-        if (envelope?.Result == null)
-            return new List<QueryChainDto>();
-
-        // Return a list with the single chain that includes stores
-        return new List<QueryChainDto> { envelope.Result };
+        return envelope?.Result ?? throw new Exception("Failed to retrieve chain with stores");
     }
 
     public async Task<ChainResponseDto> PutChainAsync(UpdateChainDto request)

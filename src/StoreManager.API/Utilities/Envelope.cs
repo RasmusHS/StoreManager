@@ -1,4 +1,6 @@
-﻿namespace StoreManager.API.Utilities;
+﻿using System.Text.Json.Serialization;
+
+namespace StoreManager.API.Utilities;
 
 public class Envelope : Envelope<string>
 {
@@ -24,13 +26,25 @@ public class Envelope : Envelope<string>
 
 public class Envelope<T>
 {
-    public T Result { get; }
-    public string ErrorMessage { get; }
+    [JsonPropertyName("result")]
+    public T Result { get; set; }
+
+    [JsonPropertyName("errorMessage")]
+    public string ErrorMessage { get; set; }
+
+    [JsonPropertyName("timeGenerated")]
     public DateTime TimeGenerated { get; set; }
+
     protected internal Envelope(T result, string errorMessage)
     {
         this.Result = result;
         this.ErrorMessage = errorMessage;
         this.TimeGenerated = DateTime.UtcNow;
+    }
+
+    // Parameterless constructor required for JSON deserialization
+    public Envelope()
+    {
+        TimeGenerated = DateTime.UtcNow;
     }
 }

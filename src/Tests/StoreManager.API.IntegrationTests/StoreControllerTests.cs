@@ -27,7 +27,7 @@ public class StoreControllerTests : BaseIntegrationTest
     public async Task CreateStore_WithValidData_ReturnsOkResult()
     {
         // Arrange
-        var request = new CreateStoreDto(null, 101, "Test Store", "123 Main St", "12345", "Test City", "1", "5551234567", "test@store.com", "John", "Doe");
+        var request = new CreateStoreDto(null, 101, "Test Store", "123 Main St", "12345", "Test City", "+1", "5551234567", "test@store.com", "John", "Doe");
         
         // Act
         var response = await _client.PostAsJsonAsync("/api/stores/postStore", request);
@@ -86,7 +86,7 @@ public class StoreControllerTests : BaseIntegrationTest
         {
             ChainId = null,
             Number = 105,
-            Name = null
+            Name = null!
         };
 
         // Act
@@ -98,6 +98,7 @@ public class StoreControllerTests : BaseIntegrationTest
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
 
         var errorResponse = await response.Content.ReadFromJsonAsync<Helpers.Envelope<StoreResponseDto>>();
+        //_output.WriteLine(errorResponse!.Result!.ToString());
         Assert.NotNull(errorResponse);
         Assert.Null(errorResponse.Result);
         Assert.NotNull(errorResponse.ErrorMessage);
@@ -109,7 +110,7 @@ public class StoreControllerTests : BaseIntegrationTest
     public async Task GetStore_WithExistingStoreId_ReturnsOkWithStore()
     {
         // Arrange
-        var storeDto = new CreateStoreDto(null, 101, "Test Store", "123 Main St", "12345", "Test City", "1", "5551234567", "test@store.com", "John", "Doe");
+        var storeDto = new CreateStoreDto(null, 101, "Test Store", "123 Main St", "12345", "Test City", "+1", "5551234567", "test@store.com", "John", "Doe");
         var storeId = await ApiHelper.CreateStoreAndGetId(_client, storeDto);
 
         // Act
@@ -278,10 +279,10 @@ public class StoreControllerTests : BaseIntegrationTest
     public async Task UpdateStore_WithValidData_ReturnsOkResult()
     {
         // Arrange
-        var storeDto = new CreateStoreDto(null, 101, "Test Store", "123 Main St", "12345", "Test City", "1", "5551234567", "test@store.com", "John", "Doe");
+        var storeDto = new CreateStoreDto(null, 101, "Test Store", "123 Main St", "12345", "Test City", "+1", "5551234567", "test@store.com", "John", "Doe");
         var storeId = await ApiHelper.CreateStoreAndGetId(_client, storeDto);
 
-        var request = new UpdateStoreDto(storeId, null, 201, "Updated Store", "456 Updated St", "54321", "Updated City", "1", "5559876543", "updated@store.com", "Jane", "Smith", DateTime.UtcNow, DateTime.UtcNow.AddDays(1));
+        var request = new UpdateStoreDto(storeId, null, 201, "Updated Store", "456 Updated St", "54321", "Updated City", "+1", "5559876543", "updated@store.com", "Jane", "Smith", DateTime.UtcNow, DateTime.UtcNow.AddDays(1));
 
         // Act
         var response = await _client.PutAsJsonAsync("/api/stores/putStore", request);
@@ -508,7 +509,7 @@ public class StoreControllerTests : BaseIntegrationTest
     }
 
     [Fact]
-    public async Task DeleteAllStores_WithChainHavingNoStores_ReturnsOk()
+    public async Task DeleteAllStores_WithChainHavingNoStores_ReturnsOk() // No stores to delete. Should it still return OK? or BadRequest?
     {
         // Arrange
         var chainId = await ApiHelper.CreateChainAndGetId(_client, StringRandom.GetRandomString(10));

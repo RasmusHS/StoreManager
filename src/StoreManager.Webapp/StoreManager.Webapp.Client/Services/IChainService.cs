@@ -8,7 +8,7 @@ public interface IChainService
     Task<ChainResponseDto> PostChainAsync(CreateChainDto request);
     Task<QueryChainDto?> GetChainByIdAsync(Guid id);
     Task<List<QueryChainDto>> GetAllChainsAsync();
-    Task<List<QueryChainDto>> GetChainAndStores(Guid id);
+    Task<QueryChainDto> GetChainAndStores(Guid id);
     Task<ChainResponseDto> PutChainAsync(UpdateChainDto request);
     Task DeleteChainAsync(Guid chainId);
 }
