@@ -1,5 +1,5 @@
 # StoreManager 
-Currently working in branch: Bulk-CreateStore 
+Currently working in branch: master
 
 # Use of AI/LLMs
 This project has utilized AI tools to assist in code generation and problem-solving. \
@@ -73,3 +73,16 @@ Would I be done faster and have more time for other parts of the project, like l
     - [ ] Administrator can access all functions in the application
     - [ ] Support can only access function relating to administrating stores and software
     - [ ] UserEntity: Email(string), Name(string), Password(string), Role(string), CreatedOn(DateTime)
+       
+# Post Meeting Plans
+- [x] Fix API Controllers
+    - [x] Adjust error handling to return all errors together instead of one at a time
+    - [x] Expand input validation to cover more edge cases
+    - [x] Change names in controllers to fit standard practice (post instead of create for example)
+    - [x] Change delete endpoints to fit with standard practice
+    - [x] Change GetChainAndStores endpoint to not return BadRequest when a chain doesn't have a store, and instead return the chain with an empty collection of stores
+- [x] Replace Ensure.That guard clauses with own solution to allow for capturing validation errors
+- [x] Frontend
+    - [x] Fix the functionality to bulk create stores, so it uses a dedicated endpoint for that purposes instead of spamming both the api and db with individual post/insert operations
+- [x] Tests
+    - [x] Adjust tests to reflect changes to the code that they test, and fix eventual errors that may arise as a result of the changes to backend
